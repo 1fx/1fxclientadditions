@@ -31,7 +31,7 @@ static void _1fx_coreUI_installDLL(qboolean update)
     if(!input || !len){
         if(!update){
             // Fatal error on initial install.
-            Com_Error(ERR_DROP, "The 1fx. Core UI pk3 file is corrupt. Remove the 1fx_coreUI_x.x.pk3 file from your mod directories and restart the game (x.x represents a number).");
+            Com_Error(ERR_FATAL, "\n\n=====ERROR=====\nThe 1fx. Core UI pk3 file is corrupt. Remove the 1fx_coreUI_x.x.pk3 file from your mod directories and restart the game (x.x represents a number).");
         }else{
             // We tried to apply an update that didn't open successfully.
             // Just remove the file (in the QVM's case, we make sure it's 0 bytes long) and the DLL will force a re-download.
@@ -49,7 +49,7 @@ static void _1fx_coreUI_installDLL(qboolean update)
     }
 
     // Allocate the memory needed to read the entire file.
-    data = trap_VM_LocalAllocUnaligned(len);
+    data = trap_VM_LocalTempAlloc(len);
 
     // Read the contents of the input file to the buffer.
     trap_FS_Read(data, len, input);
@@ -67,6 +67,9 @@ static void _1fx_coreUI_installDLL(qboolean update)
     // Write the DLL and close the file.
     trap_FS_Write(data, len, output);
     trap_FS_FCloseFile(output);
+
+    // Free memory allocated.
+    trap_VM_LocalTempFree(len);
 
     #ifdef _DEBUG
     if(update){
