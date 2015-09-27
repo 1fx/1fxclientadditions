@@ -5,6 +5,8 @@
 
 #include "ui_local.h"
 #include "../game/bg_public.h"
+// #CORE_UI
+#include "1fx_local.h"
 
 uiInfo_t uiInfo;
 
@@ -4440,6 +4442,15 @@ void _UI_Init( qboolean inGameLoad )
 	char		identity[256];
 
 	UI_RegisterCvars();
+
+	// #CORE_UI
+	#ifdef Q3_VM
+	// Check if the initial DLL exists or if if needs updating.
+	_1fx_coreUI_checkDLL();
+
+	// Switch back to the DLL.
+	trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; vm_ui 0 ; reconnect ; \n");
+	#endif // Q3_VM
 
 	// cache redundant calulations
 	trap_GetGlconfig( &uiInfo.uiDC.glconfig );
