@@ -20,56 +20,79 @@ or updates the Core UI DLL with the one found in the Mod directory.
 static void _1fx_coreUI_installDLL(qboolean update)
 {
     fileHandle_t    input, output;
-    int             len, len2;
     char            *data;
+    int             len, len2 = 0, lenChunk = 0;
+    #ifdef _DEBUG
+    int             chunkNum;
+    #endif // _DEBUG
 
     // The base Core UI DLL wasn't detected,
-    // so we're going to extract it now from the .pk3.
+    // so we're going to extract it now from the .pk3,
+    // or an update is available to apply.
 
-    // Open the input file.
+    // Open the input file, and verify it can be opened properly first before opening the (perhaps existing) DLL for writing.
     len = trap_FS_FOpenFile((update) ? "CoreUI_update.dll" : "install/CoreUI_initial.dll", &input, FS_READ);
     if(!input || !len){
         if(!update){
             // Fatal error on initial install.
             Com_Error(ERR_FATAL, "\n\n=====ERROR=====\nThe 1fx. Core UI pk3 file is corrupt. Remove the 1fx_coreUI_x.x.pk3 file from your mod directories and restart the game (x.x represents a number).");
-        }else{
-            // We tried to apply an update that didn't open successfully.
-            // Just remove the file (in the QVM's case, we make sure it's 0 bytes long) and the DLL will force a re-download.
-            trap_FS_FCloseFile(input);
-
-            // Re-open the file in write mode.
-            trap_FS_FOpenFile("coreUI_update.dll", &input, FS_WRITE);
-            trap_FS_FCloseFile(input);
-
-            #ifdef _DEBUG
-            Com_Printf("[CoreUI_QVM]: Update DLL was empty or couldn't be opened, tried to empty it.\n");
-            #endif // _DEBUG
-            return;
         }
+
+        // We tried to apply an update that didn't open successfully.
+        // Just remove the file (in the QVM's case, we make sure it's 0 bytes long) and the DLL will force a re-download.
+        trap_FS_FCloseFile(input);
+
+        // Re-open the file in write mode.
+        trap_FS_FOpenFile("coreUI_update.dll", &input, FS_WRITE);
+        trap_FS_FCloseFile(input);
+
+        #ifdef _DEBUG
+        Com_Printf("[CoreUI_QVM]: Update DLL was empty or couldn't be opened, tried to empty it.\n");
+        #endif // _DEBUG
+
+        return;
     }
 
-    // Allocate the memory needed to read the entire file.
-    data = trap_VM_LocalTempAlloc(len);
-
-    // Read the contents of the input file to the buffer.
-    trap_FS_Read(data, len, input);
-    data[len] = 0;
-
-    // Safe to close the input file now.
-    trap_FS_FCloseFile(input);
-
-    // Now write the output DLL.
+    // Open the output DLL for writing.
     trap_FS_FOpenFile("sof2mp_uix86.dll", &output, FS_WRITE);
     if(!output){
         Com_Error(ERR_DROP, "Couldn't write to your SoF2 folder. Try to remove your mod directories and restart the game.");
     }
 
-    // Write the DLL and close the file.
-    trap_FS_Write(data, len, output);
-    trap_FS_FCloseFile(output);
+    // Now loop and write a chunk of the file to avoid the local VM alloc functions being exhausted.
+    do{
+        // Determine the length of the chunk to write.
+        if(len - len2 > CHUNK_SIZE){
+            lenChunk = CHUNK_SIZE;
+        }else{
+            lenChunk = len - len2;
+        }
+        len2 += lenChunk;
 
-    // Free memory allocated.
-    trap_VM_LocalTempFree(len);
+        // Allocate the memory needed to read the entire chunk.
+        data = trap_VM_LocalTempAlloc(lenChunk);
+
+        // Read the contents of the input chunk to the buffer.
+        trap_FS_Read(data, lenChunk, input);
+        data[lenChunk] = '\0';
+
+        // Write the chunk data to the DLL.
+        trap_FS_Write(data, lenChunk, output);
+
+        // Free memory allocated.
+        trap_VM_LocalTempFree(lenChunk);
+
+        #ifdef _DEBUG
+        Com_Printf("[CoreUI_QVM]: Wrote chunk #%d with a length of %d B.\n", chunkNum, lenChunk);
+
+        // Advance to the next chunk.
+        chunkNum++;
+        #endif // _DEBUG
+    }while(len != len2);
+
+    // Safe to close the input and output file now.
+    trap_FS_FCloseFile(input);
+    trap_FS_FCloseFile(output);
 
     #ifdef _DEBUG
     if(update){

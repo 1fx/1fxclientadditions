@@ -1,6 +1,6 @@
 // Copyright (C) 2015 - Boe!Man, Henkie.
 //
-// 1fx_local.h - All the Core UI definitions go here.
+// 1fx_local.h - All the Core UI (QVM and DLL) definitions go here.
 
 //==================================================================
 
@@ -12,6 +12,8 @@
 //
 
 #ifdef Q3_VM
+#define CHUNK_SIZE 131072 // Write in chunks of 128K to avoid exceeding the temporary memory buffer limit.
+
 void _1fx_coreUI_checkDLL ( void );
 #endif // Q3_VM
 
