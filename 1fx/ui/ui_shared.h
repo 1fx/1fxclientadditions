@@ -103,13 +103,16 @@ typedef struct {
   float h;    // height;
 } rectDef_t;
 
-typedef rectDef_t Rectangle;
+// #CORE_UI
+// NOTE: Change all Rectangle references in this file to QRectangle.
+typedef rectDef_t QRectangle;
+// #END CORE_UI
 
 // FIXME: do something to separate text vs window stuff
 typedef struct
 {
-	Rectangle	rect;                 // client coord rectangle
-	Rectangle	rectClient;           // screen coord rectangle
+	QRectangle	rect;                 // client coord rectangle
+	QRectangle	rectClient;           // screen coord rectangle
 	const char	*name;               //
 	const char	*group;              // if it belongs to a group
 	const char	*cinematicName;		  // cinematic name
@@ -122,8 +125,8 @@ typedef struct
 	const char* ownerDrawParam;
 	float		borderSize;           //
 	int			flags;                // visible, focus, mouseover, cursor
-	Rectangle	rectEffects;          // for various effects
-	Rectangle	rectEffects2;         // for various effects
+	QRectangle	rectEffects;          // for various effects
+	QRectangle	rectEffects2;         // for various effects
 	int			offsetTime;           // time based value for various effects
 	int			nextTime;             // time next effect should cycle
 	vec4_t		foreColor;            // text color
@@ -243,7 +246,7 @@ typedef struct textScrollDef_s
 
 typedef struct itemDef_s {
 	Window		window;						// common positional, border, style, layout info
-	Rectangle	textRect;					// rectangle the text ( if any ) consumes
+	QRectangle	textRect;					// rectangle the text ( if any ) consumes
 	int			type;						// text, button, radiobutton, checkbox, textfield, listbox, combo
 	int			alignment;					// left center right
 	int			textalignment;				// ( optional ) alignment for text within rect based on text width

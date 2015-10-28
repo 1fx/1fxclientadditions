@@ -85,6 +85,15 @@ extern vmCvar_t	ui_allowparental;
 
 extern vmCvar_t	ui_noNetCheck;
 
+// #CORE_UI
+extern vmCvar_t	ui_qvmState;
+extern vmCvar_t	ui_connectedServer;
+extern vmCvar_t	ui_lastConnectedServer;
+
+extern vmCvar_t ui_httpRefPaks;
+extern vmCvar_t ui_httpBaseURL;
+// #END CORE_UI
+
 typedef void		*TGhoul2;
 
 #define G2SURFACEFLAG_ISBOLT		0x00000001

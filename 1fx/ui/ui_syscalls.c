@@ -7,9 +7,11 @@
 
 static int (QDECL *syscall)( int arg, ... ) = (int (QDECL *)( int, ...))-1;
 
-void dllEntry( int (QDECL *syscallptr)( int arg,... ) ) {
+// #CORE_UI
+__declspec(dllexport) void dllEntry( int (QDECL *syscallptr)( int arg,... ) ) {
 	syscall = syscallptr;
 }
+// #END CORE_UI
 
 int PASSFLOAT( float x ) {
 	float	floatTemp;
@@ -26,7 +28,7 @@ void trap_Error( const char *string ) {
 }
 
 int trap_Milliseconds( void ) {
-	return syscall( UI_MILLISECONDS ); 
+	return syscall( UI_MILLISECONDS );
 }
 
 void trap_Cvar_Register( vmCvar_t *cvar, const char *var_name, const char *value, int flags, float MinValue, float MaxValue ) {
@@ -56,7 +58,7 @@ void trap_Cvar_SetValue( const char *var_name, float value ) {
 }
 
 void trap_Cvar_Reset( const char *name ) {
-	syscall( UI_CVAR_RESET, name ); 
+	syscall( UI_CVAR_RESET, name );
 }
 
 void trap_Cvar_Create( const char *var_name, const char *var_value, int flags ) {
@@ -151,7 +153,7 @@ int		trap_R_GetTextWidth  ( const char* text, qhandle_t font, float scale, int l
 {
 	return syscall ( UI_R_GETTEXTWIDTH, text, font, PASSFLOAT(scale), limit );
 }
-	
+
 int		trap_R_GetTextHeight ( const char* text, qhandle_t font, float scale, int limit )
 {
 	return syscall ( UI_R_GETTEXTHEIGHT, text, font, PASSFLOAT(scale), limit );
@@ -365,7 +367,7 @@ int trap_RealTime(qtime_t *qtime) {
 int trap_CIN_PlayCinematic( const char *arg0, int xpos, int ypos, int width, int height, int bits) {
   return syscall(UI_CIN_PLAYCINEMATIC, arg0, xpos, ypos, width, height, bits);
 }
- 
+
 // stops playing the cinematic and ends it.  should always return FMV_EOF
 // cinematics must be stopped in reverse order of when they are started
 e_status trap_CIN_StopCinematic(int handle) {
@@ -377,13 +379,13 @@ e_status trap_CIN_StopCinematic(int handle) {
 e_status trap_CIN_RunCinematic (int handle) {
   return syscall(UI_CIN_RUNCINEMATIC, handle);
 }
- 
+
 
 // draws the current frame
 void trap_CIN_DrawCinematic (int handle) {
   syscall(UI_CIN_DRAWCINEMATIC, handle);
 }
- 
+
 
 // allows you to resize the animation dynamically
 void trap_CIN_SetExtents (int handle, int x, int y, int w, int h) {
@@ -391,12 +393,12 @@ void trap_CIN_SetExtents (int handle, int x, int y, int w, int h) {
 }
 
 
-void trap_R_RemapShader( const char *oldShader, const char *newShader, const char *timeOffset ) 
+void trap_R_RemapShader( const char *oldShader, const char *newShader, const char *timeOffset )
 {
 	syscall( UI_R_REMAP_SHADER, oldShader, newShader, timeOffset );
 }
 
-qboolean trap_VerifyCDKey( const char *key ) 
+qboolean trap_VerifyCDKey( const char *key )
 {
 	return syscall( UI_VERIFY_CDKEY, key );
 }

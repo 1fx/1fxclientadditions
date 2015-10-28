@@ -7,6 +7,7 @@
 #include "../game/bg_public.h"
 // #CORE_UI
 #include "1fx_local.h"
+// #END CORE_UI
 
 uiInfo_t uiInfo;
 
@@ -93,7 +94,13 @@ qboolean	_UI_KeyEvent	 ( int key, qboolean down );
 qboolean	_UI_MouseEvent	 ( int dx, int dy );
 void		_UI_Refresh		 ( int realtime );
 
+// #CORE_UI
+#ifdef Q3_VM
 int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  )
+#else
+__declspec(dllexport) int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  )
+#endif // Q3_VM
+// #END CORE_UI
 {
 	switch ( command )
 	{
@@ -256,6 +263,15 @@ void _UI_Refresh( int realtime )
 	//	return;
 	//}
 
+	// #CORE_UI
+	#ifndef Q3_VM
+	if(httpDLStatus == HTTPDL_DOWNLOADING){
+		// FIXME: Draw loading screen.
+		return;
+	}
+	#endif // not Q3_VM
+	// #END CORE_UI
+
 	uiInfo.uiDC.frameTime = realtime - uiInfo.uiDC.realTime;
 	uiInfo.uiDC.realTime = realtime;
 
@@ -319,6 +335,18 @@ void _UI_Shutdown( void )
 	}
 
 	trap_LAN_SaveCachedServers();
+
+	// #CORE_UI
+	// Boe!Man 10/26/15: Safely shutdown.
+	#ifndef Q3_VM
+	_1fx_joinHTTPThread();
+	#endif // not Q3_VM
+
+    // Reset some globals, this fixes a DLL crash.
+	bg_identityCount = 0;
+	bg_characterTemplates = NULL;
+	bg_itemTemplates = NULL;
+	// #END CORE_UI
 }
 
 char *defaultMenu = NULL;
@@ -2498,6 +2526,14 @@ static void UI_RunMenuScript(const char **args)
 	const char *name, *name2;
 	char buff[1024];
 
+	// #CORE_UI
+	#ifndef Q3_VM
+	if(httpDLStatus == HTTPDL_DOWNLOADING){
+		return;
+	}
+	#endif // not Q3_VM
+	// #END CORE_UI
+
 	if (String_Parse(args, &name))
 	{
 		if ( Q_stricmp ( name, "LoadOutfittings" ) == 0 )
@@ -4440,6 +4476,7 @@ void _UI_Init( qboolean inGameLoad )
 	int			start;
 	int			i;
 	char		identity[256];
+	char		info[MAX_INFO_VALUE];
 
 	UI_RegisterCvars();
 
@@ -4448,9 +4485,51 @@ void _UI_Init( qboolean inGameLoad )
 	// Check if the initial DLL exists or if if needs updating.
 	_1fx_coreUI_checkDLL();
 
+	// (Re-)set QVM state.
+	trap_Cvar_Set("ui_qvmState", "1");
+	trap_Cvar_Update(&ui_qvmState);
+
 	// Switch back to the DLL.
 	trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; vm_ui 0 ; reconnect ; \n");
+	#else
+	// Boe!Man 10/19/15: Start the HTTP downloader thread if we come from a QVM state
+	// or if the connected server is different from the previous one.
+	if(ui_qvmState.integer == 1 || strcmp(ui_connectedServer.string, ui_lastConnectedServer.string)){
+		if(inGameLoad){
+			// Ensure we stop connecting right about now.
+			trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; \n");
+			return;
+		}else{
+			_1fx_httpDL_initialize();
+			Com_Printf("Initializing 1fx. HTTP downloader.\n");
+		}
+	}
+
+	// (Re-)set QVM state.
+	trap_Cvar_Set("ui_qvmState", "0");
+	trap_Cvar_Update(&ui_qvmState);
 	#endif // Q3_VM
+
+	// Check some CVARs when initializing in game, we might get kicked in a while.
+	if(inGameLoad){
+        info[0] = '\0';
+        if( trap_GetConfigString( CS_SYSTEMINFO, info, sizeof(info) ) ) {
+            // Boe!Man 7/7/15: Also get the referenced pk3s to download over HTTP here.
+            trap_Cvar_Set("ui_httpBaseURL", Info_ValueForKey(info, "g_httpBaseURL"));
+            trap_Cvar_Set("ui_httpRefPaks", Info_ValueForKey(info, "g_httpRefPaks"));
+
+            trap_Cvar_Update(&ui_httpBaseURL);
+            trap_Cvar_Update(&ui_httpRefPaks);
+        }
+	}
+
+	// Boe!Man 7/7/15: Force DLL upon next connect or even map switch!
+	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; \n");
+
+	// No annoying "Q3 Arena Unauthorized DLL" popups.
+	// Yes, this isn't a real CVAR in SoF2, but it is actively being checked in the engine nonetheless.
+	trap_Cvar_Register(NULL, "com_blindlyLoadDLLs", "1", CVAR_INTERNAL | CVAR_CHEAT, 0.0f, 0.0f);
+	// #END CORE_UI
 
 	// cache redundant calulations
 	trap_GetGlconfig( &uiInfo.uiDC.glconfig );
@@ -4999,9 +5078,27 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 	// see what information we should display
 	trap_GetClientState( &cstate );
 
+	// #CORE_UI
+	info[0] = '\0';
+	if(trap_GetConfigString( CS_SYSTEMINFO, info, sizeof(info))){
+        // Boe!Man 7/7/15: Get the referenced base URL and paks from the server here.
+		trap_Cvar_Set("ui_httpBaseURL", Info_ValueForKey(info, "g_httpBaseURL"));
+		trap_Cvar_Set("ui_httpRefPaks", Info_ValueForKey(info, "g_httpRefPaks"));
+
+		trap_Cvar_Update(&ui_httpBaseURL);
+		trap_Cvar_Update(&ui_httpRefPaks);
+	}
+	// #END CORE_UI
+
 	if ( cstate.connState == CA_CONNECTED )
 	{
 		char downloadName[MAX_INFO_VALUE];
+
+		// #CORE_UI
+		// Boe!Man 10/28/15: Set connected server here.
+		trap_Cvar_Set("ui_connectedServer", cstate.servername);
+		trap_Cvar_Update(&ui_connectedServer);
+		// #END CORE_UI
 
 		trap_Cvar_VariableStringBuffer( "cl_downloadName", downloadName, sizeof(downloadName) );
 		if (*downloadName)
@@ -5225,6 +5322,15 @@ vmCvar_t	ui_allowparental;
 
 vmCvar_t	ui_noNetCheck;
 
+// #CORE_UI
+vmCvar_t	ui_qvmState;
+vmCvar_t	ui_connectedServer;
+vmCvar_t	ui_lastConnectedServer;
+
+vmCvar_t    ui_httpRefPaks;
+vmCvar_t    ui_httpBaseURL;
+// #END CORE_UI
+
 static cvarTable_t cvarTable[] =
 {
 	{ &ui_botteam, "ui_botteam", "auto", 0 },
@@ -5313,6 +5419,15 @@ static cvarTable_t cvarTable[] =
 	{ &ui_allowparental,	"ui_allowparental",		"1", CVAR_ROM | CVAR_INTERNAL | CVAR_PARENTAL },
 
 	{ &ui_noNetCheck,		"ui_noNetCheck",		"0", CVAR_ARCHIVE },
+
+	// #CORE_UI
+	{ &ui_qvmState,  			"ui_qvmState", 			 	"1", 	CVAR_ROM | CVAR_INTERNAL | CVAR_NORESTART },
+	{ &ui_lastConnectedServer,  "ui_lastConnectedServer", 	"", 	CVAR_ROM | CVAR_INTERNAL | CVAR_NORESTART },
+	{ &ui_connectedServer,  	"ui_connectedServer", 	 	"", 	CVAR_ROM | CVAR_INTERNAL | CVAR_NORESTART },
+
+	{ &ui_httpRefPaks,      	"ui_httpRefPaks",        	"", 	CVAR_ROM | CVAR_INTERNAL },
+	{ &ui_httpBaseURL,      	"ui_httpBaseURL",        	"", 	CVAR_ROM | CVAR_INTERNAL },
+	// #END CORE_UI
 };
 
 static int	cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

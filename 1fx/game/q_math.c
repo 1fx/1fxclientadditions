@@ -800,12 +800,12 @@ int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 #else
 #pragma warning( disable: 4035 )
 
+#ifndef __GNUC__
 __declspec( naked ) int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 {
 	static int bops_initialized;
 	static int Ljmptab[8];
 
-#ifndef __GNUC__
 	__asm {
 
 		push ebx
@@ -1029,10 +1029,10 @@ LSetSides:
 Lerror:
 		int 3
 	}
-#endif // not __GNUC__
 }
 #pragma warning( default: 4035 )
 
+#endif // not __GNUC__
 #endif
 #endif
 
