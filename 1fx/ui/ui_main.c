@@ -5253,8 +5253,8 @@ void UI_DrawHTTPDownloadScreen( void )
 	UI_SetColor(colorWhite);
 
 	// Draw the header.
-	Text_PaintCenter(centerPoint, 20, uiInfo.uiDC.Assets.defaultFont, scale, colorYellow, "1fx. HTTP Downloader", 0 );
-	Text_PaintCenter(centerPoint, 35, uiInfo.uiDC.Assets.defaultFont, scale, colorYellow, "www.1fxmod.org", 0 );
+	Text_PaintCenter(centerPoint, 20, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "1fx. HTTP Downloader", 0 );
+	Text_PaintCenter(centerPoint, 35, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "www.1fxmod.org", 0 );
 
 	// Boe!Man 10/29/15: Always determine file progress for both screens.
 	if(httpDL.pakName != NULL){
