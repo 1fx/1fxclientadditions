@@ -5240,7 +5240,7 @@ base checks, such as Core UI update etc.
 void UI_DrawHTTPDownloadScreen( void )
 {
 	float 	centerPoint = 320, yStart = 340, scale = 0.43f;
-	int 	leftWidth = 320;
+	int 	leftWidth = 320, timeLeft;
 	char 	dlSizeBuf_done[64], dlSizeBuf_total[64];
 	char 	dlNameBuf[64], xferRateBuf[64], dlTimeBuf[64];
 
@@ -5253,8 +5253,8 @@ void UI_DrawHTTPDownloadScreen( void )
 	UI_SetColor(colorWhite);
 
 	// Draw the header.
-	Text_PaintCenter(centerPoint, 20, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "1fx. HTTP Downloader", 0 );
-	Text_PaintCenter(centerPoint, 35, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "www.1fxmod.org", 0 );
+	Text_PaintCenter(centerPoint, 20, uiInfo.uiDC.Assets.defaultFont, scale, colorYellow, "1fx. HTTP Downloader", 0 );
+	Text_PaintCenter(centerPoint, 35, uiInfo.uiDC.Assets.defaultFont, scale, colorYellow, "www.1fxmod.org", 0 );
 
 	// Boe!Man 10/29/15: Always determine file progress for both screens.
 	if(httpDL.pakName != NULL){
@@ -5296,7 +5296,27 @@ void UI_DrawHTTPDownloadScreen( void )
 			Text_PaintCenter(centerPoint, yStart + 15, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlNameBuf, 0 );
 		}
 	}else{
-		// FIXME: Regular download screen.
+		// Draw base for extra pk3 download screen.
+		Text_PaintCenter(centerPoint, yStart, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Downloading extra files..", 0 );
+		Text_PaintCenter(centerPoint, yStart + 50, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Transfer rate:", 0 );
+		Text_PaintCenter(centerPoint, yStart + 90, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Estimated time left:", 0 );
+
+		if(httpDL.pakName != NULL){
+			// Print download name.
+			Q_strncpyz(dlNameBuf, va("Downloading extra .pk3 file: %s", httpDL.pakName), sizeof(dlNameBuf));
+			Text_PaintCenter(centerPoint, yStart + 15, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlNameBuf, 0 );
+
+			if(httpDL.pakSize != -1){
+				// Print estimated time left.
+				// We do it in K (/1024) because we'd overflow around 4MB.
+				timeLeft = httpDL.pakSize / httpDL.speedAvg; // Estimated time for entire download in seconds.
+				UI_PrintTime ( dlTimeBuf, sizeof dlTimeBuf,
+					(timeLeft - (((httpDL.bytesReceived/1024) * timeLeft) / (httpDL.pakSize/1024))) * 1000);
+				Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlTimeBuf, 0 );
+			}else{
+				Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "unknown", 0 );
+			}
+		}
 	}
 }
 

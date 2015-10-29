@@ -21,26 +21,6 @@ httpDownloadLocals_t    httpDL                          = {0};
 
 /*
 ==========================
-_1fx_httpDL_checkPaks
-9/27/15 - 8:50 PM
-Checks if there are .pk3 files missing locally
-but are available on the remote server.
-==========================
-*/
-
-static void _1fx_httpDL_checkPaks()
-{
-    // Check if the server owner made files available to download.
-    if(!strlen(ui_httpRefPaks.string) || strlen(ui_httpBaseURL.string)){
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_DLL]: No files available to be downloaded (CVARs empty).\n");
-        #endif // _DEBUG
-        return;
-    }
-}
-
-/*
-==========================
 _1fx_httpDL_cURL_write
 10/26/15 - 10:17 PM
 cURL write callback.
@@ -240,6 +220,10 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
         return qfalse;
     }
 
+    #ifdef _DEBUG
+    Com_Printf("[CoreUI_DLL]: Trying to downloaded file: %s\n", url);
+    #endif // _DEBUG
+
     // Start cURL routine.
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, f);
@@ -259,6 +243,9 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
         // This probably means the server returned a >= 400 HTTP error.
         // Most likely the file is not present on the remote server.
         // Or the remote file isn't a valid MD5SUM file.
+        #ifdef _DEBUG
+        Com_Printf("[CoreUI_DLL]: Getting file headers failed: %s.\n", curl_easy_strerror(res));
+        #endif // _DEBUG
         fclose(f);
         DeleteFile(TEXT(destination));
         return qfalse;
@@ -269,7 +256,7 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     curl_easy_setopt(curl, CURLOPT_HEADER, 0);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
 
-    // Let the UI we're downloading a file.
+    // Let the UI know we're downloading a file.
     httpDL.pakName = pakName;
 
     // Rewind to the beginning of the output file.
@@ -289,6 +276,10 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
         DeleteFile(TEXT(destination));
         return qfalse;
     }
+
+    #ifdef _DEBUG
+    Com_Printf("[CoreUI_DLL]: Successfully downloaded file: %s\n", pakName);
+    #endif // _DEBUG
 
     return qtrue;
 }
@@ -358,6 +349,82 @@ static void _1fx_httpDL_checkModFile(char *filename, qboolean restartRequired)
 
 /*
 ==========================
+_1fx_httpDL_checkExtraPaks
+9/27/15 - 8:50 PM
+Checks if there are extra .pk3 files missing
+locally but are available on the remote server.
+==========================
+*/
+
+static void _1fx_httpDL_checkExtraPaks()
+{
+	char    *s;
+	char    paks[MAX_CVAR_VALUE_STRING], currentPak[MAX_CVAR_VALUE_STRING], fileExtension[5];
+    int     pakLength;
+
+    // Check if the server owner made files available to download.
+    if(!strlen(ui_httpRefPaks.string) || !strlen(ui_httpBaseURL.string)){
+        #ifdef _DEBUG
+        Com_Printf("[CoreUI_DLL]: No extra files available to be downloaded (CVARs empty).\n");
+        #endif // _DEBUG
+        return;
+    }
+
+    #ifdef _DEBUG
+	Com_Printf("[CoreUI_DLL]: Downloading extra .pk3 files from: %s\n", ui_httpBaseURL.string);
+	#endif // _DEBUG
+
+	// Loop through the paks available on the server.
+    Q_strncpyz(paks, ui_httpRefPaks.string, sizeof(paks));
+    s = paks;
+    while(1){
+        // Determine if there's another package available for download.
+        char *nextPak = strstr(s, " ");
+        if(nextPak != NULL){
+            pakLength = nextPak - s;
+        }else{
+            pakLength = strlen(s);
+        }
+        pakLength++;
+
+        // We need a valid .pk3 extension to continue.
+        if((int)s + pakLength > 4){
+            // We can set the current pak now.
+            Q_strncpyz(currentPak, s, pakLength);
+            Q_strncpyz(fileExtension, s + pakLength - 5, sizeof(fileExtension));
+            Q_strlwr(fileExtension);
+
+            if(strcmp(fileExtension, ".pk3") != 0){
+                // Not a .pk3 file.
+                Com_Printf("Trying to download a non .pk3 file (%s): this is not allowed!\n", currentPak);
+            }else{
+                // We can download this .pk3 file.
+                _1fx_httpDL_getRemoteFile(va("%s%s", ui_httpBaseURL.string, currentPak), va("%s\\%s", fs_game, currentPak), currentPak);
+
+                // Don't continue if the user wants to cancel.
+                if(httpDL.httpDLStatus == HTTPDL_CANCEL){
+                    break;
+                }
+            }
+        }
+
+        // Increase to the next package,
+        // or break if there's nothing available anymore.
+        s = nextPak;
+        if(s != NULL && strlen(s) > 2){
+            s++;
+        }else{
+            break;
+        }
+    }
+
+    #ifdef _DEBUG
+	Com_Printf("[CoreUI_DLL]: Finished downloading extra .pk3 files.\n");
+	#endif // _DEBUG
+}
+
+/*
+==========================
 _1fx_httpDL_mainDownloader
 9/27/15 - 9:08 PM
 Main HTTP download routine to execute when
@@ -387,6 +454,7 @@ static void *_1fx_httpDL_mainDownloader()
 	// Set some global cURL settings here.
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _1fx_httpDL_cURL_write);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, _1fx_httpDL_cURL_writeEmpty);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "1fx-httpdownloader/" _1FX_CLADD_VER);
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
 
@@ -400,6 +468,10 @@ static void *_1fx_httpDL_mainDownloader()
         curl_global_cleanup();
         return NULL;
 	}
+
+	// Continue by fetching the extra pk3 files exposed to the server.
+	httpDL.baseChecksComplete = qtrue;
+    _1fx_httpDL_checkExtraPaks();
 
 	// Cleanup cURL.
     curl_easy_cleanup(curl);
