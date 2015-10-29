@@ -377,7 +377,7 @@ static void _1fx_httpDL_checkExtraPaks()
 	// Loop through the paks available on the server.
     Q_strncpyz(paks, ui_httpRefPaks.string, sizeof(paks));
     s = paks;
-    while(1){
+    do{
         // Determine if there's another package available for download.
         char *nextPak = strstr(s, " ");
         if(nextPak != NULL){
@@ -411,12 +411,7 @@ static void _1fx_httpDL_checkExtraPaks()
         // Increase to the next package,
         // or break if there's nothing available anymore.
         s = nextPak;
-        if(s != NULL && strlen(s) > 2){
-            s++;
-        }else{
-            break;
-        }
-    }
+    }while(s != NULL && strlen(s) > 2 && s++);
 
     #ifdef _DEBUG
 	Com_Printf("[CoreUI_DLL]: Finished downloading extra .pk3 files.\n");
