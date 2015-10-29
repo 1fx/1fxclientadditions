@@ -312,15 +312,18 @@ extern vec4_t		text_color_highlight;
 //
 // ui_main.c
 //
-void UI_Report				( void );
-void UI_Reload				( void );
-void UI_LoadMenus			( const char *menuFile, qboolean reset );
-void UI_SetActiveMenu		( uiMenuCommand_t menu );
-int	 UI_AdjustTimeByGame	( int time );
-void UI_LoadArenas			( void );
+void UI_Report					( void );
+void UI_Reload					( void );
+void UI_LoadMenus				( const char *menuFile, qboolean reset );
+void UI_SetActiveMenu			( uiMenuCommand_t menu );
+int	 UI_AdjustTimeByGame		( int time );
+void UI_LoadArenas				( void );
 
-void UI_DrawConnectScreen( qboolean overlay );
-void UI_DrawLoadingScreen( void ) ;
+void UI_DrawConnectScreen		( qboolean overlay );
+void UI_DrawLoadingScreen		( void ) ;
+// #CORE_UI
+void UI_DrawHTTPDownloadScreen	( void ) ;
+// #END CORE_UI
 
 //
 // ui_menu.c

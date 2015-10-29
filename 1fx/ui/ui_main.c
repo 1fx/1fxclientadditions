@@ -265,8 +265,8 @@ void _UI_Refresh( int realtime )
 
 	// #CORE_UI
 	#ifndef Q3_VM
-	if(httpDLStatus == HTTPDL_DOWNLOADING){
-		// FIXME: Draw loading screen.
+	if(httpDL.httpDLStatus == HTTPDL_DOWNLOADING){
+		UI_DrawHTTPDownloadScreen();
 		return;
 	}
 	#endif // not Q3_VM
@@ -2528,7 +2528,7 @@ static void UI_RunMenuScript(const char **args)
 
 	// #CORE_UI
 	#ifndef Q3_VM
-	if(httpDLStatus == HTTPDL_DOWNLOADING){
+	if(httpDL.httpDLStatus == HTTPDL_DOWNLOADING){
 		return;
 	}
 	#endif // not Q3_VM
@@ -5221,6 +5221,86 @@ void UI_DrawLoadingScreen( void )
 	Text_PaintCenter(centerPoint, yStart, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Loading...", 0 );
 }
 
+// #CORE_UI
+
+/*
+==========================
+UI_DrawHTTPDownloadScreen
+10/28/15 - 4:49 PM
+This is actually an overlay for the main menu.
+
+Draws a HTTP Download info screen which will
+state download info, size and remaining time.
+
+It will also show information regarding the
+base checks, such as Core UI update etc.
+==========================
+*/
+
+void UI_DrawHTTPDownloadScreen( void )
+{
+	float 	centerPoint = 320, yStart = 340, scale = 0.43f;
+	int 	leftWidth = 320;
+	char 	dlSizeBuf_done[64], dlSizeBuf_total[64];
+	char 	dlNameBuf[64], xferRateBuf[64], dlTimeBuf[64];
+
+	// Boe!Man 7/5/15: Do draw the loading menu, or the whole overlay will bug.
+	menuDef_t *menu = Menus_FindByName("Loading");
+	if (menu){
+		Menu_Paint(menu, qtrue);
+	}
+
+	UI_SetColor(colorWhite);
+
+	// Draw the header.
+	Text_PaintCenter(centerPoint, 20, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "1fx. HTTP Downloader", 0 );
+	Text_PaintCenter(centerPoint, 35, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "www.1fxmod.org", 0 );
+
+	// Boe!Man 10/29/15: Always determine file progress for both screens.
+	if(httpDL.pakName != NULL){
+		// Total size.
+		if(httpDL.pakSize != -1){
+			Q_strncpyz(dlSizeBuf_total, httpDL.pakSize < 1000000 ? va("%.0f KB", httpDL.pakSize / 1024) : va("%.1f MB", httpDL.pakSize / 1024 / 1024), sizeof(dlSizeBuf_total));
+		}else{
+			Q_strncpyz(dlSizeBuf_total, "unknown size", sizeof(dlSizeBuf_total));
+		}
+
+		// Size already downloaded.
+		Q_strncpyz(dlSizeBuf_done, httpDL.bytesReceived < 1000000 ? va("%.0f KB", httpDL.bytesReceived / 1024) : va("%.1f MB", httpDL.bytesReceived / 1024 / 1024), sizeof(dlSizeBuf_done));
+
+		UI_ReadableSize( dlSizeBuf_total,	sizeof dlSizeBuf_total,	httpDL.pakSize );
+		UI_ReadableSize( dlSizeBuf_done,	sizeof dlSizeBuf_done,	httpDL.bytesReceived );
+
+		// Transfer rate.
+		Q_strncpyz(xferRateBuf, httpDL.speedAvg < 1000000 ? va("%.0f KB/s", httpDL.speedAvg / 1024) : va("%.1f MB/s", httpDL.speedAvg / 1024 / 1024), sizeof(xferRateBuf));
+
+		// Print file progress.
+		Text_PaintCenter(leftWidth, yStart + 30, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, va("(%s of %s copied)", dlSizeBuf_done, dlSizeBuf_total), 0 );
+
+		// Print transfer rate.
+		Text_PaintCenter(leftWidth, yStart + 65, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, xferRateBuf, 0 );
+	}
+
+	// If we're still checking the core files, we draw a different screen.
+	if(!httpDL.baseChecksComplete){
+		// Draw base check screen.
+		Text_PaintCenter(centerPoint, yStart, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Checking 1fx. Client Additions..", 0 );
+		Text_PaintCenter(centerPoint, yStart + 90, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "SoF2 will reconnect a few times during this process.", 0 );
+
+		if(httpDL.pakName != NULL){
+			// Draw additional "header".
+			Text_PaintCenter(centerPoint, yStart + 50, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Transfer rate:", 0 );
+
+			// Print download name.
+			Q_strncpyz(dlNameBuf, va("Updating Mod file: %s", httpDL.pakName), sizeof(dlNameBuf));
+			Text_PaintCenter(centerPoint, yStart + 15, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlNameBuf, 0 );
+		}
+	}else{
+		// FIXME: Regular download screen.
+	}
+}
+
+// #END CORE_UI
 
 /*
 ================

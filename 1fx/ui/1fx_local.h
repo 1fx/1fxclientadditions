@@ -7,13 +7,17 @@
 #ifndef _1FX_LOCAL
 #define _1FX_LOCAL
 
+// 1fx. Client Additions version number.
+#define _1FX_CLADD_VER "0.1"
+
 //
 // 1fx_httpdownload.c
 //
 
-#define HTTPDL_BASEURL "http://1fxmod.org/clientadditions"
-
 #ifndef Q3_VM
+#define HTTPDL_BASEURL	"http://1fxmod.org/clientadditions"
+#define MAX_PAK_NAME 	256
+
 typedef enum {
 	HTTPDL_CANCEL 		= -1,
 	HTTPDL_IDLE 		= 0,
@@ -21,7 +25,16 @@ typedef enum {
 	HTTPDL_FINISHED 	= 2
 } httpDownloadState_t;
 
-extern int httpDLStatus;
+typedef struct {
+    int			httpDLStatus;		// Status of the downloader.
+    qboolean	baseChecksComplete; // True if base Core UI file checks are complete.
+
+    char		*pakName;			// Name of the file currently downloaded.
+    double		pakSize;			// Size of the file currently downloaded.
+    double		bytesReceived;		// Bytes already received.
+    double		speedAvg;			// Average speed in bytes.
+} httpDownloadLocals_t;
+extern httpDownloadLocals_t httpDL;
 
 void	_1fx_httpDL_initialize	( void );
 void 	_1fx_joinHTTPThread		( void );

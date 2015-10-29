@@ -13,12 +13,11 @@
 #include "ui_local.h"
 #include "1fx_local.h"
 
-static CURL         *curl;
-static pthread_t    downloadThread;
-static char         fs_game[MAX_CVAR_VALUE_STRING];
-static qboolean     baseChecksComplete  = qfalse;
-static qboolean     restartWhenFinished = qfalse;
-int                 httpDLStatus        = HTTPDL_IDLE;
+static CURL             *curl;
+static pthread_t        downloadThread;
+static char             fs_game[MAX_CVAR_VALUE_STRING];
+static qboolean         restartWhenFinished             = qfalse;
+httpDownloadLocals_t    httpDL                          = {0};
 
 /*
 ==========================
@@ -49,20 +48,39 @@ Also updates UI variables.
 ==========================
 */
 
-size_t _1fx_httpDL_cURL_write(void *ptr, size_t size, size_t nmemb, FILE *f)
+static size_t _1fx_httpDL_cURL_write(void *ptr, size_t size, size_t nmemb, FILE *f)
 {
     size_t written = fwrite(ptr, size, nmemb, f);
-	//downloaded += written;
 
-	//curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, &bytesDone);
-	//curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &speedAvgInBytes);
+	curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, &httpDL.bytesReceived);
+	curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &httpDL.speedAvg);
 
-	if(httpDLStatus == HTTPDL_CANCEL){
+	if(httpDL.httpDLStatus == HTTPDL_CANCEL){
         return -1;
 	}
 
 	return written;
 }
+
+/*
+==========================
+_1fx_httpDL_cURL_writeEmpty
+10/26/15 - 10:17 PM
+cURL write callback that
+doesn't actually perform
+any write.
+==========================
+*/
+
+static size_t _1fx_httpDL_cURL_writeEmpty(void *ptr, size_t size, size_t nmemb, void *data)
+{
+  (void)ptr;
+  (void)data;
+
+  // Only return the size we would have saved.
+  return (size_t)(size * nmemb);
+}
+
 
 /*
 ==========================
@@ -131,6 +149,7 @@ static char *_1fx_httpDL_getRemoteChecksum(char *url)
     FILE    *f;
     char    *hash;
     int     res;
+    double  remoteFileSize;
 
     // Open the file, both read and write.
     f = fopen(va("%s\\1fx_MD5SUM", fs_game), "wb+");
@@ -143,13 +162,39 @@ static char *_1fx_httpDL_getRemoteChecksum(char *url)
     // Go ahead and fetch the checksum.
     // Start cURL routine.
     curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _1fx_httpDL_cURL_write);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, f);
 
-    // Get the remote file.
+    // Grab the file size from the header first.
+    curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+
+    // Get the remote header.
     res = curl_easy_perform(curl);
 
-    // Get the file size.
+    // Fetch the download size from the retrieved info.
+    curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &remoteFileSize);
+
+    // Verify retrieved header info.
+    if(res != CURLE_OK || remoteFileSize != MD5_DIGEST_LENGTH * 2 + 1){
+        // This probably means the server returned a >= 400 HTTP error.
+        // Most likely the file is not present on the remote server.
+        // Or the remote file isn't a valid MD5SUM file.
+        fclose(f);
+        return NULL;
+    }
+
+    // Premature checks seem fine, go ahead and download the real file.
+    // Reset some cURL options.
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
+
+    // Rewind to the beginning of the output file.
+    fseek(f, 0, SEEK_SET);
+
+    // Perform actual download.
+    res = curl_easy_perform(curl);
+
+    // Get the size of the retrieved data.
     fsize = ftell(f);
 
     // Verify if the download went correctly,
@@ -182,11 +227,10 @@ Gets any remote file.
 ==========================
 */
 
-static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination)
+static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pakName)
 {
     FILE    *f;
-    int     res, fsize;
-    char    fileBuffer[4096];
+    int     res;
 
     // Open the file in write mode.
     f = fopen(destination, "wb+");
@@ -196,50 +240,53 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination)
         return qfalse;
     }
 
-    // Go ahead and fetch the checksum.
     // Start cURL routine.
     curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _1fx_httpDL_cURL_write);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, f);
 
-    // Get the remote file.
+    // Grab the file size from the header first.
+    curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+
+    // Get the remote header.
     res = curl_easy_perform(curl);
+
+    // Fetch the download size from the retrieved info.
+    curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &httpDL.pakSize);
+
+    // Verify retrieved header info.
+    if(res != CURLE_OK){
+        // This probably means the server returned a >= 400 HTTP error.
+        // Most likely the file is not present on the remote server.
+        // Or the remote file isn't a valid MD5SUM file.
+        fclose(f);
+        DeleteFile(TEXT(destination));
+        return qfalse;
+    }
+
+    // Premature checks seem fine, go ahead and download the real file.
+    // Reset some cURL options.
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
+
+    // Let the UI we're downloading a file.
+    httpDL.pakName = pakName;
+
+    // Rewind to the beginning of the output file.
+    fseek(f, 0, SEEK_SET);
+
+    // Get the remote file and close the file.
+    res = curl_easy_perform(curl);
+    fclose(f);
+
+    // Cleanup download info.
+    httpDL.pakName = NULL;
+    httpDL.pakSize = -1;
 
     // Check success.
     if(res != CURLE_OK){
         // Try to remove the incorrectly fetched file.
-        fclose(f);
         DeleteFile(TEXT(destination));
-
-        return qfalse;
-    }
-
-    // Have some sort of verification here.
-    // If the file was not found on the server, this file will probably contain a 404 error page.
-    // So check the file for some HTML contents, and if found, this file is still invalid.
-
-    // Get the file size.
-    fsize = ftell(f);
-
-    // Re-wind the file to read it.
-    fseek(f, 0, SEEK_SET);
-
-    // Read as a maximum 4KB of the output file.
-    // This should be enough to determine the validness of the file.
-    res = fread(fileBuffer, sizeof(char), (fsize >= 4096) ? 4095 : fsize, f);
-    fileBuffer[res] = '\0';
-
-    // Close the file.
-    fclose(f);
-
-    // Determine if this file was valid.
-    // Check for some contents.
-    if(strstr(fileBuffer, "<html>")){
-        DeleteFile(TEXT(destination));
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_DLL]: Incorrectly downloaded file (contained HTML, so possibly a 404 or 500 web page).\n");
-        #endif // _DEBUG
-
         return qfalse;
     }
 
@@ -295,7 +342,7 @@ static void _1fx_httpDL_checkModFile(char *filename, qboolean restartRequired)
 
         // Fetch file and verify success,
         // and check if this was a critical file that needs a restart into QVM to install.
-        if(_1fx_httpDL_getRemoteFile(va("%s/%s/%s", HTTPDL_BASEURL, fs_game, filename), va("%s\\%s", fs_game, filename)) && restartRequired){
+        if(_1fx_httpDL_getRemoteFile(va("%s/%s/%s", HTTPDL_BASEURL, fs_game, filename), va("%s\\%s", fs_game, filename), filename) && restartRequired){
             restartWhenFinished = qtrue;
         }
     }
@@ -325,21 +372,38 @@ static void *_1fx_httpDL_mainDownloader()
     #endif // _DEBUG
 
     // Start initializing cURL.
+    curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
+
 	if(!curl){
         Com_Printf("ERROR: Couldn't initialize cURL in the 1fx. HTTP downloader.\n");
         Com_Printf("Please e-mail the given error to boe@1fxmod.org\n");
         Com_Printf("Aborting.\n");
 
-        httpDLStatus = HTTPDL_FINISHED;
+        httpDL.httpDLStatus = HTTPDL_FINISHED;
         return NULL;
 	}
 
+	// Set some global cURL settings here.
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _1fx_httpDL_cURL_write);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, _1fx_httpDL_cURL_writeEmpty);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "1fx-httpdownloader/" _1FX_CLADD_VER);
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+
+    // Start checking the core Mod files.
 	_1fx_httpDL_checkModFile("CoreUI_update.dll", qtrue);
 	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll", qtrue);
 
+	// Safe to cancel from this point forward, should we?
+	if(httpDL.httpDLStatus == HTTPDL_CANCEL){
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+        return NULL;
+	}
+
 	// Cleanup cURL.
     curl_easy_cleanup(curl);
+    curl_global_cleanup();
 
     // Delete temporary MD5SUM file.
     DeleteFile(TEXT(va("%s\\1fx_MD5SUM", fs_game)));
@@ -371,11 +435,11 @@ void _1fx_httpDL_initialize()
         Com_Printf("Please e-mail the following error code to boe@1fxmod.org -> %d\n", errnum);
         Com_Printf("Aborting.\n");
 
-        httpDLStatus = HTTPDL_FINISHED;
+        httpDL.httpDLStatus = HTTPDL_FINISHED;
         return;
     }
 
-    httpDLStatus = HTTPDL_DOWNLOADING;
+    httpDL.httpDLStatus = HTTPDL_DOWNLOADING;
     #ifdef _DEBUG
     Com_Printf("[CoreUI_DLL]: Initialized HTTP download thread.\n");
     #endif // _DEBUG
@@ -393,8 +457,8 @@ prior to shutting down.
 void _1fx_joinHTTPThread()
 {
     // Give thread cancel signal if still running.
-    if(httpDLStatus == HTTPDL_DOWNLOADING){
-        httpDLStatus = HTTPDL_CANCEL;
+    if(httpDL.httpDLStatus == HTTPDL_DOWNLOADING){
+        httpDL.httpDLStatus = HTTPDL_CANCEL;
     }
 
 	pthread_join(downloadThread, NULL);
