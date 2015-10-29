@@ -358,9 +358,9 @@ locally but are available on the remote server.
 
 static void _1fx_httpDL_checkExtraPaks()
 {
-	char    *s;
-	char    paks[MAX_CVAR_VALUE_STRING], currentPak[MAX_CVAR_VALUE_STRING], fileExtension[5];
-    int     pakLength;
+	char        *s;
+	char        paks[MAX_CVAR_VALUE_STRING], currentPak[MAX_CVAR_VALUE_STRING], fileExtension[5];
+    int         pakLength;
 
     // Check if the server owner made files available to download.
     if(!strlen(ui_httpRefPaks.string) || !strlen(ui_httpBaseURL.string)){
@@ -377,6 +377,7 @@ static void _1fx_httpDL_checkExtraPaks()
 	// Loop through the paks available on the server.
     Q_strncpyz(paks, ui_httpRefPaks.string, sizeof(paks));
     s = paks;
+    memset(currentPak, 0, sizeof(currentPak));
     do{
         // Determine if there's another package available for download.
         char *nextPak = strstr(s, " ");
@@ -387,24 +388,25 @@ static void _1fx_httpDL_checkExtraPaks()
         }
         pakLength++;
 
+        // We can set the current pak now.
+        strncat(currentPak, s, pakLength);
+
         // We need a valid .pk3 extension to continue.
         if((int)s + pakLength > 4){
-            // We can set the current pak now.
-            Q_strncpyz(currentPak, s, pakLength);
             Q_strncpyz(fileExtension, s + pakLength - 5, sizeof(fileExtension));
             Q_strlwr(fileExtension);
 
-            if(strcmp(fileExtension, ".pk3") != 0){
-                // Not a .pk3 file.
-                Com_Printf("Trying to download a non .pk3 file (%s): this is not allowed!\n", currentPak);
-            }else{
-                // We can download this .pk3 file.
+            if(strcmp(fileExtension, ".pk3") == 0){
+                // We can download this .pk3 file now.
                 _1fx_httpDL_getRemoteFile(va("%s%s", ui_httpBaseURL.string, currentPak), va("%s\\%s", fs_game, currentPak), currentPak);
 
                 // Don't continue if the user wants to cancel.
                 if(httpDL.httpDLStatus == HTTPDL_CANCEL){
                     break;
                 }
+
+                // Reset currentPak variable.
+                memset(currentPak, 0, sizeof(currentPak));
             }
         }
 
