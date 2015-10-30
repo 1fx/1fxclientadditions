@@ -5256,8 +5256,24 @@ void UI_DrawHTTPDownloadScreen( void )
 	Text_PaintCenter(centerPoint, 20, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "1fx. HTTP Downloader", 0 );
 	Text_PaintCenter(centerPoint, 35, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "www.1fxmod.org", 0 );
 
+	// If we're still checking the core files, we draw a different screen.
+	if(!httpDL.baseChecksComplete){
+		// Draw base check screen.
+		Text_PaintCenter(centerPoint, yStart, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Checking 1fx. Client Additions..", 0 );
+	}else{
+		// Draw base for extra pk3 download screen.
+		Text_PaintCenter(centerPoint, yStart, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Downloading extra files..", 0 );
+	}
+
 	// Boe!Man 10/29/15: Always determine file progress for both screens.
 	if(httpDL.pakName != NULL){
+		// Print download name.
+		if(!httpDL.baseChecksComplete){
+			Q_strncpyz(dlNameBuf, va("Updating Mod file: %s", httpDL.pakName), sizeof(dlNameBuf));
+		}else{
+			Q_strncpyz(dlNameBuf, va("Downloading extra .pk3 file: %s", httpDL.pakName), sizeof(dlNameBuf));
+		}
+
 		// Total size.
 		if(httpDL.pakSize != -1){
 			Q_strncpyz(dlSizeBuf_total, httpDL.pakSize < 1000000 ? va("%.0f KB", httpDL.pakSize / 1024) : va("%.1f MB", httpDL.pakSize / 1024 / 1024), sizeof(dlSizeBuf_total));
@@ -5275,47 +5291,24 @@ void UI_DrawHTTPDownloadScreen( void )
 		Q_strncpyz(xferRateBuf, httpDL.speedAvg < 1000000 ? va("%.0f KB/s", httpDL.speedAvg / 1024) : va("%.1f MB/s", httpDL.speedAvg / 1024 / 1024), sizeof(xferRateBuf));
 
 		// Print file progress.
+		Text_PaintCenter(centerPoint, yStart + 15, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlNameBuf, 0 );
 		Text_PaintCenter(leftWidth, yStart + 30, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, va("(%s of %s copied)", dlSizeBuf_done, dlSizeBuf_total), 0 );
 
 		// Print transfer rate.
-		Text_PaintCenter(leftWidth, yStart + 65, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, xferRateBuf, 0 );
-	}
-
-	// If we're still checking the core files, we draw a different screen.
-	if(!httpDL.baseChecksComplete){
-		// Draw base check screen.
-		Text_PaintCenter(centerPoint, yStart, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Checking 1fx. Client Additions..", 0 );
-		Text_PaintCenter(centerPoint, yStart + 90, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "SoF2 will reconnect a few times during this process.", 0 );
-
-		if(httpDL.pakName != NULL){
-			// Draw additional "header".
-			Text_PaintCenter(centerPoint, yStart + 50, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Transfer rate:", 0 );
-
-			// Print download name.
-			Q_strncpyz(dlNameBuf, va("Updating Mod file: %s", httpDL.pakName), sizeof(dlNameBuf));
-			Text_PaintCenter(centerPoint, yStart + 15, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlNameBuf, 0 );
-		}
-	}else{
-		// Draw base for extra pk3 download screen.
-		Text_PaintCenter(centerPoint, yStart, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Downloading extra files..", 0 );
 		Text_PaintCenter(centerPoint, yStart + 50, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Transfer rate:", 0 );
+		Text_PaintCenter(leftWidth, yStart + 65, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, xferRateBuf, 0 );
+
+		// Print time remaining.
 		Text_PaintCenter(centerPoint, yStart + 90, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Estimated time left:", 0 );
-
-		if(httpDL.pakName != NULL){
-			// Print download name.
-			Q_strncpyz(dlNameBuf, va("Downloading extra .pk3 file: %s", httpDL.pakName), sizeof(dlNameBuf));
-			Text_PaintCenter(centerPoint, yStart + 15, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlNameBuf, 0 );
-
-			if(httpDL.pakSize != -1){
-				// Print estimated time left.
-				// We do it in K (/1024) because we'd overflow around 4MB.
-				timeLeft = httpDL.pakSize / httpDL.speedAvg; // Estimated time for entire download in seconds.
-				UI_PrintTime ( dlTimeBuf, sizeof dlTimeBuf,
-					(timeLeft - (((httpDL.bytesReceived/1024) * timeLeft) / (httpDL.pakSize/1024))) * 1000);
-				Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlTimeBuf, 0 );
-			}else{
-				Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "unknown", 0 );
-			}
+		if(httpDL.pakSize != -1){
+			// Print estimated time left.
+			// We do it in K (/1024) because we'd overflow around 4MB.
+			timeLeft = httpDL.pakSize / httpDL.speedAvg; // Estimated time for entire download in seconds.
+			UI_PrintTime ( dlTimeBuf, sizeof dlTimeBuf,
+				(timeLeft - (((httpDL.bytesReceived/1024) * timeLeft) / (httpDL.pakSize/1024))) * 1000);
+			Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlTimeBuf, 0 );
+		}else{
+			Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "unknown", 0 );
 		}
 	}
 }
