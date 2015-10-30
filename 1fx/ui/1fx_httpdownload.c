@@ -131,8 +131,8 @@ static char *_1fx_httpDL_getRemoteChecksum(char *url)
     int     res;
     double  remoteFileSize;
 
-    // Open the file, both read and write.
-    f = fopen(va("%s\\1fx_MD5SUM", fs_game), "wb+");
+    // Open the file for writing.
+    f = fopen(va("%s\\1fx_MD5SUM", fs_game), "wb");
 
     // Verify success.
     if(f == NULL){
@@ -168,8 +168,11 @@ static char *_1fx_httpDL_getRemoteChecksum(char *url)
     curl_easy_setopt(curl, CURLOPT_HEADER, 0);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
 
-    // Rewind to the beginning of the output file.
-    fseek(f, 0, SEEK_SET);
+    // Reopen the file in write + read mode.
+    freopen(va("%s\\1fx_MD5SUM", fs_game), "wb+", f);
+    if(f == NULL){
+        return NULL;
+    }
 
     // Perform actual download.
     res = curl_easy_perform(curl);
@@ -211,9 +214,13 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
 {
     FILE    *f;
     int     res;
+    char    destBuf[MAX_PATH];
+
+    // Make a copy of the destination filename.
+    Q_strncpyz(destBuf, destination, sizeof(destBuf));
 
     // Open the file in write mode.
-    f = fopen(destination, "wb+");
+    f = fopen(destBuf, "wb");
 
     // Verify success.
     if(f == NULL){
@@ -247,7 +254,7 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
         Com_Printf("[CoreUI_DLL]: Getting file headers failed: %s.\n", curl_easy_strerror(res));
         #endif // _DEBUG
         fclose(f);
-        DeleteFile(TEXT(destination));
+        DeleteFile(destBuf);
         return qfalse;
     }
 
@@ -259,8 +266,12 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     // Let the UI know we're downloading a file.
     httpDL.pakName = pakName;
 
-    // Rewind to the beginning of the output file.
-    fseek(f, 0, SEEK_SET);
+    // Reopen the file to ensure no bogus data is left.
+    freopen(destBuf, "wb", f);
+    if(f == NULL){
+        DeleteFile(destBuf);
+        return qfalse;
+    }
 
     // Get the remote file and close the file.
     res = curl_easy_perform(curl);
@@ -273,7 +284,7 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     // Check success.
     if(res != CURLE_OK){
         // Try to remove the incorrectly fetched file.
-        DeleteFile(TEXT(destination));
+        DeleteFile(destBuf);
         return qfalse;
     }
 
@@ -557,7 +568,7 @@ static void *_1fx_httpDL_mainDownloader()
     curl_global_cleanup();
 
     // Delete temporary MD5SUM file.
-    DeleteFile(TEXT(va("%s\\1fx_MD5SUM", fs_game)));
+    DeleteFile(va("%s\\1fx_MD5SUM", fs_game));
 
     #ifdef _DEBUG
     Com_Printf("[CoreUI_DLL]: Main downloader thread finished.\n");

@@ -5222,7 +5222,7 @@ void UI_DrawLoadingScreen( void )
 }
 
 // #CORE_UI
-
+#ifndef Q3_VM
 /*
 ==========================
 UI_DrawHTTPDownloadScreen
@@ -5320,6 +5320,7 @@ void UI_DrawHTTPDownloadScreen( void )
 	}
 }
 
+#endif // not Q3_VM
 // #END CORE_UI
 
 /*
