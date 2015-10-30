@@ -354,9 +354,6 @@ static void _1fx_httpDL_replaceModFile(char *filename, char *remoteChecksum)
         return;
     }
 
-    // Remove backup file, all successful.
-    DeleteFile(va("%s.bak", fullFilename));
-
     #ifdef _DEBUG
     Com_Printf("[CoreUI_DLL]: Checksum matched of new file, success!\n");
     #endif // _DEBUG
@@ -377,6 +374,11 @@ static void _1fx_httpDL_checkModFile(char *filename)
 {
     char *localChecksum;
     char *remoteChecksum;
+
+    // First off, check if there's an old backup left. Remove that now.
+    if(PathFileExists(va("%s\\%s.bak", fs_game, filename))){
+        DeleteFile(va("%s\\%s.bak", fs_game, filename));
+    }
 
     // Check if the 1fx. Mod website has an update available for us.
 	// Calculate local checksum.
