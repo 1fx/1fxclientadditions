@@ -573,6 +573,12 @@ static void *_1fx_httpDL_mainDownloader()
     #ifdef _DEBUG
     Com_Printf("[CoreUI_DLL]: Main downloader thread finished.\n");
     #endif // _DEBUG
+
+    // Give the signal to reconnect.
+    if(httpDL.httpDLStatus != HTTPDL_CANCEL){
+        httpDL.httpDLStatus = HTTPDL_FINISHED;
+        trap_Cmd_ExecuteText(EXEC_APPEND, "reconnect ; \n");
+    }
 }
 
 /*
@@ -602,6 +608,11 @@ void _1fx_httpDL_initialize()
     }
 
     httpDL.httpDLStatus = HTTPDL_DOWNLOADING;
+
+	// Boe!Man 10/30/15: Also set last connected server here.
+	trap_Cvar_Set("ui_lastConnectedServer", ui_connectedServer.string);
+	trap_Cvar_Update(&ui_lastConnectedServer);
+
     #ifdef _DEBUG
     Com_Printf("[CoreUI_DLL]: Initialized HTTP download thread.\n");
     #endif // _DEBUG

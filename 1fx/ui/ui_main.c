@@ -4482,19 +4482,15 @@ void _UI_Init( qboolean inGameLoad )
 
 	// #CORE_UI
 	#ifdef Q3_VM
-	// Check if the initial DLL exists or if if needs updating.
+	// Check if the initial DLL exists.
 	_1fx_coreUI_checkDLL();
 
-	// (Re-)set QVM state.
-	trap_Cvar_Set("ui_qvmState", "1");
-	trap_Cvar_Update(&ui_qvmState);
-
-	// Switch back to the DLL.
+	// Switch (back) to the DLL.
 	trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; vm_ui 0 ; reconnect ; \n");
 	#else
-	// Boe!Man 10/19/15: Start the HTTP downloader thread if we come from a QVM state
-	// or if the connected server is different from the previous one.
-	if(ui_qvmState.integer == 1 || strcmp(ui_connectedServer.string, ui_lastConnectedServer.string)){
+	// Boe!Man 10/19/15: Start the HTTP downloader thread if
+	// the connected server is different from the previous one.
+	if(strcmp(ui_connectedServer.string, ui_lastConnectedServer.string)){
 		if(inGameLoad){
 			// Ensure we stop connecting right about now.
 			trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; \n");
@@ -4504,10 +4500,6 @@ void _UI_Init( qboolean inGameLoad )
 			Com_Printf("Initializing 1fx. HTTP downloader.\n");
 		}
 	}
-
-	// (Re-)set QVM state.
-	trap_Cvar_Set("ui_qvmState", "0");
-	trap_Cvar_Update(&ui_qvmState);
 	#endif // Q3_VM
 
 	// Check some CVARs when initializing in game, we might get kicked in a while.
@@ -5417,7 +5409,6 @@ vmCvar_t	ui_allowparental;
 vmCvar_t	ui_noNetCheck;
 
 // #CORE_UI
-vmCvar_t	ui_qvmState;
 vmCvar_t	ui_connectedServer;
 vmCvar_t	ui_lastConnectedServer;
 
@@ -5515,7 +5506,6 @@ static cvarTable_t cvarTable[] =
 	{ &ui_noNetCheck,		"ui_noNetCheck",		"0", CVAR_ARCHIVE },
 
 	// #CORE_UI
-	{ &ui_qvmState,  			"ui_qvmState", 			 	"1", 	CVAR_ROM | CVAR_INTERNAL | CVAR_NORESTART },
 	{ &ui_lastConnectedServer,  "ui_lastConnectedServer", 	"", 	CVAR_ROM | CVAR_INTERNAL | CVAR_NORESTART },
 	{ &ui_connectedServer,  	"ui_connectedServer", 	 	"", 	CVAR_ROM | CVAR_INTERNAL | CVAR_NORESTART },
 
