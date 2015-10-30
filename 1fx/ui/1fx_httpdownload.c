@@ -392,7 +392,7 @@ static void _1fx_httpDL_checkModFile(char *filename)
     }
     #endif // _DEBUG
 
-    remoteChecksum = _1fx_httpDL_getRemoteChecksum(va("%s/%s/%s.MD5SUM", HTTPDL_BASEURL, fs_game, filename));
+    remoteChecksum = _1fx_httpDL_getRemoteChecksum(va("%s/%s/%s/%s.MD5SUM", HTTPDL_BASEURL, SOF2_VERSION_ID, fs_game, filename));
 
     #ifdef _DEBUG
     if(remoteChecksum != NULL){
@@ -410,7 +410,7 @@ static void _1fx_httpDL_checkModFile(char *filename)
 
         // Fetch file and verify success.
         if(PathFileExists(va("%s\\%s", fs_game, filename))){
-            if(_1fx_httpDL_getRemoteFile(va("%s/%s/%s", HTTPDL_BASEURL, fs_game, filename), va("%s\\%s.tmp", fs_game, filename), filename)){
+            if(_1fx_httpDL_getRemoteFile(va("%s/%s/%s/%s", HTTPDL_BASEURL, SOF2_VERSION_ID, fs_game, filename), va("%s\\%s.tmp", fs_game, filename), filename)){
                 // We can replace the original file now with the downloaded file.
                 _1fx_httpDL_replaceModFile(filename, remoteChecksum);
             }
@@ -418,7 +418,7 @@ static void _1fx_httpDL_checkModFile(char *filename)
             // First time we download this file. Save it to the proper location immediately.
             // If this happens to fail, no worries, next update the checksum won't match,
             // forcing a re-download.
-            _1fx_httpDL_getRemoteFile(va("%s/%s/%s", HTTPDL_BASEURL, fs_game, filename), va("%s\\%s", fs_game, filename), filename);
+            _1fx_httpDL_getRemoteFile(va("%s/%s/%s/%s", HTTPDL_BASEURL, SOF2_VERSION_ID, fs_game, filename), va("%s\\%s", fs_game, filename), filename);
 
             #ifdef _DEBUG
             Com_Printf("[CoreUI_DLL]: Initial download complete of file: %s\n", filename);
