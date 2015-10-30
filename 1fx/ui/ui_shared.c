@@ -4,6 +4,9 @@
 
 #include "ui_shared.h"
 #include "../game/bg_public.h"
+// #CORE_UI
+#include "1fx_local.h"
+// #END CORE_UI
 
 #define SCROLL_TIME_START					500
 #define SCROLL_TIME_ADJUST				150
@@ -1325,14 +1328,33 @@ void Script_Play(itemDef_t *item, const char **args) {
 	}
 }
 
+// #CORE_UI
+static const char *delayedLoopSound = NULL;
+
 void Script_playLooped(itemDef_t *item, const char **args) {
 	const char *val;
-	if (String_Parse(args, &val)) {
-		DC->stopBackgroundTrack();
-		DC->startBackgroundTrack(val, val, qfalse);
+
+	// Boe!Man 10/30/15: Check for a delayed loop sound,
+	// and if existing, play it.
+	if(delayedLoopSound != NULL){
+        DC->stopBackgroundTrack();
+        DC->startBackgroundTrack(delayedLoopSound, delayedLoopSound, qfalse);
+        delayedLoopSound = NULL;
+        return;
+	}
+
+	if (String_Parse(args, &val)){
+        if(httpDL.httpDLStatus != HTTPDL_DOWNLOADING){
+			DC->stopBackgroundTrack();
+			DC->startBackgroundTrack(val, val, qfalse);
+        }else{
+        	// Boe!Man 10/30/15: Save a copy of the background sound,
+        	// which we can play later (after a possible cancel).
+            delayedLoopSound = val;
+        }
 	}
 }
-
+// #END CORE_UI
 
 commandDef_t commandList[] =
 {
@@ -3437,11 +3459,19 @@ qboolean Menu_HandleKey(menuDef_t *menu, int key, qboolean down)
 			break;
 
 		case K_ESCAPE:
-			if (!g_waitingForKey && menu->onESC) {
+			// #CORE_UI
+			if (!g_waitingForKey && menu->onESC && httpDL.httpDLStatus != HTTPDL_DOWNLOADING) {
 				itemDef_t it;
-		    it.parent = menu;
-		    Item_RunScript(&it, menu->onESC);
+				it.parent = menu;
+				Item_RunScript(&it, menu->onESC);
+			}else if(httpDL.httpDLStatus == HTTPDL_DOWNLOADING){
+				// Boe!Man 10/30/15: Cancel on escape press.
+				httpDL.httpDLStatus = HTTPDL_CANCEL;
+
+				// Start playing background sound again.
+                Script_playLooped(NULL, NULL);
 			}
+			// #END CORE_UI
 			break;
 		case K_TAB:
 		case K_RIGHTARROW:

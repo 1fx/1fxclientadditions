@@ -578,6 +578,11 @@ static void *_1fx_httpDL_mainDownloader()
     if(httpDL.httpDLStatus != HTTPDL_CANCEL){
         httpDL.httpDLStatus = HTTPDL_FINISHED;
         trap_Cmd_ExecuteText(EXEC_APPEND, "reconnect ; \n");
+    }else{
+        // User canceled.
+        // Reset last connected server to ensure the downloader starts upon reconnect.
+        trap_Cvar_Set("ui_lastConnectedServer", "");
+        trap_Cvar_Update(&ui_lastConnectedServer);
     }
 }
 
