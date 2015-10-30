@@ -451,7 +451,8 @@ static void _1fx_httpDL_checkExtraPaks()
     int         pakLength;
 
     // Check if the server owner made files available to download.
-    if(!strlen(ui_httpRefPaks.string) || !strlen(ui_httpBaseURL.string)){
+    if(!strlen(ui_httpRefPaks.string) || !strlen(ui_httpBaseURL.string)
+        || !strcmp(ui_httpRefPaks.string, "none") || !strcmp(ui_httpBaseURL.string, "none")){
         #ifdef _DEBUG
         Com_Printf("[CoreUI_DLL]: No extra files available to be downloaded (CVARs empty).\n");
         #endif // _DEBUG
