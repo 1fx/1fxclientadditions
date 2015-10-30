@@ -17,7 +17,7 @@ or updates the Core UI DLL with the one found in the Mod directory.
 ==========================
 */
 
-static void _1fx_coreUI_installDLL(qboolean update)
+static void _1fx_coreUI_installDLL()
 {
     fileHandle_t    input, output;
     char            *data;
@@ -27,30 +27,13 @@ static void _1fx_coreUI_installDLL(qboolean update)
     #endif // _DEBUG
 
     // The base Core UI DLL wasn't detected,
-    // so we're going to extract it now from the .pk3,
-    // or an update is available to apply.
+    // so we're going to extract it now from the .pk3.
 
     // Open the input file, and verify it can be opened properly first before opening the (perhaps existing) DLL for writing.
-    len = trap_FS_FOpenFile((update) ? "CoreUI_update.dll" : "install/CoreUI_initial.dll", &input, FS_READ);
+    len = trap_FS_FOpenFile("install/CoreUI_initial.dll", &input, FS_READ);
     if(!input || !len){
-        if(!update){
-            // Fatal error on initial install.
-            Com_Error(ERR_FATAL, "\n\n=====ERROR=====\nThe 1fx. Core UI pk3 file is corrupt. Remove the 1fx_coreUI_x.x.pk3 file from your mod directories and restart the game (x.x represents a number).");
-        }
-
-        // We tried to apply an update that didn't open successfully.
-        // Just remove the file (in the QVM's case, we make sure it's 0 bytes long) and the DLL will force a re-download.
-        trap_FS_FCloseFile(input);
-
-        // Re-open the file in write mode.
-        trap_FS_FOpenFile("coreUI_update.dll", &input, FS_WRITE);
-        trap_FS_FCloseFile(input);
-
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_QVM]: Update DLL was empty or couldn't be opened, tried to empty it.\n");
-        #endif // _DEBUG
-
-        return;
+        // Fatal error on initial install.
+        Com_Error(ERR_FATAL, "\n\n=====ERROR=====\nThe 1fx. Core UI pk3 file is corrupt. Remove the 1fx_coreUI_x.x.pk3 file from your mod directories and restart the game (x.x represents a number).");
     }
 
     // Open the output DLL for writing.
@@ -95,11 +78,7 @@ static void _1fx_coreUI_installDLL(qboolean update)
     trap_FS_FCloseFile(output);
 
     #ifdef _DEBUG
-    if(update){
-        Com_Printf("[CoreUI_QVM]: Update Core UI DLL successfully installed.\n");
-    }else{
-        Com_Printf("[CoreUI_QVM]: Initial Core UI DLL successfully installed.\n");
-    }
+    Com_Printf("[CoreUI_QVM]: Initial Core UI DLL successfully installed.\n");
     #endif // _DEBUG
 }
 
@@ -125,28 +104,15 @@ void _1fx_coreUI_checkDLL()
 
         // Start installation routine.
         trap_FS_FCloseFile(f);
-        _1fx_coreUI_installDLL(qfalse);
+        _1fx_coreUI_installDLL();
         return;
     }
 
-    // File is present and contains data, check if there is an update pending.
+    // File is present and contains data.
     trap_FS_FCloseFile(f);
-    len = trap_FS_FOpenFile("CoreUI_update.dll", &f, FS_READ);
-    if(f && len){
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_QVM]: DLL update found, installing...\n");
-        #endif // _DEBUG
-
-        // An update is pending, install it now.
-        trap_FS_FCloseFile(f);
-        _1fx_coreUI_installDLL(qtrue);
-        return;
-    }else{
-        trap_FS_FCloseFile(f);
-    }
 
     #ifdef _DEBUG
-    Com_Printf("[CoreUI_QVM]: No initial Core UI DLL installation or DLL update required.\n");
+    Com_Printf("[CoreUI_QVM]: No initial Core UI DLL installation required.\n");
     #endif // _DEBUG
 }
 

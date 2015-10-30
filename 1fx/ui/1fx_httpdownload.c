@@ -9,6 +9,7 @@
 #include <curl/curl.h>
 #include <pthread.h>
 #include <openssl/md5.h>
+#include "Shlwapi.h"
 
 #include "ui_local.h"
 #include "1fx_local.h"
@@ -16,7 +17,6 @@
 static CURL             *curl;
 static pthread_t        downloadThread;
 static char             fs_game[MAX_CVAR_VALUE_STRING];
-static qboolean         restartWhenFinished             = qfalse;
 httpDownloadLocals_t    httpDL                          = {0};
 
 /*
@@ -286,6 +286,74 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
 
 /*
 ==========================
+_1fx_httpDL_replaceModFile
+10/30/15 - 3:30 PM
+Updates Mod file with
+downloaded *.tmp file.
+==========================
+*/
+
+static void _1fx_httpDL_replaceModFile(char *filename, char *remoteChecksum)
+{
+    char fullFilename[MAX_PATH];
+    char *newChecksum;
+
+    // Make a copy of the file name with the fs_game CVAR path embedded.
+    Q_strncpyz(fullFilename, va("%s\\%s", fs_game, filename), sizeof(fullFilename));
+
+    // Don't just overwrite the original file in case it's still in use. Rename it first.
+    if(!MoveFile(fullFilename, va("%s.bak", fullFilename))){
+        #ifdef _DEBUG
+        Com_Printf("[CoreUI_DLL]: Couldn't move mod file to .bak.\n");
+        #endif // _DEBUG
+        return;
+    }
+
+    // Made a backup of the original file (and possibly file handle).
+    // Now move the .tmp file to the original file location.
+    if(!MoveFile(va("%s.tmp", fullFilename), fullFilename)){
+        #ifdef _DEBUG
+        Com_Printf("[CoreUI_DLL]: Couldn't move update file to mod file\n.");
+        #endif // _DEBUG
+
+        // Restore old file.
+        // Don't check it here, worst case is that this fails and CoreUI QVM will restore the original one.
+        MoveFile(va("%s.bak", fullFilename), fullFilename);
+        return;
+    }
+
+    // Success moving file to .bak and moving .tmp to file,
+    // now verify checksum.
+    newChecksum = _1fx_httpDL_getFileChecksum(va("%s\\%s", fs_game, fullFilename));
+
+    // Verify the downloaded package.
+    if(newChecksum == NULL || strcmp(newChecksum, remoteChecksum)){
+        #ifdef _DEBUG
+        Com_Printf("[CoreUI_DLL]: Checksum didn't match of new file.\n");
+        #endif // _DEBUG
+
+        // Restore old file.
+        DeleteFile(fullFilename);
+        MoveFile(va("%s.bak", fullFilename), fullFilename);
+
+        // Free possibly allocated memory and return.
+        if(newChecksum != NULL){
+            free(newChecksum);
+        }
+        return;
+    }
+
+    // Remove backup file, all successful.
+    DeleteFile(va("%s.bak", fullFilename));
+
+    #ifdef _DEBUG
+    Com_Printf("[CoreUI_DLL]: Checksum matched of new file, success!\n");
+    #endif // _DEBUG
+    free(newChecksum);
+}
+
+/*
+==========================
 _1fx_httpDL_checkModFile
 10/26/15 - 6:24 PM
 Checks a local Mod file,
@@ -294,18 +362,14 @@ remote one, updates it.
 ==========================
 */
 
-static void _1fx_httpDL_checkModFile(char *filename, qboolean restartRequired)
+static void _1fx_httpDL_checkModFile(char *filename)
 {
     char *localChecksum;
     char *remoteChecksum;
 
     // Check if the 1fx. Mod website has an update available for us.
 	// Calculate local checksum.
-	if(!strcmp(filename, "CoreUI_update.dll")){
-        localChecksum = _1fx_httpDL_getFileChecksum(va("%s\\sof2mp_uix86.dll", fs_game));
-    }else{
-        localChecksum = _1fx_httpDL_getFileChecksum(va("%s\\%s", fs_game, filename));
-    }
+    localChecksum = _1fx_httpDL_getFileChecksum(va("%s\\%s", fs_game, filename));
 
     #ifdef _DEBUG
     if(localChecksum != NULL){
@@ -331,10 +395,21 @@ static void _1fx_httpDL_checkModFile(char *filename, qboolean restartRequired)
         Com_Printf("[CoreUI_DLL]: Update required for file: %s\n", filename);
         #endif // _DEBUG
 
-        // Fetch file and verify success,
-        // and check if this was a critical file that needs a restart into QVM to install.
-        if(_1fx_httpDL_getRemoteFile(va("%s/%s/%s", HTTPDL_BASEURL, fs_game, filename), va("%s\\%s", fs_game, filename), filename) && restartRequired){
-            restartWhenFinished = qtrue;
+        // Fetch file and verify success.
+        if(PathFileExists(va("%s\\%s", fs_game, filename))){
+            if(_1fx_httpDL_getRemoteFile(va("%s/%s/%s", HTTPDL_BASEURL, fs_game, filename), va("%s\\%s.tmp", fs_game, filename), filename)){
+                // We can replace the original file now with the downloaded file.
+                _1fx_httpDL_replaceModFile(filename, remoteChecksum);
+            }
+        }else{
+            // First time we download this file. Save it to the proper location immediately.
+            // If this happens to fail, no worries, next update the checksum won't match,
+            // forcing a re-download.
+            _1fx_httpDL_getRemoteFile(va("%s/%s/%s", HTTPDL_BASEURL, fs_game, filename), va("%s\\%s", fs_game, filename), filename);
+
+            #ifdef _DEBUG
+            Com_Printf("[CoreUI_DLL]: Initial download complete of file: %s\n", filename);
+            #endif // _DEBUG
         }
     }
 
@@ -389,7 +464,7 @@ static void _1fx_httpDL_checkExtraPaks()
         pakLength++;
 
         // We can set the current pak now.
-        strncat(currentPak, s, pakLength);
+        strncat(currentPak, s, pakLength - 1);
 
         // We need a valid .pk3 extension to continue.
         if((int)s + pakLength > 4){
@@ -397,8 +472,15 @@ static void _1fx_httpDL_checkExtraPaks()
             Q_strlwr(fileExtension);
 
             if(strcmp(fileExtension, ".pk3") == 0){
-                // We can download this .pk3 file now.
-                _1fx_httpDL_getRemoteFile(va("%s%s", ui_httpBaseURL.string, currentPak), va("%s\\%s", fs_game, currentPak), currentPak);
+                if(!PathFileExists(va("%s\\%s", fs_game, currentPak))){
+                    // We can download this .pk3 file now.
+                    if(_1fx_httpDL_getRemoteFile(va("%s%s", ui_httpBaseURL.string, currentPak), va("%s\\%s.tmp", fs_game, currentPak), currentPak)){
+                        // Move to the new location and remove the old file.
+                        // Don't bother too much with this, if it fails we'll download it again the next time.
+                        MoveFile(va("%s\\%s.tmp", fs_game, currentPak), va("%s\\%s", fs_game, currentPak));
+                        DeleteFile(va("%s\\%s.tmp", fs_game, currentPak));
+                    }
+                }
 
                 // Don't continue if the user wants to cancel.
                 if(httpDL.httpDLStatus == HTTPDL_CANCEL){
@@ -456,8 +538,8 @@ static void *_1fx_httpDL_mainDownloader()
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
 
     // Start checking the core Mod files.
-	_1fx_httpDL_checkModFile("CoreUI_update.dll", qtrue);
-	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll", qtrue);
+	_1fx_httpDL_checkModFile("sof2mp_uix86.dll");
+	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll");
 
 	// Safe to cancel from this point forward, should we?
 	if(httpDL.httpDLStatus == HTTPDL_CANCEL){
