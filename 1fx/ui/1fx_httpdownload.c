@@ -550,6 +550,7 @@ static void *_1fx_httpDL_mainDownloader()
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "1fx-httpdownloader/" _1FX_CLADD_VER);
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5);
 
     // Start checking the core Mod files.
 	_1fx_httpDL_checkModFile("sof2mp_uix86.dll");
