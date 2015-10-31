@@ -145,8 +145,8 @@ static char *_1fx_httpDL_getRemoteChecksum(char *url)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, f);
 
     // Grab the file size from the header first.
-    curl_easy_setopt(curl, CURLOPT_HEADER, 1);
-    curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 
     // Get the remote header.
     res = curl_easy_perform(curl);
@@ -165,8 +165,8 @@ static char *_1fx_httpDL_getRemoteChecksum(char *url)
 
     // Premature checks seem fine, go ahead and download the real file.
     // Reset some cURL options.
-    curl_easy_setopt(curl, CURLOPT_HEADER, 0);
-    curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
 
     // Reopen the file in write + read mode.
     freopen(va("%s\\1fx_MD5SUM", fs_game), "wb+", f);
@@ -236,8 +236,8 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, f);
 
     // Grab the file size from the header first.
-    curl_easy_setopt(curl, CURLOPT_HEADER, 1);
-    curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 
     // Get the remote header.
     res = curl_easy_perform(curl);
@@ -260,8 +260,8 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
 
     // Premature checks seem fine, go ahead and download the real file.
     // Reset some cURL options.
-    curl_easy_setopt(curl, CURLOPT_HEADER, 0);
-    curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
 
     // Let the UI know we're downloading a file.
     httpDL.pakName = pakName;
@@ -547,10 +547,10 @@ static void *_1fx_httpDL_mainDownloader()
 	// Set some global cURL settings here.
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _1fx_httpDL_cURL_write);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, _1fx_httpDL_cURL_writeEmpty);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "1fx-httpdownloader/" _1FX_CLADD_VER);
-    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5);
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
 
     // Start checking the core Mod files.
 	_1fx_httpDL_checkModFile("sof2mp_uix86.dll");

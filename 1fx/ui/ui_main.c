@@ -4487,7 +4487,29 @@ void _UI_Init( qboolean inGameLoad )
 
 	// Switch (back) to the DLL.
 	trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; vm_ui 0 ; reconnect ; \n");
-	#else
+	#endif // Q3_VM
+
+	// Check some CVARs when initializing in game, we might get kicked in a while.
+	if(inGameLoad){
+		info[0] = '\0';
+		if( trap_GetConfigString( CS_SYSTEMINFO, info, sizeof(info) ) ) {
+			// Boe!Man 7/7/15: Also get the referenced pk3s to download over HTTP here.
+			trap_Cvar_Set("ui_httpBaseURL", Info_ValueForKey(info, "g_httpBaseURL"));
+			trap_Cvar_Set("ui_httpRefPaks", Info_ValueForKey(info, "g_httpRefPaks"));
+
+			trap_Cvar_Update(&ui_httpBaseURL);
+			trap_Cvar_Update(&ui_httpRefPaks);
+		}
+	}
+
+	// Boe!Man 7/7/15: Force DLL upon next connect or even map switch!
+	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; \n");
+
+	// No annoying "Q3 Arena Unauthorized DLL" popups.
+	// Yes, this isn't a real CVAR in SoF2, but it is actively being checked in the engine nonetheless.
+	trap_Cvar_Register(NULL, "com_blindlyLoadDLLs", "1", CVAR_INTERNAL | CVAR_CHEAT, 0.0f, 0.0f);
+
+	#ifndef Q3_VM
 	// Boe!Man 10/19/15: Start the HTTP downloader thread if
 	// the connected server is different from the previous one.
 	if(strcmp(ui_connectedServer.string, ui_lastConnectedServer.string)){
@@ -4500,27 +4522,7 @@ void _UI_Init( qboolean inGameLoad )
 			Com_Printf("Initializing 1fx. HTTP downloader.\n");
 		}
 	}
-	#endif // Q3_VM
-
-	// Check some CVARs when initializing in game, we might get kicked in a while.
-	if(inGameLoad){
-        info[0] = '\0';
-        if( trap_GetConfigString( CS_SYSTEMINFO, info, sizeof(info) ) ) {
-            // Boe!Man 7/7/15: Also get the referenced pk3s to download over HTTP here.
-            trap_Cvar_Set("ui_httpBaseURL", Info_ValueForKey(info, "g_httpBaseURL"));
-            trap_Cvar_Set("ui_httpRefPaks", Info_ValueForKey(info, "g_httpRefPaks"));
-
-            trap_Cvar_Update(&ui_httpBaseURL);
-            trap_Cvar_Update(&ui_httpRefPaks);
-        }
-	}
-
-	// Boe!Man 7/7/15: Force DLL upon next connect or even map switch!
-	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; \n");
-
-	// No annoying "Q3 Arena Unauthorized DLL" popups.
-	// Yes, this isn't a real CVAR in SoF2, but it is actively being checked in the engine nonetheless.
-	trap_Cvar_Register(NULL, "com_blindlyLoadDLLs", "1", CVAR_INTERNAL | CVAR_CHEAT, 0.0f, 0.0f);
+	#endif // not Q3_VM
 	// #END CORE_UI
 
 	// cache redundant calulations
@@ -5069,18 +5071,6 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 
 	// see what information we should display
 	trap_GetClientState( &cstate );
-
-	// #CORE_UI
-	info[0] = '\0';
-	if(trap_GetConfigString( CS_SYSTEMINFO, info, sizeof(info))){
-        // Boe!Man 7/7/15: Get the referenced base URL and paks from the server here.
-		trap_Cvar_Set("ui_httpBaseURL", Info_ValueForKey(info, "g_httpBaseURL"));
-		trap_Cvar_Set("ui_httpRefPaks", Info_ValueForKey(info, "g_httpRefPaks"));
-
-		trap_Cvar_Update(&ui_httpBaseURL);
-		trap_Cvar_Update(&ui_httpRefPaks);
-	}
-	// #END CORE_UI
 
 	if ( cstate.connState == CA_CONNECTED )
 	{
