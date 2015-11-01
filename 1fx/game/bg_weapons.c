@@ -8,7 +8,7 @@
 #include "g_local.h"
 
 // names as they appear in the SOF2.wpn and inview files
-char *bg_weaponNames[WP_NUM_WEAPONS] = 
+char *bg_weaponNames[WP_NUM_WEAPONS] =
 {
 	"No Weapon",					// WP_NONE,
 	"Knife",						// WP_KNIFE,
@@ -31,12 +31,18 @@ char *bg_weaponNames[WP_NUM_WEAPONS] =
 	"SMOHG92",						// WP_SMOHG92_GRENADE,
 	"ANM14", 						// WP_ANM14_GRENADE,
 	"M15",							// WP_M15_GRENADE,
+	// #CL_ADD
+	"M67",							// WP_M67_GRENADE,
+	"F1",							// WP_F1_GRENADE,
+	"L2A2",							// WP_L2A2_GRENADE,
+	"MDN11",						// WP_MDN11_GRENADE,
+	// #END CL_ADD
 };
 
 weaponData_t weaponData[WP_NUM_WEAPONS];
 
 char *ammoNames[AMMO_MAX] =
-{							
+{
 	"Knife",		//	AMMO_KNIFE,
 	"0.45 ACP",		//	AMMO_045,
 	"5.56mm", 		//	AMMO_556,
@@ -51,6 +57,12 @@ char *ammoNames[AMMO_MAX] =
 	"ANM14", 		//	AMMO_ANM14,
 	"7.62mm belt",	//  AMMO_762_BELT,
 	"9mm|mp5",		//  AMMO_9_MP5
+	// #CL_ADD
+	"M67",			//  AMMO_M67
+	"F1",			//  AMMO_F1
+	"L2A2",			//  AMMO_L2A2
+	"MDN11",		//  AMMO_MDN11
+	// #END CL_ADD
 };
 
 ammoData_t ammoData[AMMO_MAX];
@@ -124,7 +136,7 @@ qboolean BG_InitAmmoStats(void)
 			{
 				continue;
 			}
-	
+
 			trap_GPG_FindPairValue(topSubs, "name", "", name);
 			if ( !Q_stricmp ( name, realName ) )
 			{
@@ -138,7 +150,7 @@ qboolean BG_InitAmmoStats(void)
 		if ( !topSubs )
 		{
 			Com_Printf("BG_InitAmmoStats: Unknown ammo: %s\n", BG_GetRealAmmoName ( i ) );
-		}		
+		}
 	}
 
 	trap_GP_Delete(&GP2);
@@ -152,7 +164,7 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	char	tmpStr[256];
 	int		i;
 
-	// No group is success.  This is to allow NULL to be passed 
+	// No group is success.  This is to allow NULL to be passed
 	if ( NULL == attacksub )
 	{
 		return qtrue;
@@ -181,7 +193,7 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 			trap_GPV_GetName ( value, weapon->zoom[zoomlvl].name );
 			trap_GPV_GetTopValue(value, tmpStr );
 
-			weapon->zoom[zoomlvl].fov = atoi ( tmpStr );					
+			weapon->zoom[zoomlvl].fov = atoi ( tmpStr );
 
 			value = trap_GPV_GetNext ( value );
 			zoomlvl ++;
@@ -199,7 +211,7 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	}
 
 	trap_GPG_FindPairValue(attacksub, "name", "NONE", attack->name);
-	trap_GPG_FindPairValue(attacksub, "hudIcon", "NONE", attack->icon);	
+	trap_GPG_FindPairValue(attacksub, "hudIcon", "NONE", attack->icon);
 
 	if ( pickupsDisabled )
 	{
@@ -208,7 +220,7 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 		{
 			trap_GPG_FindPairValue(attacksub, "mp_ammoType||ammoType", "none", tmpStr);
 		}
-	}		
+	}
 	else
 	{
 		trap_GPG_FindPairValue(attacksub, "mp_ammoType||ammoType", "none", tmpStr);
@@ -267,14 +279,14 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	ammoData[attack->ammoIndex].max += attack->clipSize * attack->extraClips;
 
 	trap_GPG_FindPairValue(attacksub,"mp_kickAngles||kickAngles", "0 0 0 0 0 0", tmpStr);
-	sscanf( tmpStr, "%f %f %f %f %f %f", 
-			&attack->minKickAngles[0], 
+	sscanf( tmpStr, "%f %f %f %f %f %f",
+			&attack->minKickAngles[0],
 			&attack->maxKickAngles[0],
-			&attack->minKickAngles[1], 
+			&attack->minKickAngles[1],
 			&attack->maxKickAngles[1],
-			&attack->minKickAngles[2], 
+			&attack->minKickAngles[2],
 			&attack->maxKickAngles[2]  );
-	
+
 	if (0 == attack->inaccuracy)
 	{
 		trap_GPG_FindPairValue(attacksub, "mp_spread||spread", "0", tmpStr);
@@ -282,7 +294,7 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	}
 	trap_GPG_FindPairValue(attacksub, "mp_pellets||pellets", "1", tmpStr);
 	attack->pellets = atof(tmpStr);
-	attack->mod = (meansOfDeath_t)weaponNum; 
+	attack->mod = (meansOfDeath_t)weaponNum;
 
 	trap_GPG_FindPairValue(attacksub, "mp_lockFlashToBarrel||lockFlashToBarrel", "true", tmpStr);
 	if (0 == Q_stricmp(tmpStr, "false"))
@@ -301,7 +313,7 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 
 	sub = trap_GPG_FindSubGroup(attacksub, "fireModes");
 	if (sub)
-	{		
+	{
 		int i;
 
 		for ( i = 0; i < 5; i ++ )
@@ -474,7 +486,7 @@ static char *BG_BuildSideSurfaceList(void *group, char *pattern, char *sideSurfa
 	char		fieldName[256], fieldValue[256];
 	int			length;
 	int			i;
-	
+
 	output = trap_VM_LocalAlloc(0);
 	length = strlen(pattern);
 	i=0;
@@ -621,7 +633,7 @@ static void BG_FindWeaponFrames(TAnimInfoWeapon *animInfo, int choice)
 			char* name;
 
 			// Get the name and break it down to just the filename without
-			// and extension			
+			// and extension
 			trap_GPG_GetName ( group, temp );
 			name = COM_SkipPath ( temp );
 			COM_StripExtension ( name, temp );
@@ -693,7 +705,7 @@ static qboolean BG_ParseAnimGroup(weapon_t weapon, void *animGroup)
 		{
 			info = (TAnimInfoWeapon *)trap_VM_LocalAlloc(sizeof(*info));
 			memset(info, 0, sizeof(*info));
-			
+
 			info->mNext = anim->mInfos;
 			anim->mInfos = info;
 
@@ -886,7 +898,7 @@ static qboolean BG_ParseWeaponGroup(TWeaponModel *weapon, void *weaponGroup)
 				weapon->mOptionalList=option;
 			}		*/
 		}
-		
+
 		sub = trap_GPG_GetNext(sub);
 	}
 
@@ -1196,7 +1208,7 @@ int BG_FindFireMode ( weapon_t weapon, attackType_t attack, int firemode )
 	}
 
 	assert ( firemode < WP_FIREMODE_MAX );
-	
+
 	return firemode;
 }
 
@@ -1227,18 +1239,18 @@ void BG_CalculateBulletEndpoint ( vec3_t muzzlePoint, vec3_t fireAngs, float ina
 
 	// Gaussian spread should keep it a bit less random looking
 	while ( 1 )
-	{ 	
+	{
 		float fGaussian;
 		float f1;
 		float f2;
 
 		f1 = (float)((unsigned int)Q_rand ( seed ) % 15000) / 15000.0f;
 		f2 = (float)((unsigned int)Q_rand ( seed ) % 15000) / 15000.0f;
-		fGaussianX = (f1-0.5f) + (f2-0.5f); 
+		fGaussianX = (f1-0.5f) + (f2-0.5f);
 
 		f1 = (float)((unsigned int)Q_rand ( seed ) % 15000) / 15000.0f;
 		f2 = (float)((unsigned int)Q_rand ( seed ) % 15000) / 15000.0f;
-		fGaussianY = (f1-0.5f) + (f2-0.5f); 
+		fGaussianY = (f1-0.5f) + (f2-0.5f);
 
 		fGaussian = fGaussianX * fGaussianX + fGaussianY * fGaussianY;
 
@@ -1246,7 +1258,7 @@ void BG_CalculateBulletEndpoint ( vec3_t muzzlePoint, vec3_t fireAngs, float ina
 		{
 			break;
 		}
-	} 
+	}
 
 	VectorMA ( fwd, 0.05f * inaccuracy * fGaussianX, right, dir );
 	VectorMA ( dir, 0.05f * inaccuracy * fGaussianY, up, dir );

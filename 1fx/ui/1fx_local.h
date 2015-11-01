@@ -8,13 +8,16 @@
 #define _1FX_LOCAL
 
 // 1fx. Client Additions version number.
-#define _1FX_CLADD_VER "0.1"
+// They are the same for the UI and CGAME module,
+// so rebuild both when pushing a new build.
+#define _1FX_CLADD_VER "0.2"
 
 //
 // 1fx_httpdownload.c
 //
 
 #ifndef Q3_VM
+#ifndef CGAME
 #define HTTPDL_BASEURL	"http://1fxmod.org/clientadditions"
 #define MAX_PAK_NAME 	256
 
@@ -38,6 +41,7 @@ extern httpDownloadLocals_t httpDL;
 
 void	_1fx_httpDL_initialize	( void );
 void 	_1fx_joinHTTPThread		( void );
+#endif // not CGAME
 #endif // not Q3_VM
 
 //

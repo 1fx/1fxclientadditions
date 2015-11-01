@@ -18,7 +18,7 @@ enhanced into a single model testing facility.
 
 Model viewing can begin with either "testmodel <modelname>" or "testgun <modelname>".
 
-The names must be the full pathname after the basedir, like 
+The names must be the full pathname after the basedir, like
 "models/weapons/v_launch/tris.md3" or "players/male/tris.md3"
 
 Testmodel will create a fake entity 100 units in front of the current view
@@ -51,12 +51,12 @@ Creates an entity in front of the current position, which
 can then be moved around
 =================
 */
-void CG_TestModel_f (void) 
+void CG_TestModel_f (void)
 {
 	vec3_t		angles;
 
 	memset( &cg.testModelEntity, 0, sizeof(cg.testModelEntity) );
-	if ( trap_Argc() < 2 ) 
+	if ( trap_Argc() < 2 )
 	{
 		return;
 	}
@@ -64,14 +64,14 @@ void CG_TestModel_f (void)
 	Q_strncpyz (cg.testModelName, CG_Argv( 1 ), MAX_QPATH );
 	cg.testModelEntity.hModel = trap_R_RegisterModel( cg.testModelName );
 
-	if ( trap_Argc() == 3 ) 
+	if ( trap_Argc() == 3 )
 	{
 		cg.testModelEntity.backlerp = atof( CG_Argv( 2 ) );
 		cg.testModelEntity.frame = 1;
 		cg.testModelEntity.oldframe = 0;
 	}
-	
-	if (! cg.testModelEntity.hModel ) 
+
+	if (! cg.testModelEntity.hModel )
 	{
 		Com_Printf( "Can't register model\n" );
 		return;
@@ -86,16 +86,16 @@ void CG_TestModel_f (void)
 	AnglesToAxis( angles, cg.testModelEntity.axis );
 }
 
-void CG_TestModelNextFrame_f (void) 
+void CG_TestModelNextFrame_f (void)
 {
 	cg.testModelEntity.frame++;
 	Com_Printf( "frame %i\n", cg.testModelEntity.frame );
 }
 
-void CG_TestModelPrevFrame_f (void) 
+void CG_TestModelPrevFrame_f (void)
 {
 	cg.testModelEntity.frame--;
-	if ( cg.testModelEntity.frame < 0 ) 
+	if ( cg.testModelEntity.frame < 0 )
 	{
 		cg.testModelEntity.frame = 0;
 	}
@@ -103,27 +103,27 @@ void CG_TestModelPrevFrame_f (void)
 	Com_Printf( "frame %i\n", cg.testModelEntity.frame );
 }
 
-void CG_TestModelNextSkin_f (void) 
+void CG_TestModelNextSkin_f (void)
 {
 	cg.testModelEntity.skinNum++;
 	Com_Printf( "skin %i\n", cg.testModelEntity.skinNum );
 }
 
-void CG_TestModelPrevSkin_f (void) 
+void CG_TestModelPrevSkin_f (void)
 {
 	cg.testModelEntity.skinNum--;
-	if ( cg.testModelEntity.skinNum < 0 ) 
+	if ( cg.testModelEntity.skinNum < 0 )
 	{
 		cg.testModelEntity.skinNum = 0;
 	}
 	Com_Printf( "skin %i\n", cg.testModelEntity.skinNum );
 }
 
-static void CG_AddTestModel (void) 
+static void CG_AddTestModel (void)
 {
 	// re-register the model, because the level may have changed
 	cg.testModelEntity.hModel = trap_R_RegisterModel( cg.testModelName );
-	if (! cg.testModelEntity.hModel ) 
+	if (! cg.testModelEntity.hModel )
 	{
 		Com_Printf ("Can't register model\n");
 		return;
@@ -139,7 +139,7 @@ CG_CalcVrect
 Sets the coordinates of the rendered window
 =================
 */
-static void CG_CalcVrect (void) 
+static void CG_CalcVrect (void)
 {
 	int		size;
 
@@ -160,13 +160,13 @@ static void CG_CalcVrect (void)
 //==============================================================================
 //==============================================================================
 // this causes a compiler bug on mac MrC compiler
-static void CG_StepOffset( void ) 
+static void CG_StepOffset( void )
 {
 	int		timeDelta;
-	
+
 	// smooth out stair climbing
 	timeDelta = cg.time - cg.stepTime;
-	if ( timeDelta < STEP_TIME ) 
+	if ( timeDelta < STEP_TIME )
 	{
 		cg.refdef.vieworg[2] -= cg.stepChange * (STEP_TIME - timeDelta) / STEP_TIME;
 	}
@@ -197,7 +197,7 @@ cg.refdef.viewangles
 
 ===============
 */
-  
+
 /*
 ===============
 CG_CalcTargetThirdPersonViewLocation
@@ -216,7 +216,7 @@ static void CG_CalcIdealThirdPersonViewTarget(void)
 	VectorMA(cameraFocusLoc, 1, cameraup, cameraIdealTarget);
 }
 
-	
+
 
 /*
 ===============
@@ -291,7 +291,7 @@ static void CG_UpdateThirdPersonTargetDamp(void)
 		VectorCopy(cameraIdealTarget, cameraCurTarget);
 	}
 	else if ( damp >=0.0)
-	{	
+	{
 		// Calculate the difference from the current position to the new one.
 		VectorSubtract(cameraIdealTarget, cameraCurTarget, targetdiff);
 
@@ -300,10 +300,10 @@ static void CG_UpdateThirdPersonTargetDamp(void)
 		dampfactor = 1.0-damp;	// We must exponent the amount LEFT rather than the amount bled off
 		dtime = (float)(cg.time-cameraLastFrame) * (1.0/(float)CAMERA_DAMP_INTERVAL);	// Our dampfactor is geared towards a time interval equal to "1".
 
-		// Note that since there are a finite number of "practical" delta millisecond values possible, 
+		// Note that since there are a finite number of "practical" delta millisecond values possible,
 		// the ratio should be initialized into a chart ultimately.
 		ratio = powf(dampfactor, (int)dtime);
-		
+
 		// This value is how much distance is "left" from the ideal.
 		VectorMA(cameraIdealTarget, -ratio, targetdiff, cameraCurTarget);
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -334,8 +334,8 @@ static void CG_UpdateThirdPersonCameraDamp(void)
 
 	// Set the cameraIdealLoc
 	CG_CalcIdealThirdPersonViewLocation();
-	
-	
+
+
 	// First thing we do is calculate the appropriate damping factor for the camera.
 	dampfactor=0.0;
 	if (damp != 0.0)
@@ -346,7 +346,7 @@ static void CG_UpdateThirdPersonCameraDamp(void)
 		pitch = Q_fabs(cameraFocusAngles[PITCH]);
 
 		// The higher the pitch, the larger the factor, so as you look up, it damps a lot less.
-		pitch /= 89.0;	
+		pitch /= 89.0;
 		dampfactor = (1.0-damp)*(pitch*pitch);
 
 		dampfactor += damp;
@@ -357,7 +357,7 @@ static void CG_UpdateThirdPersonCameraDamp(void)
 		VectorCopy(cameraIdealLoc, cameraCurLoc);
 	}
 	else if (dampfactor>=0.0)
-	{	
+	{
 		// Calculate the difference from the current position to the new one.
 		VectorSubtract(cameraIdealLoc, cameraCurLoc, locdiff);
 
@@ -366,10 +366,10 @@ static void CG_UpdateThirdPersonCameraDamp(void)
 		dampfactor = 1.0-dampfactor;	// We must exponent the amount LEFT rather than the amount bled off
 		dtime = (float)(cg.time-cameraLastFrame) * (1.0/(float)CAMERA_DAMP_INTERVAL);	// Our dampfactor is geared towards a time interval equal to "1".
 
-		// Note that since there are a finite number of "practical" delta millisecond values possible, 
+		// Note that since there are a finite number of "practical" delta millisecond values possible,
 		// the ratio should be initialized into a chart ultimately.
 		ratio = powf(dampfactor, (int)dtime);
-		
+
 		// This value is how much distance is "left" from the ideal.
 		VectorMA(cameraIdealLoc, -ratio, locdiff, cameraCurLoc);
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +413,7 @@ CG_OffsetThirdPersonView
 ===============
 */
 extern vmCvar_t cg_thirdPersonHorzOffset;
-static void CG_OffsetThirdPersonView( void ) 
+static void CG_OffsetThirdPersonView( void )
 {
 	vec3_t diff;
 
@@ -421,7 +421,7 @@ static void CG_OffsetThirdPersonView( void )
 	VectorCopy( cg.refdef.viewangles, cameraFocusAngles );
 
 	// if dead, look at killer
-	if ( 0 && cg.snap->ps.stats[STAT_HEALTH] <= 0 ) 
+	if ( 0 && cg.snap->ps.stats[STAT_HEALTH] <= 0 )
 	{
 		cameraFocusAngles[YAW] = cg.snap->ps.stats[STAT_DEAD_YAW];
 		cameraFocusAngles[PITCH] = 90;
@@ -563,11 +563,11 @@ static void CG_OffsetThirdPersonView( void ) {
 // this causes a compiler bug on mac MrC compiler
 static void CG_StepOffset( void ) {
 	int		timeDelta;
-	
+
 	// smooth out stair climbing
 	timeDelta = cg.time - cg.stepTime;
 	if ( timeDelta < STEP_TIME ) {
-		cg.refdef.vieworg[2] -= cg.stepChange 
+		cg.refdef.vieworg[2] -= cg.stepChange
 			* (STEP_TIME - timeDelta) / STEP_TIME;
 	}
 }*/
@@ -577,7 +577,7 @@ static void CG_StepOffset( void ) {
 CG_OffsetFirstPersonView
 ===============
 */
-static void CG_OffsetFirstPersonView( void ) 
+static void CG_OffsetFirstPersonView( void )
 {
 	float	*origin;
 	float	*angles;
@@ -602,7 +602,7 @@ static void CG_OffsetFirstPersonView( void )
 		int		atime;
 		int		htime;
 		float	f;
-		
+
 		atime = (cg.time - cg.deathTime);
 		if ( atime > 450)
 		{
@@ -627,10 +627,10 @@ static void CG_OffsetFirstPersonView( void )
 	}
 
 	// add angles based on damage kick
-	if ( cg.damageTime ) 
+	if ( cg.damageTime )
 	{
 		ratio = cg.time - cg.damageTime;
-		if ( ratio < DAMAGE_DEFLECT_TIME ) 
+		if ( ratio < DAMAGE_DEFLECT_TIME )
 		{
 			ratio /= DAMAGE_DEFLECT_TIME;
 			angles[PITCH] += ratio * cg.v_dmg_pitch;
@@ -639,11 +639,11 @@ static void CG_OffsetFirstPersonView( void )
 			{
 				angles[ROLL] += ratio * cg.v_dmg_roll;
 			}
-		} 
-		else 
+		}
+		else
 		{
 			ratio = 1.0 - ( ratio - DAMAGE_DEFLECT_TIME ) / DAMAGE_RETURN_TIME;
-			if ( ratio > 0 ) 
+			if ( ratio > 0 )
 			{
 				angles[PITCH] += ratio * cg.v_dmg_pitch;
 
@@ -668,7 +668,7 @@ static void CG_OffsetFirstPersonView( void )
 
 	delta = DotProduct ( predictedVelocity, cg.refdef.viewaxis[0]);
 	angles[PITCH] += delta * cg_runpitch.value;
-	
+
 	delta = DotProduct ( predictedVelocity, cg.refdef.viewaxis[1]);
 	angles[ROLL] -= delta * cg_runroll.value;
 
@@ -696,7 +696,7 @@ static void CG_OffsetFirstPersonView( void )
 	// smooth out duck height changes
 	timeDelta = cg.time - cg.duckTime;
 	if ( timeDelta < DUCK_TIME) {
-		cg.refdef.vieworg[2] -= cg.duckChange 
+		cg.refdef.vieworg[2] -= cg.duckChange
 			* (DUCK_TIME - timeDelta) / DUCK_TIME;
 	}
 
@@ -750,7 +750,7 @@ Calcs Y FOV from given X FOV
 #define	WAVE_AMPLITUDE	1
 #define	WAVE_FREQUENCY	0.4
 
-qboolean CG_CalcFOVFromX( float fov_x ) 
+qboolean CG_CalcFOVFromX( float fov_x )
 {
 	float	x;
 //	float	phase;
@@ -764,7 +764,7 @@ qboolean CG_CalcFOVFromX( float fov_x )
 	fov_y = fov_y * 360 / M_PI;
 
 	// there's a problem with this, it only takes the leafbrushes into account, not the entity brushes,
-	//	so if you give slime/water etc properties to a func_door area brush in order to move the whole water 
+	//	so if you give slime/water etc properties to a func_door area brush in order to move the whole water
 	//	level up/down this doesn't take into account the door position, so warps the view the whole time
 	//	whether the water is up or not. Fortunately there's only one slime area in Trek that you can be under,
 	//	so lose it...
@@ -871,7 +871,7 @@ static int CG_CalcFov( void ) {
 				}
 				else
 				{	// Still zooming
-					static zoomSoundTime = 0;
+					static int zoomSoundTime = 0;
 
 					if (zoomSoundTime < cg.time || zoomSoundTime > cg.time + 10000)
 					{
@@ -882,16 +882,16 @@ static int CG_CalcFov( void ) {
 
 			fov_x = zoomFov;
 		}
-		else 
+		else
 		{
 			zoomFov = (float)weaponData[cg.predictedPlayerState.weapon].zoom[cg.predictedPlayerState.zoomFov].fov;
 
 			f = ( cg.time - cg.predictedPlayerState.zoomTime ) / ZOOM_OUT_TIME;
-			if ( f > 1.0 ) 
+			if ( f > 1.0 )
 			{
 				fov_x = fov_x;
-			} 
-			else 
+			}
+			else
 			{
 				fov_x = zoomFov + f * ( fov_x - zoomFov );
 			}
@@ -922,7 +922,7 @@ static int CG_CalcFov( void ) {
 	if ( !(cg.predictedPlayerState.pm_flags&PMF_ZOOMED) )
 	{
 		cg.zoomSensitivity = 1;
-	} 
+	}
 	else
 	{
 		cg.zoomSensitivity = cg.refdef.fov_y / 75.0;
@@ -945,7 +945,7 @@ static void CG_DamageBlendBlob( void )
 	float		alphaVal;
 	float		cvarScale;
 
-	if (cg_damageindicator.value <= 0) 
+	if (cg_damageindicator.value <= 0)
 	{
 		return;
 	}
@@ -976,7 +976,7 @@ static void CG_DamageBlendBlob( void )
 		VectorMA(lineStart, (dmgIsToTheLeft?6:-6), cg.refdef.viewaxis[1], lineStart);
 		VectorMA(lineStart, (dmgIsToTheLeft?2:-2)*cvarScale, cg.refdef.viewaxis[1], lineEnd);
 
-		trap_FX_AddLine( lineStart, lineEnd, 
+		trap_FX_AddLine( lineStart, lineEnd,
 							5.0f*cvarScale, 5.0f*cvarScale, 0.0f,
 							alphaVal, alphaVal, 0.0f,
 							rgb1, rgb2, 0.0f,
@@ -989,7 +989,7 @@ static void CG_DamageBlendBlob( void )
 		VectorMA(lineStart, (dmgIsToTheLeft?-6:6), cg.refdef.viewaxis[1], lineStart);
 		VectorMA(lineStart, (dmgIsToTheLeft?-2:2)*cvarScale, cg.refdef.viewaxis[1], lineEnd);
 
-		trap_FX_AddLine( lineStart, lineEnd, 
+		trap_FX_AddLine( lineStart, lineEnd,
 							5.0f*cvarScale, 5.0f*cvarScale, 0.0f,
 							alphaVal, alphaVal, 0.0f,
 							rgb1, rgb2, 0.0f,
@@ -1003,7 +1003,7 @@ static void CG_DamageBlendBlob( void )
 		VectorMA(lineStart, (dmgIsAbove?6:-6), cg.refdef.viewaxis[2], lineStart);
 		VectorMA(lineStart, (dmgIsAbove?2:-2)*cvarScale, cg.refdef.viewaxis[2], lineEnd);
 
-		trap_FX_AddLine( lineStart, lineEnd, 
+		trap_FX_AddLine( lineStart, lineEnd,
 							5.0f*cvarScale, 5.0f*cvarScale, 0.0f,
 							alphaVal, alphaVal, 0.0f,
 							rgb1, rgb2, 0.0f,
@@ -1015,7 +1015,7 @@ static void CG_DamageBlendBlob( void )
 		VectorMA(lineStart, (dmgIsAbove?-6:6), cg.refdef.viewaxis[2], lineStart);
 		VectorMA(lineStart, (dmgIsAbove?-2:2)*cvarScale, cg.refdef.viewaxis[2], lineEnd);
 
-		trap_FX_AddLine( lineStart, lineEnd, 
+		trap_FX_AddLine( lineStart, lineEnd,
 							5.0f*cvarScale, 5.0f*cvarScale, 0.0f,
 							alphaVal, alphaVal, 0.0f,
 							rgb1, rgb2, 0.0f,
@@ -1030,7 +1030,7 @@ CG_CalcViewValues
 Sets cg.refdef view values
 ===============
 */
-static int CG_CalcViewValues( void ) 
+static int CG_CalcViewValues( void )
 {
 	playerState_t	*ps;
 
@@ -1059,7 +1059,7 @@ static int CG_CalcViewValues( void )
 	}
 */
 	// intermission view
-	if ( ps->pm_type == PM_INTERMISSION ) 
+	if ( ps->pm_type == PM_INTERMISSION )
 	{
 		VectorCopy( ps->origin, cg.refdef.vieworg );
 		VectorCopy( ps->viewangles, cg.refdef.viewangles );
@@ -1076,9 +1076,9 @@ static int CG_CalcViewValues( void )
 	VectorCopy( ps->origin, cg.refdef.vieworg );
 	VectorCopy( ps->viewangles, cg.refdef.viewangles );
 
-	if (cg_cameraOrbit.integer) 
+	if (cg_cameraOrbit.integer)
 	{
-		if (cg.time > cg.nextOrbitTime) 
+		if (cg.time > cg.nextOrbitTime)
 		{
 			cg.nextOrbitTime = cg.time + cg_cameraOrbitDelay.integer;
 			cg_thirdPersonYaw.value += cg_cameraOrbit.value;
@@ -1086,7 +1086,7 @@ static int CG_CalcViewValues( void )
 	}
 
 	// add error decay
-	if ( cg_errorDecay.value > 0 ) 
+	if ( cg_errorDecay.value > 0 )
 	{
 		int		t;
 		float	f;
@@ -1100,12 +1100,12 @@ static int CG_CalcViewValues( void )
 		}
 	}
 
-	if ( cg.renderingThirdPerson && !(cg.snap->ps.pm_flags & PMF_ZOOMED) ) 
+	if ( cg.renderingThirdPerson && !(cg.snap->ps.pm_flags & PMF_ZOOMED) )
 	{
 		// back away from character
 		CG_OffsetThirdPersonView();
-	} 
-	else 
+	}
+	else
 	{
 		// offset for local bobbing and kicks
 		CG_OffsetFirstPersonView();
@@ -1181,7 +1181,7 @@ void CG_UpdateRogerWilco ( void )
 			{
 				dead = qtrue;
 			}
-		}		
+		}
 	}
 
 	trap_RW_SetTeam(cgs.clientinfo[cg.clientNum].team, dead);
@@ -1258,7 +1258,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// update the scores from the playerstate
 	if ( cgs.scores1 != cg.predictedPlayerState.persistant[PERS_RED_SCORE] )
-	{		
+	{
 		cgs.scores1 = cg.predictedPlayerState.persistant[PERS_RED_SCORE];
 		trap_Cvar_Set ( "ui_info_redscore", va("%d", cgs.scores1 ) );
 	}
@@ -1303,21 +1303,21 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// build cg.refdef
 	inwater = CG_CalcViewValues();
-	
+
 	// first person blend blobs, done after AnglesToAxis
 	if ( !cg.renderingThirdPerson ) {
 		CG_DamageBlendBlob();
 	}
 
 	// Load deferred models
-	if ( cg.deferredPlayerLoading > 10 ) 
+	if ( cg.deferredPlayerLoading > 10 )
 	{
 		CG_LoadDeferredPlayers();
 		cg.deferredPlayerLoading = 0;
 	}
 
 	// build the render lists
-	if ( !cg.hyperspace ) 
+	if ( !cg.hyperspace )
 	{
 		CG_AddPacketEntities();			// adter calcViewValues, so predicted player state is correct
 		CG_AddLocalEntities();
@@ -1330,7 +1330,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		CG_AddViewWeapon( &cg.predictedPlayerState );
 	}
 
-	if ( !cg.hyperspace ) 
+	if ( !cg.hyperspace )
 	{
 		trap_FX_AddScheduledEffects();
 	}
@@ -1368,7 +1368,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	// actually issue the rendering calls
 	CG_DrawActive( stereoView );
 
-	if ( cg_stats.integer ) 
+	if ( cg_stats.integer )
 	{
 		Com_Printf( "cg.clientFrame:%i\n", cg.clientFrame );
 	}

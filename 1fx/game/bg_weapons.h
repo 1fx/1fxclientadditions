@@ -6,7 +6,7 @@
 #define __BG_WEAPONS_H__
 
 // means of death
-typedef enum 
+typedef enum
 {
 	MOD_UNKNOWN,
 
@@ -15,25 +15,25 @@ typedef enum
 
 	// Pistols
 	MOD_M1911A1_PISTOL,
-	MOD_USSOCOM_PISTOL,         
+	MOD_USSOCOM_PISTOL,
 	MOD_SILVER_TALON,
 
 	// Secondarys
 	MOD_M590_SHOTGUN,
-	MOD_MICRO_UZI_SUBMACHINEGUN, 
-	MOD_M3A1_SUBMACHINEGUN,      
+	MOD_MICRO_UZI_SUBMACHINEGUN,
+	MOD_M3A1_SUBMACHINEGUN,
 	MOD_MP5,
 
 	// Primaries
-	MOD_USAS_12_SHOTGUN,         
-	MOD_M4_ASSAULT_RIFLE,        
-	MOD_AK74_ASSAULT_RIFLE,      
+	MOD_USAS_12_SHOTGUN,
+	MOD_M4_ASSAULT_RIFLE,
+	MOD_AK74_ASSAULT_RIFLE,
 	MOD_SIG551,
 
-	MOD_MSG90A1_SNIPER_RIFLE,    
-	MOD_M60_MACHINEGUN,          
-	MOD_MM1_GRENADE_LAUNCHER,    
-	MOD_RPG7_LAUNCHER,           
+	MOD_MSG90A1_SNIPER_RIFLE,
+	MOD_M60_MACHINEGUN,
+	MOD_MM1_GRENADE_LAUNCHER,
+	MOD_RPG7_LAUNCHER,
 
 	// Grenades
 	MOD_M84_GRENADE,
@@ -53,7 +53,7 @@ typedef enum
 
 } meansOfDeath_t;
 
-typedef enum 
+typedef enum
 {
 	WP_NONE,
 
@@ -88,13 +88,21 @@ typedef enum
 	WP_ANM14_GRENADE,
 	WP_M15_GRENADE,
 
+	// #CL_ADD
+	// Boe!Man 7/27/15: Extra grenades for 1fx. Client Additions.
+    WP_M67_GRENADE,
+    WP_F1_GRENADE,
+    WP_L2A2_GRENADE,
+    WP_MDN11_GRENADE,
+    // #END CL_ADD
+
 	WP_NUM_WEAPONS
 } weapon_t;
 
 #define WP_DELAYED_CHANGE_BIT	(1<<5)
-				
-typedef enum 
-{							
+
+typedef enum
+{
 	AMMO_KNIFE,
 	AMMO_045,
 	AMMO_556,
@@ -112,7 +120,15 @@ typedef enum
 
 	AMMO_MP5_9,
 
-	AMMO_MAX,
+	// #CL_ADD
+	// Boe!Man 7/27/15: Extra grenade ammo types for 1fx. Client Additions.
+    AMMO_M67,
+    AMMO_F1,
+    AMMO_L2A2,
+    AMMO_MDN11,
+    // #END CL_ADD
+
+    AMMO_MAX,
 
 	AMMO_NONE,
 
@@ -165,9 +181,9 @@ typedef struct attackData_s
 
 	meansOfDeath_t	mod;						// means of death
 	int				ammoIndex;					// Index to proper ammo slot
-	union 
+	union
 	{
-		int		range;							// Range of weapon 
+		int		range;							// Range of weapon
 		int		velocity;						// speed of projectile
 	} rV;
 
@@ -297,7 +313,7 @@ typedef struct SAnimInfoWeapon
 	float					mSpeed;
 	int						mLODBias;
 	int						mNumChoices;
-							
+
 	int						mStartFrame[MAX_WEAPON_ANIM_CHOICES];
 	int						mNumFrames[MAX_WEAPON_ANIM_CHOICES];
 	int						mFPS[MAX_WEAPON_ANIM_CHOICES];
