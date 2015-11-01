@@ -798,9 +798,8 @@ int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 	return sides;
 }
 #else
-#pragma warning( disable: 4035 )
-
 #ifndef __GNUC__
+#pragma warning( disable: 4035 )
 __declspec( naked ) int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 {
 	static int bops_initialized;

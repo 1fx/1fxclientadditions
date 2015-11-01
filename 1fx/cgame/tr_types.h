@@ -5,7 +5,7 @@
 
 #define	MAX_DLIGHTS		32			// can't be increased, because bit flags are used on surfaces
 #define	MAX_ENTITIES	1023		// can't be increased without changing drawsurf bit packing
-#define	MAX_MINI_ENTITIES	1024		
+#define	MAX_MINI_ENTITIES	1024
 
 // renderfx flags
 #define	RF_MINLIGHT			1		// allways have some light (viewmodel, some items)
@@ -62,7 +62,7 @@ typedef enum {
 	RT_MAX_REF_ENTITY_TYPE
 } refEntityType_t;
 
-typedef struct miniRefEntity_s 
+typedef struct miniRefEntity_s
 {
 	refEntityType_t		reType;
 	int					renderfx;
@@ -94,7 +94,9 @@ typedef struct miniRefEntity_s
 
 } miniRefEntity_t;
 
+#ifndef __GNUC__
 #pragma warning (disable : 4201 )
+#endif // not __GNUC__
 typedef struct {
 	// this stucture must remain identical as the miniRefEntity_t
 	//
@@ -149,10 +151,10 @@ typedef struct {
 	qhandle_t	customSkin;			// NULL for default skin
 
 	// texturing
-	union	
+	union
 	{
 //		int			skinNum;		// inline skin index
-//		ivec3_t		terxelCoords;	// coords of patch for RT_TERXELS	
+//		ivec3_t		terxelCoords;	// coords of patch for RT_TERXELS
 		struct
 		{
 			int		miniStart;
@@ -162,13 +164,13 @@ typedef struct {
 
 	// extra sprite information
 	union {
-		struct 
+		struct
 		{
 			float rotation;
 			float radius;
 			byte  vertRGBA[4][4];
 		} sprite;
-		struct 
+		struct
 		{
 			float width;
 			float width2;
@@ -189,7 +191,7 @@ typedef struct {
 			float bias;
 			qboolean wrap;
 		} cylinder;
-		struct 
+		struct
 		{
 			float width;
 			float deviation;
@@ -276,14 +278,14 @@ typedef struct {
 
 	int						tfSolidCompressed;
 	float					tfSolidCompressedBPT;
-	int						tfAlphaCompressed;	
-	float					tfAlphaCompressedBPT;	
+	int						tfAlphaCompressed;
+	float					tfAlphaCompressedBPT;
 	int						tfSolidUncompressed;
 	float					tfSolidUncompressedBPT;
 	int						tfAlphaUncompressed;
 	float					tfAlphaUncompressedBPT;
-	int						tfLightmap;			
-	float					tfLightmapBPT;			
+	int						tfLightmap;
+	float					tfLightmapBPT;
 	int						tfCinematic;					// Specially for the Voodoo4 - glTexImage2D can only handle 16 bit
 	float					tfCinematicBPT;
 

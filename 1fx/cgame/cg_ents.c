@@ -13,11 +13,11 @@ CG_SetEntitySoundPosition
 Also called by event processing code
 ======================
 */
-float *CG_SetEntitySoundPosition( centity_t *cent ) 
+float *CG_SetEntitySoundPosition( centity_t *cent )
 {
 	static vec3_t v3Return;
 
-	if ( cent->currentState.solid == SOLID_BMODEL ) 
+	if ( cent->currentState.solid == SOLID_BMODEL )
 	{
 		vec3_t	origin;
 		float	*v;
@@ -26,8 +26,8 @@ float *CG_SetEntitySoundPosition( centity_t *cent )
 		VectorAdd( cent->lerpOrigin, v, origin );
 		trap_S_UpdateEntityPosition( cent->currentState.number, origin );
 		VectorCopy(origin, v3Return);
-	} 
-	else 
+	}
+	else
 	{
 		trap_S_UpdateEntityPosition( cent->currentState.number, cent->lerpOrigin );
 		VectorCopy(cent->lerpOrigin, v3Return);
@@ -43,7 +43,7 @@ CG_EntityEffects
 Add continuous entity effects, like local entity emission and lighting
 ==================
 */
-static void CG_EntityEffects( centity_t *cent ) 
+static void CG_EntityEffects( centity_t *cent )
 {
 	sfxHandle_t		hSFX;
 	float			*v3Origin;
@@ -52,7 +52,7 @@ static void CG_EntityEffects( centity_t *cent )
 	v3Origin = CG_SetEntitySoundPosition(cent);
 
 	// add loop sound
-	if ( cent->currentState.loopSound ) 
+	if ( cent->currentState.loopSound )
 	{
 		// ambient soundset string index valid?
 		if (cent->currentState.eType == ET_MOVER &&	cent->currentState.mSoundSet)
@@ -65,26 +65,26 @@ static void CG_EntityEffects( centity_t *cent )
 			}
 			else
 			{
-				trap_S_AddLoopingSound( cent->currentState.number, v3Origin/*cent->lerpOrigin*/, vec3_origin, hSFX, CHAN_AUTO );			
+				trap_S_AddLoopingSound( cent->currentState.number, v3Origin/*cent->lerpOrigin*/, vec3_origin, hSFX, CHAN_AUTO );
 			}
 		}
 		else
 		{
-			if (cent->currentState.eType != ET_SPEAKER) 
+			if (cent->currentState.eType != ET_SPEAKER)
 			{
-				trap_S_AddLoopingSound( 
-					cent->currentState.number, 
-					cent->lerpOrigin, 
-					vec3_origin, 
+				trap_S_AddLoopingSound(
+					cent->currentState.number,
+					cent->lerpOrigin,
+					vec3_origin,
 					0,
 					cgs.gameSounds[ cent->currentState.loopSound ] );
-			} 
-			else 
+			}
+			else
 			{
-				trap_S_AddRealLoopingSound( 
-					cent->currentState.number, 
-					cent->lerpOrigin, 
-					vec3_origin, 
+				trap_S_AddRealLoopingSound(
+					cent->currentState.number,
+					cent->lerpOrigin,
+					vec3_origin,
 					((float)cent->currentState.time2) / 1000.0f,
 					cgs.gameSounds[ cent->currentState.loopSound ] );
 			}
@@ -113,12 +113,12 @@ Position an entity based on the bolt point of a ghoul2 model
 ==================
 */
 qboolean G2_PositionEntityOnBolt (
-	refEntity_t *ent, 
-	void		*ghoul2, 
-	int			modelIndex, 
-	int			boltIndex, 
-	vec3_t		origin, 
-	vec3_t		angles, 
+	refEntity_t *ent,
+	void		*ghoul2,
+	int			modelIndex,
+	int			boltIndex,
+	vec3_t		origin,
+	vec3_t		angles,
 	vec3_t		modelScale
 	)
 {
@@ -132,7 +132,7 @@ qboolean G2_PositionEntityOnBolt (
 											angles, origin, cg.time, cgs.gameModels, modelScale);
 
 	if (boltMatrixOK)
-	{	
+	{
 		// set up the axis and origin
 		ent->origin[0] = boltMatrix.matrix[0][3];
 		ent->origin[1] = boltMatrix.matrix[1][3];
@@ -160,7 +160,7 @@ CG_ScaleModelAxis
 ==================
 */
 void CG_ScaleModelAxis(refEntity_t	*ent)
-{		
+{
 	// scale the model should we need to
 	if (ent->modelScale[0] && ent->modelScale[0] != 1.0f)
 	{
@@ -184,7 +184,7 @@ void CG_ScaleModelAxis(refEntity_t	*ent)
 CG_General
 ==================
 */
-static void CG_General( centity_t *cent ) 
+static void CG_General( centity_t *cent )
 {
 	refEntity_t			ent;
 	entityState_t		*s1;
@@ -198,7 +198,7 @@ static void CG_General( centity_t *cent )
 	}
 
 	// if set to invisible, skip
-	if ((!s1->modelindex) && !(trap_G2_HaveWeGhoul2Models(cent->ghoul2))) 
+	if ((!s1->modelindex) && !(trap_G2_HaveWeGhoul2Models(cent->ghoul2)))
 	{
 		return;
 	}
@@ -218,7 +218,7 @@ static void CG_General( centity_t *cent )
 	ent.hModel = cgs.gameModels[s1->modelindex];
 
 	// player model
-	if (s1->number == cg.snap->ps.clientNum) 
+	if (s1->number == cg.snap->ps.clientNum)
 	{
 		ent.renderfx |= RF_THIRD_PERSON;	// only draw from mirrors
 	}
@@ -228,7 +228,7 @@ static void CG_General( centity_t *cent )
 	{
 		CG_PlayerShadow( cent, &ent.shadowPlane );
 
-		if ( cg_shadows.integer == 3 && ent.shadowPlane ) 
+		if ( cg_shadows.integer == 3 && ent.shadowPlane )
 		{
 			ent.renderfx |= RF_SHADOW_PLANE;
 		}
@@ -250,15 +250,15 @@ CG_Speaker
 Speaker entities can automatically play sounds
 ==================
 */
-static void CG_Speaker( centity_t *cent ) 
+static void CG_Speaker( centity_t *cent )
 {
-	if ( ! cent->currentState.clientNum ) 
-	{	
+	if ( ! cent->currentState.clientNum )
+	{
 		// not auto triggering
-		return;		
+		return;
 	}
 
-	if ( cg.time < cent->miscTime ) 
+	if ( cg.time < cent->miscTime )
 	{
 		return;
 	}
@@ -273,26 +273,24 @@ static void CG_Speaker( centity_t *cent )
 CG_Item
 ==================
 */
-static void CG_Item( centity_t *cent ) 
+static void CG_Item( centity_t *cent )
 {
 	refEntity_t		ent;
 	entityState_t	*es;
 	gitem_t			*item;
-	int				msec;
-	float			frac;
 	weaponInfo_t	*wi;
 
 	es = &cent->currentState;
-	if ( es->modelindex >= bg_numItems ) 
+	if ( es->modelindex >= bg_numItems )
 	{
 		Com_Error( ERR_FATAL, "Bad item index %i on entity", es->modelindex );
 	}
 
 	// if set to invisible, skip
-	if ( (!es->modelindex ) || ( es->eFlags & EF_NODRAW ) ) 
+	if ( (!es->modelindex ) || ( es->eFlags & EF_NODRAW ) )
 	{
 		return;
-	}	
+	}
 
 	if ( !cg_items[es->modelindex].registered )
 	{
@@ -300,15 +298,15 @@ static void CG_Item( centity_t *cent )
 	}
 
 	item = &bg_itemlist[ es->modelindex ];
-	
+
 	// Track gametype items for the radar
 	if ( es->modelindex >= MODELINDEX_GAMETYPE_ITEM && es->modelindex <= MODELINDEX_GAMETYPE_ITEM_2 )
 	{
 		cg.radarEntities[cg.radarEntityCount++] = cent;
 	}
 
-	// Simple items draws sprites only 
-	if ( cg_simpleItems.integer && item->giType != IT_GAMETYPE && cg_items[es->modelindex].mSimpleIcon) 
+	// Simple items draws sprites only
+	if ( cg_simpleItems.integer && item->giType != IT_GAMETYPE && cg_items[es->modelindex].mSimpleIcon)
 	{
 		memset( &ent, 0, sizeof( ent ) );
 		ent.reType = RT_SPRITE;
@@ -357,18 +355,18 @@ static void CG_Item( centity_t *cent )
 	// eccentricly
 	if (!(cent->currentState.eFlags & EF_ANGLE_OVERRIDE))
 	{
-		if ( item->giType == IT_WEAPON ) 
+		if ( item->giType == IT_WEAPON )
 		{
 			wi = &cg_weapons[item->giTag];
-			cent->lerpOrigin[0] -= 
+			cent->lerpOrigin[0] -=
 				wi->weaponMidpoint[0] * ent.axis[0][0] +
 				wi->weaponMidpoint[1] * ent.axis[1][0] +
 				wi->weaponMidpoint[2] * ent.axis[2][0];
-			cent->lerpOrigin[1] -= 
+			cent->lerpOrigin[1] -=
 				wi->weaponMidpoint[0] * ent.axis[0][1] +
 				wi->weaponMidpoint[1] * ent.axis[1][1] +
 				wi->weaponMidpoint[2] * ent.axis[2][1];
-			cent->lerpOrigin[2] -= 
+			cent->lerpOrigin[2] -=
 				wi->weaponMidpoint[0] * ent.axis[0][2] +
 				wi->weaponMidpoint[1] * ent.axis[1][2] +
 				wi->weaponMidpoint[2] * ent.axis[2][2];
@@ -400,14 +398,10 @@ static void CG_Item( centity_t *cent )
 
 	ent.nonNormalizedAxes = qfalse;
 
-	// if just respawned, slowly scale up
-	msec = cg.time - cent->miscTime;
-	frac = 1.0;
-
 	// items without glow textures need to keep a minimum light value
 	// so they are always visible
 //	if ( ( item->giType == IT_WEAPON ) || ( item->giType == IT_ARMOR ) || (item->giType == IT_GAMETYPE ) ||
-//		 ( item->giType == IT_HEALTH) ) 
+//		 ( item->giType == IT_HEALTH) )
 	{
 		ent.renderfx |= RF_MINLIGHT;
 	}
@@ -421,7 +415,7 @@ static void CG_Item( centity_t *cent )
 CG_Missile
 ===============
 */
-static void CG_Missile( centity_t *cent ) 
+static void CG_Missile( centity_t *cent )
 {
 	refEntity_t				ent;
 	entityState_t			*s1;
@@ -429,7 +423,7 @@ static void CG_Missile( centity_t *cent )
 	const attackInfo_t		*attack;
 
 	s1 = &cent->currentState;
-	if ( s1->weapon > WP_NUM_WEAPONS ) 
+	if ( s1->weapon > WP_NUM_WEAPONS )
 	{
 		s1->weapon = 0;
 	}
@@ -454,7 +448,7 @@ static void CG_Missile( centity_t *cent )
 	}
 
 	// add trails
-	if ( attack->missileTrailFunc )  
+	if ( attack->missileTrailFunc )
 	{
 		if ( cg.time > cent->miscTime  )
 		{
@@ -464,17 +458,17 @@ static void CG_Missile( centity_t *cent )
 	}
 
 	// add dynamic light
-	if ( attack->missileDlight ) 
+	if ( attack->missileDlight )
 	{
-		trap_R_AddLightToScene(cent->lerpOrigin, 
-							   attack->missileDlight, 
-							   attack->missileDlightColor[0], 
-							   attack->missileDlightColor[1], 
+		trap_R_AddLightToScene(cent->lerpOrigin,
+							   attack->missileDlight,
+							   attack->missileDlightColor[0],
+							   attack->missileDlightColor[1],
 							   attack->missileDlightColor[2] );
 	}
 
 	// add missile sound
-	if ( attack->missileSound ) 
+	if ( attack->missileSound )
 	{
 		vec3_t	velocity;
 
@@ -498,28 +492,28 @@ static void CG_Missile( centity_t *cent )
 		VectorSet( cent->modelScale, 1, 1, 1);
 	}
 
-	CG_SetGhoul2Info(&ent, cent);  
+	CG_SetGhoul2Info(&ent, cent);
 
 	// flicker between two skins
 	ent.skinNum = cg.clientFrame & 1;
 	ent.renderfx = RF_NOSHADOW;
 	ent.ghoul2 = attack->missileG2Model;
-	
+
 	// spin as it moves
 	if ( !(s1->eFlags&EF_ANGLE_OVERRIDE) && s1->apos.trType != TR_INTERPOLATE )
 	{
 		// convert direction of travel into axis
-		if ( VectorNormalize2( s1->pos.trDelta, ent.axis[0] ) == 0 ) 
+		if ( VectorNormalize2( s1->pos.trDelta, ent.axis[0] ) == 0 )
 		{
 			ent.axis[0][2] = 1;
 		}
 
 		// spin as it moves
-		if ( s1->pos.trType != TR_STATIONARY ) 
+		if ( s1->pos.trType != TR_STATIONARY )
 		{
 			RotateAroundDirection( ent.axis, cg.time * 0.25f );
-		} 
-		else 
+		}
+		else
 		{
 			RotateAroundDirection( ent.axis, (float)s1->time );
 		}
@@ -538,7 +532,7 @@ static void CG_Missile( centity_t *cent )
 CG_Mover
 ===============
 */
-static void CG_Mover( centity_t *cent ) 
+static void CG_Mover( centity_t *cent )
 {
 	refEntity_t			ent;
 	entityState_t		*s1;
@@ -553,17 +547,17 @@ static void CG_Mover( centity_t *cent )
 
 	ent.renderfx = RF_NOSHADOW;
 
-	CG_SetGhoul2Info(&ent, cent);  
+	CG_SetGhoul2Info(&ent, cent);
 
 	// flicker between two skins (FIXME?)
 	ent.skinNum = ( cg.time >> 6 ) & 1;
 
 	// get the model, either as a bmodel or a modelindex
-	if ( s1->solid == SOLID_BMODEL ) 
+	if ( s1->solid == SOLID_BMODEL )
 	{
 		ent.hModel = cgs.inlineDrawModel[s1->modelindex];
-	} 
-	else 
+	}
+	else
 	{
 		ent.hModel = cgs.gameModels[s1->modelindex];
 	}
@@ -572,7 +566,7 @@ static void CG_Mover( centity_t *cent )
 	trap_R_AddRefEntityToScene(&ent);
 
 	// add the secondary model
-	if ( s1->modelindex2 ) 
+	if ( s1->modelindex2 )
 	{
 		ent.skinNum = 0;
 		ent.hModel = cgs.gameModels[s1->modelindex2];
@@ -587,7 +581,7 @@ CG_Beam
 Also called as an event
 ===============
 */
-void CG_Beam( centity_t *cent ) 
+void CG_Beam( centity_t *cent )
 {
 	refEntity_t			ent;
 	entityState_t		*s1;
@@ -603,7 +597,7 @@ void CG_Beam( centity_t *cent )
 
 	ent.renderfx = RF_NOSHADOW;
 
-	CG_SetGhoul2Info(&ent, cent);  
+	CG_SetGhoul2Info(&ent, cent);
 
 	// add to refresh list
 	trap_R_AddRefEntityToScene(&ent);
@@ -615,7 +609,7 @@ void CG_Beam( centity_t *cent )
 CG_Portal
 ===============
 */
-static void CG_Portal( centity_t *cent ) 
+static void CG_Portal( centity_t *cent )
 {
 	refEntity_t			ent;
 	entityState_t		*s1;
@@ -639,7 +633,7 @@ static void CG_Portal( centity_t *cent )
 	ent.frame = s1->frame;		// rotation speed
 	ent.skinNum = s1->clientNum/256.0 * 360;	// roll offset
 
-	CG_SetGhoul2Info(&ent, cent);  
+	CG_SetGhoul2Info(&ent, cent);
 
 	// add to refresh list
 	trap_R_AddRefEntityToScene(&ent);
@@ -653,26 +647,26 @@ CG_AdjustPositionForMover
 Also called by client movement prediction code
 =========================
 */
-void CG_AdjustPositionForMover( 
-	const vec3_t	in, 
-	int				moverNum, 
-	int				fromTime, 
-	int				toTime, 
-	vec3_t			out 
-	) 
+void CG_AdjustPositionForMover(
+	const vec3_t	in,
+	int				moverNum,
+	int				fromTime,
+	int				toTime,
+	vec3_t			out
+	)
 {
 	centity_t	*cent;
 	vec3_t	oldOrigin, origin, deltaOrigin;
 	vec3_t	oldAngles, angles, deltaAngles;
 
-	if ( moverNum <= 0 || moverNum >= ENTITYNUM_MAX_NORMAL ) 
+	if ( moverNum <= 0 || moverNum >= ENTITYNUM_MAX_NORMAL )
 	{
 		VectorCopy( in, out );
 		return;
 	}
 
 	cent = CG_GetEntity ( moverNum );
-	if ( cent->currentState.eType != ET_MOVER ) 
+	if ( cent->currentState.eType != ET_MOVER )
 	{
 		VectorCopy( in, out );
 		return;
@@ -697,7 +691,7 @@ void CG_AdjustPositionForMover(
 CG_InterpolateEntityPosition
 =============================
 */
-static void CG_InterpolateEntityPosition( centity_t *cent ) 
+static void CG_InterpolateEntityPosition( centity_t *cent )
 {
 	vec3_t		current;
 	vec3_t		next;
@@ -705,12 +699,12 @@ static void CG_InterpolateEntityPosition( centity_t *cent )
 
 	// it would be an internal error to find an entity that interpolates without
 	// a snapshot ahead of the current one
-	if ( cg.nextSnap == NULL ) 
+	if ( cg.nextSnap == NULL )
 	{
 		Com_Error( ERR_FATAL, "CG_InterpoateEntityPosition: cg.nextSnap == NULL" );
 	}
 
-	f = cg.frameInterpolation;	
+	f = cg.frameInterpolation;
 
 	// this will linearize a sine or parabolic curve, but it is important
 	// to not extrapolate player positions if more recent data is available
@@ -742,20 +736,20 @@ static void CG_InterpolateEntityPosition( centity_t *cent )
 CG_CalcEntityLerpPositions
 ===============
 */
-void CG_CalcEntityLerpPositions( centity_t *cent ) 
+void CG_CalcEntityLerpPositions( centity_t *cent )
 {
 	// if this player does not want to see extrapolated players
-	if ( !cg_smoothClients.integer ) 
+	if ( !cg_smoothClients.integer )
 	{
 		// make sure the clients use TR_INTERPOLATE
-		if ( cent->currentState.number < MAX_CLIENTS ) 
+		if ( cent->currentState.number < MAX_CLIENTS )
 		{
 			cent->currentState.pos.trType = TR_INTERPOLATE;
 			cent->nextState.pos.trType = TR_INTERPOLATE;
 		}
 	}
 
-	if ( cent->interpolate && cent->currentState.pos.trType == TR_INTERPOLATE ) 
+	if ( cent->interpolate && cent->currentState.pos.trType == TR_INTERPOLATE )
 	{
 		CG_InterpolateEntityPosition( cent );
 		return;
@@ -763,9 +757,9 @@ void CG_CalcEntityLerpPositions( centity_t *cent )
 
 	// first see if we can interpolate between two snaps for
 	// linear extrapolated clients
-	if ( cent->interpolate								 && 
+	if ( cent->interpolate								 &&
 		 cent->currentState.pos.trType == TR_LINEAR_STOP &&
-		 cent->currentState.number < MAX_CLIENTS            ) 
+		 cent->currentState.number < MAX_CLIENTS            )
 	{
 		CG_InterpolateEntityPosition( cent );
 		return;
@@ -781,7 +775,7 @@ void CG_CalcEntityLerpPositions( centity_t *cent )
 	// player state
 	if ( cent->currentState.number != cg.predictedPlayerState.clientNum )
 	{
-		CG_AdjustPositionForMover( cent->lerpOrigin, cent->currentState.groundEntityNum, 
+		CG_AdjustPositionForMover( cent->lerpOrigin, cent->currentState.groundEntityNum,
 								   cg.snap->serverTime, cg.time, cent->lerpOrigin );
 	}
 }
@@ -804,7 +798,7 @@ void CG_DebugCylinder ( centity_t* cent )
 	ref.rotation = cent->currentState.time2 + 10;
 	ref.customShader = trap_R_RegisterShader( "line" );
 	ref.reType = RT_CYLINDER;
-	
+
 	ref.shaderRGBA[0] = (unsigned char) (255.0f * g_color_table[ColorIndex(cent->currentState.time)][0]);
 	ref.shaderRGBA[1] = (unsigned char) (255.0f * g_color_table[ColorIndex(cent->currentState.time)][1]);
 	ref.shaderRGBA[2] = (unsigned char) (255.0f * g_color_table[ColorIndex(cent->currentState.time)][2]);
@@ -815,7 +809,7 @@ void CG_DebugCylinder ( centity_t* cent )
 	VectorCopy( normal, ref.axis[0] );
 	RotateAroundDirection( ref.axis, 0);
 
-	trap_R_AddRefEntityToScene ( &ref ); 
+	trap_R_AddRefEntityToScene ( &ref );
 }
 
 static void CG_AddLocalSet( centity_t *cent )
@@ -828,10 +822,10 @@ static void CG_AddLocalSet( centity_t *cent )
 CG_AddCEntity
 ===============
 */
-static void CG_AddCEntity( centity_t *cent ) 
+static void CG_AddCEntity( centity_t *cent )
 {
 	// event-only entities will have been dealt with already
-	if ( cent->currentState.eType >= ET_EVENTS ) 
+	if ( cent->currentState.eType >= ET_EVENTS )
 	{
 		return;
 	}
@@ -845,7 +839,7 @@ static void CG_AddCEntity( centity_t *cent )
 	// add local sound set if any
 	if ( cent->currentState.mSoundSet && cent->currentState.eType != ET_MOVER )
 	{
-		CG_AddLocalSet( cent );		
+		CG_AddLocalSet( cent );
 	}
 
 	// do this before we copy the data to refEnts
@@ -854,7 +848,7 @@ static void CG_AddCEntity( centity_t *cent )
 		trap_G2_SetGhoul2ModelIndexes(cent->ghoul2, cgs.gameModels, cgs.skins);
 	}
 
-	switch ( cent->currentState.eType ) 
+	switch ( cent->currentState.eType )
 	{
 		default:
 			Com_Error( ERR_FATAL, "Bad entity type: %i\n", cent->currentState.eType );
@@ -957,31 +951,31 @@ static void CG_AddCEntity( centity_t *cent )
 CG_AddPacketEntities
 ===============
 */
-void CG_AddPacketEntities( void ) 
+void CG_AddPacketEntities( void )
 {
 	int			num;
 	centity_t	*cent;
 
 	// set cg.frameInterpolation
-	if ( cg.nextSnap ) 
+	if ( cg.nextSnap )
 	{
 		int		delta;
 
 		delta = (cg.nextSnap->serverTime - cg.snap->serverTime);
-		if ( delta == 0 ) 
+		if ( delta == 0 )
 		{
 			cg.frameInterpolation = 0;
-		} 
-		else 
+		}
+		else
 		{
 			cg.frameInterpolation = (float)( cg.time - cg.snap->serverTime ) / delta;
 		}
-	} 
-	else 
+	}
+	else
 	{
-		// actually, it should never be used, because 
+		// actually, it should never be used, because
 		// no entities should be marked as interpolating
-		cg.frameInterpolation = 0;									
+		cg.frameInterpolation = 0;
 	}
 
 	// the auto-rotating items will all have the same axis
@@ -1003,8 +997,8 @@ void CG_AddPacketEntities( void )
 //	cg.predictedPlayerEntity.radius = cg_entities[ cg.snap->ps.clientNum].radius;
 
 //	num = cg_entitiescg.predictedPlayerEntity.currentState.number;
-	BG_PlayerStateToEntityState( &cg.predictedPlayerState, 
-								 &cg_entities[cg.predictedPlayerState.clientNum].currentState, 
+	BG_PlayerStateToEntityState( &cg.predictedPlayerState,
+								 &cg_entities[cg.predictedPlayerState.clientNum].currentState,
 								 qfalse );
 
 /*
@@ -1028,12 +1022,12 @@ void CG_AddPacketEntities( void )
 	cg.radarEntityCount = 0;
 
 	// add each entity sent over by the server
-	for ( num = 0 ; num < cg.snap->numEntities ; num++ ) 
+	for ( num = 0 ; num < cg.snap->numEntities ; num++ )
 	{
 		// Don't re-add ents that have been predicted.
 		if (cg.snap->entities[ num ].number != cg.snap->ps.clientNum)
 		{
-			cent = CG_GetEntity ( cg.snap->entities[ num ].number ); 
+			cent = CG_GetEntity ( cg.snap->entities[ num ].number );
 			CG_AddCEntity( cent );
 		}
 	}

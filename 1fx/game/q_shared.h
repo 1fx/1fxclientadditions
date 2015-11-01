@@ -161,7 +161,7 @@ static ID_INLINE short BigShort( short l) { return ShortSwap(l); }
 #define LittleShort
 static ID_INLINE int BigLong(int l) { return LongSwap(l); }
 #define LittleLong
-static ID_INLINE float BigFloat(const float *l) { FloatSwap(l); }
+static ID_INLINE float BigFloat(const float l) { return FloatSwap(&l); }
 #define LittleFloat
 
 #define	PATH_SEP '\\'
@@ -860,9 +860,9 @@ void VectorRotate( vec3_t in, vec3_t matrix[3], vec3_t out );
 
 static ID_INLINE int VectorToInt(vec3_t vec)
 {
+#ifndef __GNUC__
 	int			tmp, retval;
 
-#ifndef __GNUC__
 	_asm
 	{
 		push	edx
@@ -886,8 +886,11 @@ static ID_INLINE int VectorToInt(vec3_t vec)
 		mov		[retval], eax
 		pop		edx
 	}
-#endif // not __GNUC__
+
 	return(retval);
+#else
+	return 0;
+#endif // not __GNUC__
 }
 
 static ID_INLINE int qftol( float f )
