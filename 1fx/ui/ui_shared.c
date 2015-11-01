@@ -1331,7 +1331,7 @@ void Script_Play(itemDef_t *item, const char **args) {
 }
 
 // #CORE_UI
-#ifndef CGAME
+#if !defined (CGAME) && !defined (Q3_VM)
 static const char *delayedLoopSound = NULL;
 
 void Script_playLooped(itemDef_t *item, const char **args) {
@@ -1358,7 +1358,7 @@ void Script_playLooped(itemDef_t *item, const char **args) {
 	}
 }
 #else
-// Boe!Man 11/1/15: Original implementation for cgame.
+// Boe!Man 11/1/15: Original implementation for cgame and UI QVM.
 void Script_playLooped(itemDef_t *item, const char **args) {
 	const char *val;
 	if (String_Parse(args, &val)) {
@@ -1366,7 +1366,7 @@ void Script_playLooped(itemDef_t *item, const char **args) {
 		DC->startBackgroundTrack(val, val, qfalse);
 	}
 }
-#endif // not CGAME
+#endif // not CGAME and not Q3_VM
 // #END CORE_UI
 
 commandDef_t commandList[] =
@@ -3473,7 +3473,7 @@ qboolean Menu_HandleKey(menuDef_t *menu, int key, qboolean down)
 
 		case K_ESCAPE:
 			// #CORE_UI
-			#ifndef CGAME
+			#if !defined(CGAME) && !defined(Q3_VM)
 			if (!g_waitingForKey && menu->onESC && httpDL.httpDLStatus != HTTPDL_DOWNLOADING) {
 				itemDef_t it;
 				it.parent = menu;
@@ -3486,7 +3486,7 @@ qboolean Menu_HandleKey(menuDef_t *menu, int key, qboolean down)
                 Script_playLooped(NULL, NULL);
 			}
 			#else
-            // Boe!Man 11/1/15: Original implementation for cgame.
+            // Boe!Man 11/1/15: Original implementation for cgame and UI QVM.
 			if (!g_waitingForKey && menu->onESC) {
 				itemDef_t it;
 				it.parent = menu;
