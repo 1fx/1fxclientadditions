@@ -552,6 +552,8 @@ static void *_1fx_httpDL_mainDownloader()
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
 
+    Com_Printf("Checking 1fx. Client Additions..\n");
+
     // Start checking the core Mod files.
 	_1fx_httpDL_checkModFile("sof2mp_uix86.dll");
 	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll");
@@ -565,6 +567,7 @@ static void *_1fx_httpDL_mainDownloader()
 
 	// Continue by fetching the extra pk3 files exposed to the server.
 	httpDL.baseChecksComplete = qtrue;
+	Com_Printf("Downloading extra files from the server..\n");
     _1fx_httpDL_checkExtraPaks();
 
 	// Cleanup cURL.
@@ -576,6 +579,8 @@ static void *_1fx_httpDL_mainDownloader()
 
     #ifdef _DEBUG
     Com_Printf("[CoreUI_DLL]: Main downloader thread finished.\n");
+    #else
+    Com_Printf("1fx. HTTP Downloader finished!\n");
     #endif // _DEBUG
 
     // Give the signal to reconnect.
@@ -624,6 +629,8 @@ void _1fx_httpDL_initialize()
 
     #ifdef _DEBUG
     Com_Printf("[CoreUI_DLL]: Initialized HTTP download thread.\n");
+    #else
+    Com_Printf("Initialized 1fx. HTTP Downloader.\n");
     #endif // _DEBUG
 }
 

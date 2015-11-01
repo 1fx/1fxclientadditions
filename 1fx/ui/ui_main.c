@@ -4487,6 +4487,8 @@ void _UI_Init( qboolean inGameLoad )
 
 	// Switch (back) to the DLL.
 	trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; vm_ui 0 ; reconnect ; \n");
+	#else
+	Com_Printf("Initializing UI with 1fx. Client Additions %s.\n", _1FX_CLADD_VER);
 	#endif // Q3_VM
 
 	// Check some CVARs when initializing in game, we might get kicked in a while.
