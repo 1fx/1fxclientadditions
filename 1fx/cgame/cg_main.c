@@ -1855,9 +1855,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 
 	// #CL_ADD
 	Com_Printf("Initializing CGAME with 1fx. Client Additions %s.\n", _1FX_CLADD_VER);
-	trap_Cvar_Register(NULL, "1fx_clientAdditions", "1", CVAR_ROM | CVAR_INTERNAL | CVAR_USERINFO, 0.0, 0.0);
-	// Boe!Man 11/1/15: Expose to the server we're using client additions.
 
+	// Boe!Man 11/1/15: Expose to the server we're using client additions.
+	trap_Cvar_Register(NULL, "1fx_clientAdditions", "1", CVAR_ROM | CVAR_INTERNAL | CVAR_USERINFO, 0.0, 0.0);
 	// #END CL_ADD
 
 	// Some of the new SOF2 features required more traffic through
