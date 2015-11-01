@@ -335,7 +335,7 @@ static void _1fx_httpDL_replaceModFile(char *filename, char *remoteChecksum)
 
     // Success moving file to .bak and moving .tmp to file,
     // now verify checksum.
-    newChecksum = _1fx_httpDL_getFileChecksum(va("%s\\%s", fs_game, fullFilename));
+    newChecksum = _1fx_httpDL_getFileChecksum(fullFilename);
 
     // Verify the downloaded package.
     if(newChecksum == NULL || strcmp(newChecksum, remoteChecksum)){

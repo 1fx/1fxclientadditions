@@ -4486,7 +4486,7 @@ void _UI_Init( qboolean inGameLoad )
 	_1fx_coreUI_checkDLL();
 
 	// Switch (back) to the DLL.
-	trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; vm_ui 0 ; reconnect ; \n");
+	trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; vm_ui 0 ; vm_cgame 0 ; reconnect ; \n");
 	#else
 	Com_Printf("Initializing UI with 1fx. Client Additions %s.\n", _1FX_CLADD_VER);
 	#endif // Q3_VM
@@ -4505,7 +4505,7 @@ void _UI_Init( qboolean inGameLoad )
 	}
 
 	// Boe!Man 7/7/15: Force DLL upon next connect or even map switch!
-	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; \n");
+	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; vm_cgame 0 ; \n");
 
 	// No annoying "Q3 Arena Unauthorized DLL" popups.
 	// Yes, this isn't a real CVAR in SoF2, but it is actively being checked in the engine nonetheless.

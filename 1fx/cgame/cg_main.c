@@ -1853,13 +1853,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 {
 	const char	*s;
 
-	// #CL_ADD
-	Com_Printf("Initializing CGAME with 1fx. Client Additions %s.\n", _1FX_CLADD_VER);
-
-	// Boe!Man 11/1/15: Expose to the server we're using client additions.
-	trap_Cvar_Register(NULL, "1fx_clientAdditions", "1", CVAR_ROM | CVAR_INTERNAL | CVAR_USERINFO, 0.0, 0.0);
-	// #END CL_ADD
-
 	// Some of the new SOF2 features required more traffic through
 	// the trap calls than than the original vm code would allow for.  Therefore
 	// a block of shared memory is registered with the engine to allow for
@@ -1889,6 +1882,12 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 	CG_LoadingStage ( 0 );
 
 	CG_RegisterCvars();
+
+	// #CL_ADD
+	Com_Printf("Initializing CGAME with 1fx. Client Additions %s.\n", _1FX_CLADD_VER);
+	// Boe!Man 11/1/15: Expose to the server we're using client additions.
+	trap_Cvar_Register(NULL, "1fx_clientAdditions", "1", CVAR_INTERNAL | CVAR_USERINFO, 0.0, 0.0);
+	// #END CL_ADD
 
 	CG_InitConsoleCommands();
 
