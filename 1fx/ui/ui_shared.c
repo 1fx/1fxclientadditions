@@ -5,7 +5,9 @@
 #include "ui_shared.h"
 #include "../game/bg_public.h"
 // #CORE_UI
+#ifndef CGAME
 #include "1fx_local.h"
+#endif // not CGAME
 // #END CORE_UI
 
 #define SCROLL_TIME_START					500
@@ -1329,6 +1331,7 @@ void Script_Play(itemDef_t *item, const char **args) {
 }
 
 // #CORE_UI
+#ifndef CGAME
 static const char *delayedLoopSound = NULL;
 
 void Script_playLooped(itemDef_t *item, const char **args) {
@@ -1354,6 +1357,16 @@ void Script_playLooped(itemDef_t *item, const char **args) {
         }
 	}
 }
+#else
+// Boe!Man 11/1/15: Original implementation for cgame.
+void Script_playLooped(itemDef_t *item, const char **args) {
+	const char *val;
+	if (String_Parse(args, &val)) {
+		DC->stopBackgroundTrack();
+		DC->startBackgroundTrack(val, val, qfalse);
+	}
+}
+#endif // not CGAME
 // #END CORE_UI
 
 commandDef_t commandList[] =
@@ -3460,6 +3473,7 @@ qboolean Menu_HandleKey(menuDef_t *menu, int key, qboolean down)
 
 		case K_ESCAPE:
 			// #CORE_UI
+			#ifndef CGAME
 			if (!g_waitingForKey && menu->onESC && httpDL.httpDLStatus != HTTPDL_DOWNLOADING) {
 				itemDef_t it;
 				it.parent = menu;
@@ -3471,6 +3485,14 @@ qboolean Menu_HandleKey(menuDef_t *menu, int key, qboolean down)
 				// Start playing background sound again.
                 Script_playLooped(NULL, NULL);
 			}
+			#else
+            // Boe!Man 11/1/15: Original implementation for cgame.
+			if (!g_waitingForKey && menu->onESC) {
+				itemDef_t it;
+				it.parent = menu;
+				Item_RunScript(&it, menu->onESC);
+			}
+			#endif // not CGAME
 			// #END CORE_UI
 			break;
 		case K_TAB:
