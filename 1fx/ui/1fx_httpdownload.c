@@ -498,7 +498,9 @@ static void _1fx_httpDL_checkExtraPaks()
 
                 // Don't continue if the user wants to cancel.
                 if(httpDL.httpDLStatus == HTTPDL_CANCEL){
-                    break;
+                    curl_easy_cleanup(curl);
+                    curl_global_cleanup();
+                    pthread_exit(0);
                 }
 
                 // Reset currentPak variable.
@@ -558,12 +560,15 @@ static void *_1fx_httpDL_mainDownloader()
 	_1fx_httpDL_checkModFile("sof2mp_uix86.dll");
 	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll");
 
-	// Safe to cancel from this point forward, should we?
-	if(httpDL.httpDLStatus == HTTPDL_CANCEL){
+	// Delete temporary MD5SUM file.
+    DeleteFile(va("%s\\1fx_MD5SUM", fs_game));
+
+    // Safe to cancel from this point forward, should we?
+    if(httpDL.httpDLStatus == HTTPDL_CANCEL){
         curl_easy_cleanup(curl);
         curl_global_cleanup();
-        return NULL;
-	}
+        pthread_exit(0);
+    }
 
 	// Continue by fetching the extra pk3 files exposed to the server.
 	httpDL.baseChecksComplete = qtrue;
@@ -573,9 +578,6 @@ static void *_1fx_httpDL_mainDownloader()
 	// Cleanup cURL.
     curl_easy_cleanup(curl);
     curl_global_cleanup();
-
-    // Delete temporary MD5SUM file.
-    DeleteFile(va("%s\\1fx_MD5SUM", fs_game));
 
     #ifdef _DEBUG
     Com_Printf("[CoreUI_DLL]: Main downloader thread finished.\n");
