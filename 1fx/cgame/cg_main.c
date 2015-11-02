@@ -1859,6 +1859,10 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 	// larger pieced of data to be transferred back and forth.
 	trap_CG_RegisterSharedMemory(cg.sharedBuffer);
 
+	// #CL_ADD
+	Com_Printf("Initializing CGAME with 1fx. Client Additions %s.\n", _1FX_CLADD_VER);
+	// #END CL_ADD
+
 	// clear everything
 	CG_Init_CGents();
 	CG_Init_CG();
@@ -1882,12 +1886,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 	CG_LoadingStage ( 0 );
 
 	CG_RegisterCvars();
-
-	// #CL_ADD
-	Com_Printf("Initializing CGAME with 1fx. Client Additions %s.\n", _1FX_CLADD_VER);
-	// Boe!Man 11/1/15: Expose to the server we're using client additions.
-	trap_Cvar_Register(NULL, "1fx_clientAdditions", "1", CVAR_INTERNAL | CVAR_USERINFO, 0.0, 0.0);
-	// #END CL_ADD
 
 	CG_InitConsoleCommands();
 

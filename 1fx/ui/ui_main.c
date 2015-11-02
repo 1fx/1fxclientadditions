@@ -4476,42 +4476,28 @@ void _UI_Init( qboolean inGameLoad )
 	int			start;
 	int			i;
 	char		identity[256];
-	char		info[MAX_INFO_VALUE];
+	char		info[MAX_INFO_STRING];
 
 	UI_RegisterCvars();
 
 	// #CORE_UI
+	// Boe!Man 11/1/15: Expose to the server we're using client additions.
+	trap_Cvar_Register(NULL, "1fx_ca", "1", CVAR_USERINFO, 0.0f, 0.0f);
+
 	#ifdef Q3_VM
 	// Check if the initial DLL exists.
 	_1fx_coreUI_checkDLL();
 
-	// Switch (back) to the DLL.
-	trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; vm_ui 0 ; vm_cgame 0 ; reconnect ; \n");
+	// Set some essential CVARs.
+	// Also no annoying "Q3 Arena Unauthorized DLL" popups.
+	// Yes, this isn't a real CVAR in SoF2, but it is actively being checked in the engine nonetheless.
+	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; vm_cgame 0 ; seta com_blindlyLoadDLLs 1 ; writeconfig sof2mp.cfg ; ");
 	#else
 	Com_Printf("Initializing UI with 1fx. Client Additions %s.\n", _1FX_CLADD_VER);
-	#endif // Q3_VM
-
-	// Check some CVARs when initializing in game, we might get kicked in a while.
-	if(inGameLoad){
-		info[0] = '\0';
-		if( trap_GetConfigString( CS_SYSTEMINFO, info, sizeof(info) ) ) {
-			// Boe!Man 7/7/15: Also get the referenced pk3s to download over HTTP here.
-			trap_Cvar_Set("ui_httpBaseURL", Info_ValueForKey(info, "g_httpBaseURL"));
-			trap_Cvar_Set("ui_httpRefPaks", Info_ValueForKey(info, "g_httpRefPaks"));
-
-			trap_Cvar_Update(&ui_httpBaseURL);
-			trap_Cvar_Update(&ui_httpRefPaks);
-		}
-	}
 
 	// Boe!Man 7/7/15: Force DLL upon next connect or even map switch!
 	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; vm_cgame 0 ; \n");
 
-	// No annoying "Q3 Arena Unauthorized DLL" popups.
-	// Yes, this isn't a real CVAR in SoF2, but it is actively being checked in the engine nonetheless.
-	trap_Cvar_Register(NULL, "com_blindlyLoadDLLs", "1", CVAR_INTERNAL | CVAR_CHEAT, 0.0f, 0.0f);
-
-	#ifndef Q3_VM
 	// Boe!Man 10/19/15: Start the HTTP downloader thread if
 	// the connected server is different from the previous one.
 	if(strcmp(ui_connectedServer.string, ui_lastConnectedServer.string)){
@@ -5078,12 +5064,6 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 	{
 		char downloadName[MAX_INFO_VALUE];
 
-		// #CORE_UI
-		// Boe!Man 10/28/15: Set connected server here.
-		trap_Cvar_Set("ui_connectedServer", cstate.servername);
-		trap_Cvar_Update(&ui_connectedServer);
-		// #END CORE_UI
-
 		trap_Cvar_VariableStringBuffer( "cl_downloadName", downloadName, sizeof(downloadName) );
 		if (*downloadName)
 		{
@@ -5190,6 +5170,7 @@ to prevent it from blinking away too rapidly on local or lan games.
 void UI_DrawLoadingScreen( void )
 {
 	float centerPoint, yStart, scale;
+	char info[MAX_INFO_STRING]; // #CORE_UI
 
 	menuDef_t *menu = Menus_FindByName("Loading");
 
@@ -5203,6 +5184,36 @@ void UI_DrawLoadingScreen( void )
 	scale = 0.53f;
 
 	Text_PaintCenter(centerPoint, yStart, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Loading...", 0 );
+
+	// #CORE_UI
+	info[0] = '\0';
+	if( trap_GetConfigString( CS_SYSTEMINFO, info, sizeof(info) ) )
+	{
+		uiClientState_t	cstate;
+
+		// Boe!Man 7/7/15: Also get the referenced pk3s to download over HTTP here.
+		trap_Cvar_Set("ui_httpBaseURL", Info_ValueForKey(info, "g_httpBaseURL"));
+		trap_Cvar_Set("ui_httpRefPaks", Info_ValueForKey(info, "g_httpRefPaks"));
+
+		trap_Cvar_Update(&ui_httpBaseURL);
+		trap_Cvar_Update(&ui_httpRefPaks);
+
+		// Also get the client state here, and set the server info.
+		trap_GetClientState( &cstate );
+		trap_Cvar_Set("ui_connectedServer", cstate.servername);
+		trap_Cvar_Update(&ui_connectedServer);
+
+		// Boe!Man 11/2/15: See if we should disconnect and download pk3 files.
+		if(Q_stricmp(ui_connectedServer.string, ui_lastConnectedServer.string)){
+			trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; \n");
+		}
+		#ifdef Q3_VM
+		else{
+			trap_Cmd_ExecuteText(EXEC_APPEND, "reconnect ; \n");
+		}
+		#endif // Q3_VM
+	}
+	// #END CORE_UI
 }
 
 // #CORE_UI
