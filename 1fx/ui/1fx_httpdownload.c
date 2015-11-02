@@ -500,6 +500,11 @@ static void _1fx_httpDL_checkExtraPaks()
                 if(httpDL.httpDLStatus == HTTPDL_CANCEL){
                     curl_easy_cleanup(curl);
                     curl_global_cleanup();
+
+                    // Reset last connected server to ensure the downloader starts upon reconnect.
+                    trap_Cvar_Set("ui_lastConnectedServer", "");
+                    trap_Cvar_Update(&ui_lastConnectedServer);
+
                     pthread_exit(0);
                 }
 
@@ -567,6 +572,11 @@ static void *_1fx_httpDL_mainDownloader()
     if(httpDL.httpDLStatus == HTTPDL_CANCEL){
         curl_easy_cleanup(curl);
         curl_global_cleanup();
+
+        // Reset last connected server to ensure the downloader starts upon reconnect.
+        trap_Cvar_Set("ui_lastConnectedServer", "");
+        trap_Cvar_Update(&ui_lastConnectedServer);
+
         pthread_exit(0);
     }
 
@@ -586,15 +596,8 @@ static void *_1fx_httpDL_mainDownloader()
     #endif // _DEBUG
 
     // Give the signal to reconnect.
-    if(httpDL.httpDLStatus != HTTPDL_CANCEL){
-        httpDL.httpDLStatus = HTTPDL_FINISHED;
-        trap_Cmd_ExecuteText(EXEC_APPEND, "reconnect ; \n");
-    }else{
-        // User canceled.
-        // Reset last connected server to ensure the downloader starts upon reconnect.
-        trap_Cvar_Set("ui_lastConnectedServer", "");
-        trap_Cvar_Update(&ui_lastConnectedServer);
-    }
+    httpDL.httpDLStatus = HTTPDL_FINISHED;
+    trap_Cmd_ExecuteText(EXEC_APPEND, "reconnect ; \n");
 }
 
 /*

@@ -4514,8 +4514,8 @@ void _UI_Init( qboolean inGameLoad )
 			trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; \n");
 			return;
 		}else{
-			_1fx_httpDL_initialize();
 			Com_Printf("Initializing 1fx. HTTP downloader.\n");
+			_1fx_httpDL_initialize();
 		}
 	}
 	#endif // not Q3_VM
@@ -4725,6 +4725,14 @@ UI_MouseEvent
 */
 qboolean _UI_MouseEvent( int dx, int dy )
 {
+	// #CORE_UI
+	#ifndef Q3_VM
+	if(httpDL.httpDLStatus == HTTPDL_DOWNLOADING){
+		return qfalse;
+	}
+	#endif // not Q3_VM
+	// #END CORE_UI
+
 	// update mouse screen position
 	uiInfo.uiDC.cursorx += dx;
 	if (uiInfo.uiDC.cursorx < 0)
