@@ -518,7 +518,7 @@ static void _1fx_httpDL_checkExtraPaks()
         pakLength++;
 
         // We can set the current pak now.
-        strncat(currentPak, s, pakLength - 1);
+        strncat(currentPak, s, pakLength);
 
         // We need a valid .pk3 extension to continue.
         if((int)s + pakLength > 4){
@@ -528,6 +528,12 @@ static void _1fx_httpDL_checkExtraPaks()
             if(strcmp(fileExtension, ".pk3") == 0){
                 if(!PathFileExists(va("%s\\%s", fs_game, currentPak))){
                     // We can download this .pk3 file now.
+
+                    // Remove trailing space.
+                    if(currentPak[strlen(currentPak)] == ' '){
+                        currentPak[strlen(currentPak) -1] = '\0';
+                    }
+
                     if(_1fx_httpDL_getRemoteFile(va("%s%s", ui_httpBaseURL.string, currentPak), va("%s\\%s.tmp", fs_game, currentPak), currentPak)){
                         // Move to the new location and remove the old file.
                         // Don't bother too much with this, if it fails we'll download it again the next time.
@@ -603,7 +609,7 @@ static void *_1fx_httpDL_mainDownloader()
 
     // Is there a speed limit set by the server?
     if(ui_httpMaxSpeed.integer > 0){
-        curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, (curl_off_t) 1000 * ui_httpMaxSpeed.integer);
+        curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, (curl_off_t) 1024 * ui_httpMaxSpeed.integer);
     }
 
     // Initial pak size is -1 (so we don't get weird time left in seconds).
