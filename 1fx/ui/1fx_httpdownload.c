@@ -89,20 +89,8 @@ static size_t _1fx_httpDL_cURL_checkProgress(void *ptr, curl_off_t dltotal, curl
     }
 
     // Cancel the download after 5 seconds with no progress.
-    if(currentTime - timeSinceNoProgress > 4){
+    if(currentTime - timeSinceNoProgress > 4 || httpDL.httpDLStatus == HTTPDL_CANCEL){
         return 1;
-    }
-
-    // Also cancel if the user wants us to.
-    if(httpDL.httpDLStatus == HTTPDL_CANCEL){
-        curl_easy_cleanup(curl);
-        curl_global_cleanup();
-
-        // Reset last connected server to ensure the downloader starts upon reconnect.
-        trap_Cvar_Set("ui_lastConnectedServer", "");
-        trap_Cvar_Update(&ui_lastConnectedServer);
-
-        pthread_exit(0);
     }
 
     return 0;
@@ -617,6 +605,9 @@ static void *_1fx_httpDL_mainDownloader()
     if(ui_httpMaxSpeed.integer > 0){
         curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, (curl_off_t) 1000 * ui_httpMaxSpeed.integer);
     }
+
+    // Initial pak size is -1 (so we don't get weird time left in seconds).
+    httpDL.pakSize = -1;
 
     Com_Printf("Checking 1fx. Client Additions..\n");
 
