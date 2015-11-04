@@ -8,7 +8,7 @@
 #endif
 
 
-void CG_AddGore(int type, float size, vec3_t hitloc, vec3_t hitdirection, 
+void CG_AddGore(int type, float size, vec3_t hitloc, vec3_t hitdirection,
 				int entnum, vec3_t entposition, float entangle, void *ghoul2)
 {
 	SSkinGoreData goreSkin;
@@ -21,7 +21,7 @@ void CG_AddGore(int type, float size, vec3_t hitloc, vec3_t hitdirection,
 	goreSkin.backFaces = qtrue; // forever
 	goreSkin.lifeTime = 0;
 	goreSkin.baseModelOnly = qfalse;
-	
+
 	goreSkin.currentTime = cg.time;
 	goreSkin.entNum      = entnum;
 	goreSkin.SSize		 = size;
@@ -51,7 +51,7 @@ void CG_AddGrowGore(int type, float size, int growtime, float startfrac, vec3_t 
 	goreSkin.backFaces = qtrue; // forever
 	goreSkin.lifeTime = 0;
 	goreSkin.baseModelOnly = qfalse;
-	
+
 	goreSkin.currentTime = cg.time;
 	goreSkin.entNum      = entnum;
 	goreSkin.SSize		 = size;
@@ -72,7 +72,7 @@ void CG_AddGrowGore(int type, float size, int growtime, float startfrac, vec3_t 
 	trap_G2API_AddSkinGore(ghoul2,&goreSkin);
 }
 
-void CG_AddSlashGore(int type, float angle, float ssize, float tsize, vec3_t hitloc, vec3_t hitdirection, 
+void CG_AddSlashGore(int type, float angle, float ssize, float tsize, vec3_t hitloc, vec3_t hitdirection,
 					 int entnum, vec3_t entposition, float entangle, void *ghoul2)
 {
 	SSkinGoreData goreSkin;
@@ -104,8 +104,8 @@ void CG_AddSlashGore(int type, float angle, float ssize, float tsize, vec3_t hit
 	trap_G2API_AddSkinGore(ghoul2,&goreSkin);
 }
 
-void CG_AddSlashGrowGore(int type, float angle, float ssize, float tsize, int growtime, float startfrac, 
-							vec3_t hitloc, vec3_t hitdirection, 
+void CG_AddSlashGrowGore(int type, float angle, float ssize, float tsize, int growtime, float startfrac,
+							vec3_t hitloc, vec3_t hitdirection,
 							int entnum, vec3_t entposition, float entangle, void *ghoul2)
 {
 	SSkinGoreData goreSkin;
@@ -138,7 +138,7 @@ void CG_AddSlashGrowGore(int type, float angle, float ssize, float tsize, int gr
 }
 
 
-void CG_AddTimedGore(int type, float size, int duration, vec3_t hitloc, vec3_t hitdirection, 
+void CG_AddTimedGore(int type, float size, int duration, vec3_t hitloc, vec3_t hitdirection,
 					int entnum, vec3_t entposition, float entangle, void *ghoul2)
 {
 	SSkinGoreData goreSkin;
@@ -171,7 +171,7 @@ void CG_AddTimedGore(int type, float size, int duration, vec3_t hitloc, vec3_t h
 }
 
 
-void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdirection, 
+void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdirection,
 						 int entnum, vec3_t entposition, float entangle, void *ghoul2)
 {
 	float angle, size, size2;
@@ -181,7 +181,7 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 	case WP_KNIFE:
 		if (attack==ATTACK_ALTERNATE)
 		{
-			CG_AddGore(PGORE_PUNCTURE, flrand(3.5, 4.0), 
+			CG_AddGore(PGORE_PUNCTURE, flrand(3.5, 4.0),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			if (cg_goreDetail.integer>0)
 			{
@@ -197,8 +197,8 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 			case 1:
 				size = flrand(2.8, 3.2);
 				size2 = flrand(1.8, 2.2);
-				CG_AddSlashGore(PGORE_KNIFESLASH, 
-						angle, size, size2, 
+				CG_AddSlashGore(PGORE_KNIFESLASH,
+						angle, size, size2,
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 				if (cg_goreDetail.integer>0)
 				{
@@ -209,8 +209,8 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 			case 2:
 				size = 8.0f*flrand(.8, 1.2);
 				size2 = 1.75f*flrand(.8, 1.2);
-				CG_AddSlashGore(PGORE_KNIFESLASH2, 
-						angle, size, size2, 
+				CG_AddSlashGore(PGORE_KNIFESLASH2,
+						angle, size, size2,
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 				if (cg_goreDetail.integer>0)
 				{
@@ -221,8 +221,8 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 			default:
 				size = flrand(3.0f,4.0f);
 				size2 = flrand(0.5f,1.0f);
-				CG_AddSlashGore(PGORE_KNIFESLASH3, 
-						angle, size, size2, 
+				CG_AddSlashGore(PGORE_KNIFESLASH3,
+						angle, size, size2,
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 				if (cg_goreDetail.integer>0)
 				{
@@ -240,13 +240,13 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 	case WP_USSOCOM_PISTOL:
 		if (attack==ATTACK_ALTERNATE)
 		{	// Bonk on the head
-			CG_AddGore(PGORE_BLOODY_SPLOTCH2, flrand(5.25f, 7.5f), 
+			CG_AddGore(PGORE_BLOODY_SPLOTCH2, flrand(5.25f, 7.5f),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 
 		}
 		else
 		{
-			CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 3.75f, 4.5f), 
+			CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 3.75f, 4.5f),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			if (cg_goreDetail.integer>0)
 			{
@@ -258,7 +258,7 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 
 	// Small guns
 	case WP_MICRO_UZI_SUBMACHINEGUN:
-		CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 3.75f, 4.5f), 
+		CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 3.75f, 4.5f),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 		if (cg_goreDetail.integer>0)
 		{
@@ -271,12 +271,12 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 	case WP_M590_SHOTGUN:
 		if (attack==ATTACK_ALTERNATE)
 		{	// Bond on de haid
-			CG_AddGore(PGORE_BLOODY_SPLOTCH2, flrand(7.75, 11.25), 
+			CG_AddGore(PGORE_BLOODY_SPLOTCH2, flrand(7.75, 11.25),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 		}
 		else
 		{
-			CG_AddGore(irand(PGORE_SHOTGUN, PGORE_SHOTGUNBIG), flrand( 8.25f, 11.25f), 
+			CG_AddGore(irand(PGORE_SHOTGUN, PGORE_SHOTGUNBIG), flrand( 8.25f, 11.25f),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			if (cg_goreDetail.integer>0)
 			{
@@ -284,7 +284,7 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 							hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 				if (cg_goreDetail.integer>1)
 				{
-					CG_AddGore(PGORE_PELLETS, 8.25f, 
+					CG_AddGore(PGORE_PELLETS, 8.25f,
 									hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 				}
 			}
@@ -295,7 +295,7 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 	case WP_M3A1_SUBMACHINEGUN:
 	case WP_MP5:
 	case WP_SIG551:
-		CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 5.25f, 7.5f), 
+		CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 5.25f, 7.5f),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 		if (cg_goreDetail.integer>0)
 		{
@@ -306,7 +306,7 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 
 	// Shotguns
 	case WP_USAS_12_SHOTGUN:
-		CG_AddGore(irand(PGORE_SHOTGUN, PGORE_SHOTGUNBIG), flrand( 8.25f, 11.25f), 
+		CG_AddGore(irand(PGORE_SHOTGUN, PGORE_SHOTGUNBIG), flrand( 8.25f, 11.25f),
 					hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 		if (cg_goreDetail.integer>0)
 		{
@@ -314,7 +314,7 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			if (cg_goreDetail.integer>1)
 			{
-				CG_AddGore(PGORE_PELLETS, 8.25f, 
+				CG_AddGore(PGORE_PELLETS, 8.25f,
 								hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			}
 		}
@@ -324,17 +324,17 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 	case WP_M4_ASSAULT_RIFLE:
 		if (attack==ATTACK_ALTERNATE)
 		{
-			CG_AddGore(PGORE_SHRAPNEL, flrand( 14.0f, 17.0f),  
+			CG_AddGore(PGORE_SHRAPNEL, flrand( 14.0f, 17.0f),
 							hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			if (cg_goreDetail.integer>1)
 			{
-				CG_AddGore(PGORE_PELLETS, 10.0, 
+				CG_AddGore(PGORE_PELLETS, 10.0,
 								hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			}
 		}
 		else
 		{
-			CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 5.25f, 7.5f), 
+			CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 5.25f, 7.5f),
 							hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			if (cg_goreDetail.integer>0)
 			{
@@ -348,7 +348,7 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 	case WP_AK74_ASSAULT_RIFLE:
 		if (attack==ATTACK_ALTERNATE)
 		{
-			CG_AddGore(PGORE_PUNCTURE, flrand(3.5f, 4.0f), 
+			CG_AddGore(PGORE_PUNCTURE, flrand(3.5f, 4.0f),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			if (cg_goreDetail.integer>0)
 			{
@@ -358,7 +358,7 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 		}
 		else
 		{
-			CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 5.25f, 7.5f), 
+			CG_AddGore(irand(PGORE_BULLET_E, PGORE_BULLET_G), flrand( 5.25f, 7.5f),
 							hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 			if (cg_goreDetail.integer>0)
 			{
@@ -381,32 +381,38 @@ void CG_DoGoreFromWeapon( int weaponnum, int attack, vec3_t hitloc, vec3_t hitdi
 		break;
 
 	// Explosions
+	// #CL_ADD
 	case WP_MM1_GRENADE_LAUNCHER:
 	case WP_RPG7_LAUNCHER:
 	case WP_SMOHG92_GRENADE:
-		CG_AddGore(PGORE_SHRAPNEL, flrand( 14.0f, 17.0f),  
+	case WP_M67_GRENADE:
+	case WP_F1_GRENADE:
+	case WP_L2A2_GRENADE:
+	case WP_MDN11_GRENADE:
+		CG_AddGore(PGORE_SHRAPNEL, flrand( 14.0f, 17.0f),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 		if (cg_goreDetail.integer>1)
 		{
-			CG_AddGore(PGORE_PELLETS, 10.0f, 
+			CG_AddGore(PGORE_PELLETS, 10.0f,
 							hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 		}
 		break;
+	// #END CL_ADD
 
 	// Stun/char
 	case WP_M84_GRENADE:
 	case WP_M15_GRENADE:
-		CG_AddGore(PGORE_BURN, flrand( 14.0f, 18.0f),  
+		CG_AddGore(PGORE_BURN, flrand( 14.0f, 18.0f),
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 		break;
 
 	// Fire
 	case WP_ANM14_GRENADE:
-		CG_AddTimedGore(PGORE_IMMOLATE, flrand( 18.0f, 22.0f), 4000, 
+		CG_AddTimedGore(PGORE_IMMOLATE, flrand( 18.0f, 22.0f), 4000,
 						hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 		if (cg_goreDetail.integer>0)
 		{
-			CG_AddGore(PGORE_BURN, flrand( 18.0f, 22.0f),  
+			CG_AddGore(PGORE_BURN, flrand( 18.0f, 22.0f),
 							hitloc, hitdirection, entnum, entposition, entangle, ghoul2);
 		}
 		break;
@@ -423,7 +429,7 @@ void CG_PredictedProcGore ( int weaponnum, int attack, vec3_t start, vec3_t end,
 	{
 		return;
 	}
-	
+
 	VectorSubtract ( end, start, direction);
 	VectorNormalize ( direction);
 
@@ -438,7 +444,7 @@ void CG_PredictedProcGore ( int weaponnum, int attack, vec3_t start, vec3_t end,
 ======================
 CG_AddProcGore
 
-Adds procedural gore to the player specified in the given cent.  The cent is a 
+Adds procedural gore to the player specified in the given cent.  The cent is a
 temp ent containing all the information about the shot.
 ======================
 */
@@ -644,13 +650,13 @@ typedef struct SGoreArea
 static TGoreEffectType	*GoreEffectTypes;
 static TGorePieceType	*GorePieceTypes;
 static TGoreArea		*GoreAreas;
-static TGoreInfo		GoreInfo[GORE_SIDE_MAX] = 
+static TGoreInfo		GoreInfo[GORE_SIDE_MAX] =
 {
 	{ "right", "r" },
 	{ "left", "l" }
 };
 
-static TGoreLocation	GoreLocations[] = 
+static TGoreLocation	GoreLocations[] =
 {
 	{ "none",		GORE_SIDE_RIGHT,	GORE_SIDE_LEFT	},
 
@@ -660,7 +666,7 @@ static TGoreLocation	GoreLocations[] =
 	{ "leg_upper",	GORE_SIDE_LEFT,		GORE_SIDE_RIGHT	},
 	{ "leg_lower",	GORE_SIDE_RIGHT,	GORE_SIDE_LEFT	},
 	{ "leg_lower",	GORE_SIDE_LEFT,		GORE_SIDE_RIGHT	},
-	
+
 	{ "hand",		GORE_SIDE_RIGHT,	GORE_SIDE_LEFT	},
 	{ "hand",		GORE_SIDE_LEFT,		GORE_SIDE_RIGHT	},
 	{ "arm_lower",	GORE_SIDE_RIGHT,	GORE_SIDE_LEFT	},
@@ -668,7 +674,7 @@ static TGoreLocation	GoreLocations[] =
 
 	{ "head",		GORE_SIDE_RIGHT,	GORE_SIDE_LEFT	},
 	{ "torso",		GORE_SIDE_RIGHT,	GORE_SIDE_LEFT	},
-	
+
 	{ "torso",		GORE_SIDE_RIGHT,	GORE_SIDE_LEFT	},
 	{ "torso",		GORE_SIDE_LEFT,		GORE_SIDE_RIGHT	},
 	{ "torso",		GORE_SIDE_RIGHT,	GORE_SIDE_LEFT	},
@@ -967,12 +973,12 @@ static void CG_ParseGoreArea(TGPGroup group)
 			else if (Q_stricmp(name, "NoChildChunks") == 0)
 			{
 				gore->mFlags |= GORE_NO_CHILD_CHUNKS;
-			}			
+			}
 			else if (Q_stricmp(name, "NoChildBoltOns") == 0)
 			{
 				gore->mFlags |= GORE_NO_CHILD_BOLTONS;
-			}			
-			
+			}
+
 			value = trap_GPV_GetNext(value);
 		}
 	}
@@ -1195,7 +1201,7 @@ static void CG_ProcessChunk(int clientNum, centity_t *cent, TGoreChunk *chunk, v
 	bolt = trap_G2API_AddBolt(cent->ghoul2, 0, CreateFinalName(chunk->mBone, &Primary, &Opposite, qfalse));
 	if (bolt != -1)
 	{
-		boltMatrixOK = trap_G2API_GetBoltMatrix(cent->ghoul2, 0, bolt, &matrix, cent->lerpAngles, 
+		boltMatrixOK = trap_G2API_GetBoltMatrix(cent->ghoul2, 0, bolt, &matrix, cent->lerpAngles,
 			cent->lerpOrigin, cg.time, cgs.gameModels, cent->modelScale);
 	}
 
@@ -1214,7 +1220,7 @@ static void CG_ProcessChunk(int clientNum, centity_t *cent, TGoreChunk *chunk, v
 
 	bolt = trap_G2API_AddBolt(re->ghoul2, 0, CreateFinalName(chunk->mBone, &Primary, &Opposite, qfalse));
 	trap_G2API_SetNewOrigin(re->ghoul2, 0, bolt);
-	
+
 	ci = &cgs.clientinfo[clientNum];
 	anim = &ci->animations[cent->currentState.torsoAnim & ~ANIM_TOGGLEBIT];
 	animSpeed = 50.0f / anim->frameLerp;
@@ -1302,8 +1308,8 @@ static void CG_ProcessGore(int clientNum, centity_t *cent, const char *Location,
 					vec3_t axis[3];
 					int boltInfo;
 
-					boltMatrixOK = trap_G2API_GetBoltMatrix(cent->ghoul2, 0, bolt, &matrix, cent->lerpAngles, 
-											cent->lerpOrigin, cg.time, cgs.gameModels, cent->modelScale);					
+					boltMatrixOK = trap_G2API_GetBoltMatrix(cent->ghoul2, 0, bolt, &matrix, cent->lerpAngles,
+											cent->lerpOrigin, cg.time, cgs.gameModels, cent->modelScale);
 					axis[0][0] = matrix.matrix[0][0];
 					axis[0][1] = matrix.matrix[1][0];
 					axis[0][2] = matrix.matrix[2][0];
@@ -1318,12 +1324,12 @@ static void CG_ProcessGore(int clientNum, centity_t *cent, const char *Location,
  					origin[2] = matrix.matrix[2][3];
 
 
-					boltInfo    =  (( 0/*modelnum*/ & MODEL_AND  ) << MODEL_SHIFT  ); 
+					boltInfo    =  (( 0/*modelnum*/ & MODEL_AND  ) << MODEL_SHIFT  );
 					boltInfo    |= (( bolt  & BOLT_AND   ) << BOLT_SHIFT   );
 					boltInfo    |= (( cent->currentState.number   & ENTITY_AND ) << ENTITY_SHIFT );
 
 					trap_FX_PlayEntityEffectID( effect->mFXID, origin, axis, boltInfo, -1, -1, -1);
-/*					boltMatrixOK = trap_G2API_GetBoltMatrix(cent->ghoul2, 0, bolt, &matrix, cent->lerpAngles, 
+/*					boltMatrixOK = trap_G2API_GetBoltMatrix(cent->ghoul2, 0, bolt, &matrix, cent->lerpAngles,
 						cent->lerpOrigin, cg.time, cgs.gameModels, cent->modelScale);
 					if (boltMatrixOK)
 					{
@@ -1422,7 +1428,7 @@ void CG_ApplyGore(int clientNum, centity_t *cent, int hitLocation, vec3_t Direct
 			Com_Error( ERR_DROP, "CG_ApplyGore: invalid hit location %d\n", hitLocation);
 			return;
 		}
-		Location = &GoreLocations[hitLocation];	
+		Location = &GoreLocations[hitLocation];
 	}
 	else
 	{

@@ -411,12 +411,18 @@ static void CG_Obituary( entityState_t *ent )
 				message2 = va("'s %s", weaponParseInfo[mod].mName );
 				break;
 
+			// #CL_ADD
 			case MOD_MM1_GRENADE_LAUNCHER:
 			case MOD_RPG7_LAUNCHER:
+			case MOD_M67_GRENADE:
 			case MOD_M84_GRENADE:
+			case MOD_F1_GRENADE:
+			case MOD_L2A2_GRENADE:
+			case MOD_MDN11_GRENADE:
 			case MOD_SMOHG92_GRENADE:
 			case MOD_ANM14_GRENADE:
 			case MOD_M15_GRENADE:
+			// #END CL_ADD
 				message = "was detonated by";
 				message2 = va("'s %s", weaponParseInfo[mod].mName );
 				break;
