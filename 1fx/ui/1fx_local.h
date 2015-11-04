@@ -33,6 +33,7 @@ typedef struct {
     qboolean	baseChecksComplete; // True if base Core UI file checks are complete.
 
     char		*pakName;			// Name of the file currently downloaded.
+    qboolean    initializingDl;     // True when the download is initializing.
     double		pakSize;			// Size of the file currently downloaded.
     double		bytesReceived;		// Bytes already received.
     double		speedAvg;			// Average speed in bytes.

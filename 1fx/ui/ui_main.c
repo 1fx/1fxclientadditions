@@ -5285,29 +5285,34 @@ void UI_DrawHTTPDownloadScreen( void )
 			Q_strncpyz(dlNameBuf, va("Downloading extra .pk3 file: %s", httpDL.pakName), sizeof(dlNameBuf));
 		}
 
-		// Total size.
-		if(httpDL.pakSize != -1){
-			Q_strncpyz(dlSizeBuf_total, httpDL.pakSize < 1000000 ? va("%.0f KB", httpDL.pakSize / 1024) : va("%.1f MB", httpDL.pakSize / 1024 / 1024), sizeof(dlSizeBuf_total));
-		}else{
-			Q_strncpyz(dlSizeBuf_total, "unknown size", sizeof(dlSizeBuf_total));
-		}
-
-		// Size already downloaded.
-		Q_strncpyz(dlSizeBuf_done, httpDL.bytesReceived < 1000000 ? va("%.0f KB", httpDL.bytesReceived / 1024) : va("%.1f MB", httpDL.bytesReceived / 1024 / 1024), sizeof(dlSizeBuf_done));
-
-		UI_ReadableSize( dlSizeBuf_total,	sizeof dlSizeBuf_total,	httpDL.pakSize );
-		UI_ReadableSize( dlSizeBuf_done,	sizeof dlSizeBuf_done,	httpDL.bytesReceived );
-
-		// Transfer rate.
-		Q_strncpyz(xferRateBuf, httpDL.speedAvg < 1000000 ? va("%.0f KB/s", httpDL.speedAvg / 1024) : va("%.1f MB/s", httpDL.speedAvg / 1024 / 1024), sizeof(xferRateBuf));
-
-		// Print file progress.
 		Text_PaintCenter(centerPoint, yStart + 15, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlNameBuf, 0 );
-		Text_PaintCenter(leftWidth, yStart + 30, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, va("(%s of %s copied)", dlSizeBuf_done, dlSizeBuf_total), 0 );
 
 		// Print transfer rate.
 		Text_PaintCenter(centerPoint, yStart + 50, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Transfer rate:", 0 );
-		Text_PaintCenter(leftWidth, yStart + 65, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, xferRateBuf, 0 );
+		if(httpDL.initializingDl == qfalse){
+			// Actual transfer rate.
+			Q_strncpyz(xferRateBuf, httpDL.speedAvg < 1000000 ? va("%.0f KB/s", httpDL.speedAvg / 1024) : va("%.1f MB/s", httpDL.speedAvg / 1024 / 1024), sizeof(xferRateBuf));
+			Text_PaintCenter(leftWidth, yStart + 65, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, xferRateBuf, 0 );
+
+			// Also print file progress.
+			// Total size.
+			if(httpDL.pakSize != -1){
+				Q_strncpyz(dlSizeBuf_total, httpDL.pakSize < 1000000 ? va("%.0f KB", httpDL.pakSize / 1024) : va("%.1f MB", httpDL.pakSize / 1024 / 1024), sizeof(dlSizeBuf_total));
+			}else{
+				Q_strncpyz(dlSizeBuf_total, "unknown size", sizeof(dlSizeBuf_total));
+			}
+
+			// Size already downloaded.
+			Q_strncpyz(dlSizeBuf_done, httpDL.bytesReceived < 1000000 ? va("%.0f KB", httpDL.bytesReceived / 1024) : va("%.1f MB", httpDL.bytesReceived / 1024 / 1024), sizeof(dlSizeBuf_done));
+
+			UI_ReadableSize( dlSizeBuf_total,	sizeof dlSizeBuf_total,	httpDL.pakSize );
+			UI_ReadableSize( dlSizeBuf_done,	sizeof dlSizeBuf_done,	httpDL.bytesReceived );
+
+			Text_PaintCenter(leftWidth, yStart + 30, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, va("(%s of %s copied)", dlSizeBuf_done, dlSizeBuf_total), 0 );
+		}else{
+			// Nothing, initializing.
+			Text_PaintCenter(leftWidth, yStart + 65, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "Initializing download...", 0 );
+		}
 
 		// Print time remaining.
 		Text_PaintCenter(centerPoint, yStart + 90, uiInfo.uiDC.Assets.defaultFont, scale, colorWhite, "Estimated time left:", 0 );

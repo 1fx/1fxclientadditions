@@ -286,7 +286,11 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     // Grab the file size from the header first.
     curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+    httpDL.initializingDl = qtrue;
     timeSinceNoProgress = -1;
+
+    // Let the UI know we're downloading a file.
+    httpDL.pakName = pakName;
 
     // Get the remote header.
     res = curl_easy_perform(curl);
@@ -311,10 +315,8 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     // Reset some cURL options.
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
+    httpDL.initializingDl = qfalse;
     timeSinceNoProgress = -1;
-
-    // Let the UI know we're downloading a file.
-    httpDL.pakName = pakName;
 
     // Reopen the file to ensure no bogus data is left.
     freopen(destBuf, "wb", f);
