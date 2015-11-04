@@ -5210,9 +5210,11 @@ void UI_DrawLoadingScreen( void )
 		// Boe!Man 7/7/15: Also get the referenced pk3s to download over HTTP here.
 		trap_Cvar_Set("ui_httpBaseURL", Info_ValueForKey(info, "g_httpBaseURL"));
 		trap_Cvar_Set("ui_httpRefPaks", Info_ValueForKey(info, "g_httpRefPaks"));
+		trap_Cvar_Set("ui_httpMaxSpeed", Info_ValueForKey(info, "g_httpMaxSpeed"));
 
 		trap_Cvar_Update(&ui_httpBaseURL);
 		trap_Cvar_Update(&ui_httpRefPaks);
+		trap_Cvar_Update(&ui_httpMaxSpeed);
 
 		// Also get the client state here, and set the server info.
 		trap_GetClientState( &cstate );
@@ -5438,6 +5440,7 @@ vmCvar_t	ui_lastConnectedServer;
 
 vmCvar_t    ui_httpRefPaks;
 vmCvar_t    ui_httpBaseURL;
+vmCvar_t    ui_httpMaxSpeed;
 // #END CORE_UI
 
 static cvarTable_t cvarTable[] =
@@ -5535,6 +5538,7 @@ static cvarTable_t cvarTable[] =
 
 	{ &ui_httpRefPaks,      	"ui_httpRefPaks",        	"", 	CVAR_ROM | CVAR_INTERNAL },
 	{ &ui_httpBaseURL,      	"ui_httpBaseURL",        	"", 	CVAR_ROM | CVAR_INTERNAL },
+	{ &ui_httpMaxSpeed,      	"ui_httpMaxSpeed",        	"0", 	CVAR_ROM | CVAR_INTERNAL },
 	// #END CORE_UI
 };
 

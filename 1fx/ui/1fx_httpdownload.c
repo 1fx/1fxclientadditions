@@ -613,6 +613,11 @@ static void *_1fx_httpDL_mainDownloader()
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
 
+    // Is there a speed limit set by the server?
+    if(ui_httpMaxSpeed.integer > 0){
+        curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, (curl_off_t) 1000 * ui_httpMaxSpeed.integer);
+    }
+
     Com_Printf("Checking 1fx. Client Additions..\n");
 
     // Start checking the core Mod files.

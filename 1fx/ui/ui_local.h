@@ -92,6 +92,7 @@ extern vmCvar_t	ui_lastConnectedServer;
 
 extern vmCvar_t ui_httpRefPaks;
 extern vmCvar_t ui_httpBaseURL;
+extern vmCvar_t ui_httpMaxSpeed;
 // #END CORE_UI
 
 typedef void		*TGhoul2;
