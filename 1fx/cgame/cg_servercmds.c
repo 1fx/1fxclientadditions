@@ -1045,6 +1045,15 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	// #CORE_UI
+	// Boe!Man 11/4/15: Let the server know we use client additions.
+	if ( !strcmp( cmd, "ca_verify" ) )
+	{
+		trap_SendClientCommand("ca_verified");
+		return;
+	}
+	// #END CORE_UI
+
 	Com_Printf( "Unknown client game command: %s\n", cmd );
 }
 

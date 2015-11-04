@@ -4484,9 +4484,6 @@ void _UI_Init( qboolean inGameLoad )
 	UI_RegisterCvars();
 
 	// #CORE_UI
-	// Boe!Man 11/1/15: Expose to the server we're using client additions.
-	trap_Cvar_Register(NULL, "1fx_ca", "1", CVAR_USERINFO, 0.0f, 0.0f);
-
 	#ifdef Q3_VM
 	// Check if the initial DLL exists.
 	_1fx_coreUI_checkDLL();
