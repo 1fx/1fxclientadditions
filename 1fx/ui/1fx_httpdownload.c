@@ -251,6 +251,7 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     FILE    *f;
     int     res;
     char    destBuf[MAX_PATH];
+    int     fsize;
 
     // Make a copy of the destination filename.
     Q_strncpyz(destBuf, destination, sizeof(destBuf));
@@ -313,8 +314,13 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
         return qfalse;
     }
 
-    // Get the remote file and close the file.
+    // Get the remote file.
     res = curl_easy_perform(curl);
+
+    // Get the size of the retrieved data.
+    fsize = ftell(f);
+
+    // Close the file.
     fclose(f);
 
     // Cleanup download info.
@@ -322,7 +328,7 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     httpDL.pakSize = -1;
 
     // Check success.
-    if(res != CURLE_OK){
+    if(res != CURLE_OK || fsize == 0){
         // Try to remove the incorrectly fetched file.
         DeleteFile(destBuf);
         return qfalse;
