@@ -5319,9 +5319,13 @@ void UI_DrawHTTPDownloadScreen( void )
 			// Print estimated time left.
 			// We do it in K (/1024) because we'd overflow around 4MB.
 			timeLeft = httpDL.pakSize / httpDL.speedAvg; // Estimated time for entire download in seconds.
-			UI_PrintTime ( dlTimeBuf, sizeof dlTimeBuf,
-				(timeLeft - (((httpDL.bytesReceived/1024) * timeLeft) / (httpDL.pakSize/1024))) * 1000);
-			Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlTimeBuf, 0 );
+			if(timeLeft > 0){
+				UI_PrintTime ( dlTimeBuf, sizeof dlTimeBuf,
+					(timeLeft - (((httpDL.bytesReceived/1024) * timeLeft) / (httpDL.pakSize/1024))) * 1000);
+				Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, dlTimeBuf, 0 );
+			}else{
+				Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "unknown", 0 );
+			}
 		}else{
 			Text_PaintCenter(leftWidth, yStart+105, uiInfo.uiDC.Assets.defaultFont, scale, colorMdGrey, "unknown", 0 );
 		}
