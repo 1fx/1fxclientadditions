@@ -4498,7 +4498,7 @@ void _UI_Init( qboolean inGameLoad )
 
 	trap_Cvar_VariableStringBuffer("com_errorMessage", error, sizeof(error));
 	if(strlen(error)){
-		trap_Cmd_ExecuteText(EXEC_APPEND, "reconnect ; ");
+		trap_Cmd_ExecuteText(EXEC_APPEND, "reconnect ; \n");
 	}
 	#else
 	Com_Printf("Initializing UI with 1fx. Client Additions %s.\n", _1FX_CLADD_VER);

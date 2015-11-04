@@ -17,6 +17,10 @@
 static CURL             *curl;
 static pthread_t        downloadThread;
 static char             fs_game[MAX_CVAR_VALUE_STRING];
+
+static double           timeSinceNoProgress             = -1;
+static curl_off_t       downloadedBytes                 = 0;
+
 httpDownloadLocals_t    httpDL                          = {0};
 
 /*
@@ -61,6 +65,48 @@ static size_t _1fx_httpDL_cURL_writeEmpty(void *ptr, size_t size, size_t nmemb, 
   return (size_t)(size * nmemb);
 }
 
+/*
+==========================
+_1fx_httpDL_cURL_checkProgress
+11/4/15 - 4:20 PM
+cURL progress callback.
+We use this to cancel a
+download that is unresponsive.
+==========================
+*/
+
+static size_t _1fx_httpDL_cURL_checkProgress(void *ptr, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
+{
+    double currentTime;
+
+    // Get the current time.
+    curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &currentTime);
+
+    // Ideally every time we call this function we've progressed a little bit.
+    if(dlnow != downloadedBytes || timeSinceNoProgress == -1){
+        timeSinceNoProgress = currentTime;
+        downloadedBytes = dlnow;
+    }
+
+    // Cancel the download after 5 seconds with no progress.
+    if(currentTime - timeSinceNoProgress > 4){
+        return 1;
+    }
+
+    // Also cancel if the user wants us to.
+    if(httpDL.httpDLStatus == HTTPDL_CANCEL){
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+
+        // Reset last connected server to ensure the downloader starts upon reconnect.
+        trap_Cvar_Set("ui_lastConnectedServer", "");
+        trap_Cvar_Update(&ui_lastConnectedServer);
+
+        pthread_exit(0);
+    }
+
+    return 0;
+}
 
 /*
 ==========================
@@ -147,6 +193,7 @@ static char *_1fx_httpDL_getRemoteChecksum(char *url)
     // Grab the file size from the header first.
     curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+    timeSinceNoProgress = -1;
 
     // Get the remote header.
     res = curl_easy_perform(curl);
@@ -167,6 +214,7 @@ static char *_1fx_httpDL_getRemoteChecksum(char *url)
     // Reset some cURL options.
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
+    timeSinceNoProgress = -1;
 
     // Reopen the file in write + read mode.
     freopen(va("%s\\1fx_MD5SUM", fs_game), "wb+", f);
@@ -238,6 +286,7 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     // Grab the file size from the header first.
     curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+    timeSinceNoProgress = -1;
 
     // Get the remote header.
     res = curl_easy_perform(curl);
@@ -262,6 +311,7 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
     // Reset some cURL options.
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
+    timeSinceNoProgress = -1;
 
     // Let the UI know we're downloading a file.
     httpDL.pakName = pakName;
@@ -554,6 +604,8 @@ static void *_1fx_httpDL_mainDownloader()
 	// Set some global cURL settings here.
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _1fx_httpDL_cURL_write);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, _1fx_httpDL_cURL_writeEmpty);
+    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, _1fx_httpDL_cURL_checkProgress);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "1fx-httpdownloader/" _1FX_CLADD_VER);
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
@@ -594,6 +646,10 @@ static void *_1fx_httpDL_mainDownloader()
     #else
     Com_Printf("1fx. HTTP Downloader finished!\n");
     #endif // _DEBUG
+
+    // Ensure the engine wants to update the FS list.
+    trap_Cvar_Set("fs_game", "none");
+    trap_Cvar_Set("fs_game", fs_game);
 
     // Give the signal to reconnect.
     httpDL.httpDLStatus = HTTPDL_FINISHED;
