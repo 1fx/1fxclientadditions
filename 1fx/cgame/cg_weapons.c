@@ -19,7 +19,7 @@ void CG_SetGhoul2InfoRef( refEntity_t *ent, refEntity_t	*s1)
 CG_CalcMuzzlePoint
 ======================
 */
-static qboolean	CG_CalcMuzzlePoint( int entityNum, vec3_t muzzlePoint) 
+static qboolean	CG_CalcMuzzlePoint( int entityNum, vec3_t muzzlePoint)
 {
 	weaponInfo_t	*weaponInfo;
 	centity_t		*cent;
@@ -32,31 +32,31 @@ static qboolean	CG_CalcMuzzlePoint( int entityNum, vec3_t muzzlePoint)
 	vec3_t			headAngles;
 
 	cent = CG_GetEntity ( entityNum );
-	if ( !cent->currentValid ) 
+	if ( !cent->currentValid )
 	{
 		return qfalse;
 	}
 
-	BG_PlayerAngles( cent->lerpAngles, 
-				     NULL, 
-						   
+	BG_PlayerAngles( cent->lerpAngles,
+				     NULL,
+
 						   rootAngles,
 						   lowerTorsoAngles,
 						   upperTorsoAngles,
 						   headAngles,
-						   
+
 						   cent->currentState.leanOffset - LEAN_OFFSET,
 
-						   cent->pe.painTime, 
-						   cent->pe.painDirection, 
+						   cent->pe.painTime,
+						   cent->pe.painDirection,
 						   cg.time,
 
 						   &cent->pe.torso,
 						   &cent->pe.legs,
 
-						   cg.frametime, 
+						   cg.frametime,
 						   cent->lerpVelocity,
-						   (cent->currentState.eFlags & EF_DEAD), 
+						   (cent->currentState.eFlags & EF_DEAD),
 						   cent->currentState.angles2[YAW],
 						   cent->ghoul2 );
 
@@ -69,7 +69,7 @@ static qboolean	CG_CalcMuzzlePoint( int entityNum, vec3_t muzzlePoint)
 
 	weaponInfo = &cg_weapons[cent->currentState.weapon];
 
-	if ( cent->currentState.eFlags & EF_ALT_FIRING ) 
+	if ( cent->currentState.eFlags & EF_ALT_FIRING )
 	{
 		attackInfo = &weaponInfo->attack[ATTACK_ALTERNATE];
 	}
@@ -85,10 +85,10 @@ static qboolean	CG_CalcMuzzlePoint( int entityNum, vec3_t muzzlePoint)
 		return qfalse;
 	}
 
-	if ( G2_PositionEntityOnBolt(&muzzle, 
-							     cent->ghoul2, cent->pe.weaponModelSpot, muzzleBolt, 
+	if ( G2_PositionEntityOnBolt(&muzzle,
+							     cent->ghoul2, cent->pe.weaponModelSpot, muzzleBolt,
 							     cent->lerpOrigin, rootAngles, cent->modelScale))
-	{	
+	{
 		VectorCopy(muzzle.origin, muzzlePoint);
 		return qtrue;
 	}
@@ -103,7 +103,7 @@ CG_PlayerWeaponEffects
 Add any weapon effects like muzzle flash or ejecting brass
 =============
 */
-void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, vec3_t newAngles ) 
+void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, vec3_t newAngles )
 {
 	weapon_t			weaponNum;
 	const weaponInfo_t	*weaponInfo;
@@ -111,10 +111,10 @@ void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, ve
 	const attackInfo_t	*attackInfo;
 	const attackData_t	*attackDat;
 	refEntity_t			flash;
-			
+
 	cent->flashBoltInterface.isValid	= qfalse;
 	cent->ejectBoltInterface.isValid	= qfalse;
-	weaponNum = cent->currentState.weapon;	
+	weaponNum = cent->currentState.weapon;
 
 	weaponInfo = &cg_weapons[weaponNum];
 	weaponDat  = &weaponData[weaponNum];
@@ -130,7 +130,7 @@ void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, ve
 
 	// Make sure the player model is valid to attach to
 	if ( !trap_G2_HaveWeGhoul2Models(cent->ghoul2) )
-	{	
+	{
 		return;
 	}
 
@@ -146,12 +146,12 @@ void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, ve
 
 	// Position the flash entity on the muzzle flash bolt
 	memset (&flash, 0, sizeof(flash));
-	if ( !G2_PositionEntityOnBolt( &flash, 
-								   cent->ghoul2, 
-								   cent->pe.weaponModelSpot, 
-								   attackInfo->muzzleFlashBoltWorld, 
-								   cent->lerpOrigin, 
-								   newAngles, 
+	if ( !G2_PositionEntityOnBolt( &flash,
+								   cent->ghoul2,
+								   cent->pe.weaponModelSpot,
+								   attackInfo->muzzleFlashBoltWorld,
+								   cent->lerpOrigin,
+								   newAngles,
 								   cent->modelScale ) )
 	{
 		return;
@@ -162,7 +162,7 @@ void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, ve
 	cent->flashBoltInterface.ghoul2		= cent->ghoul2;
 	cent->flashBoltInterface.modelNum	= cent->pe.weaponModelSpot;
 	cent->flashBoltInterface.boltNum	= attackInfo->muzzleFlashBoltWorld;
-	
+
 	VectorCopy ( flash.origin, cent->flashBoltInterface.origin );
 	VectorCopy ( flash.axis[0], cent->flashBoltInterface.dir );
 	VectorCopy ( flash.axis[0], cent->flashBoltInterface.forward );
@@ -176,7 +176,7 @@ void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, ve
 
 	// First frame of the flash?
 	if ( cg.time == cent->muzzleFlashTime )
-	{	
+	{
 		// Ejecting brass
 		if ( attackInfo->shellEject && cg_shellEjection.integer )
 		{
@@ -185,12 +185,12 @@ void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, ve
 			memset ( &eject, 0, sizeof(eject) );
 
 			// Now position the flash entity on the bolt itself.
-			if ( G2_PositionEntityOnBolt( &eject, 
-										  cent->ghoul2, 
-										  cent->pe.weaponModelSpot, 
-										  attackInfo->shellEjectBoltWorld, 
-										  cent->lerpOrigin, 
-										  newAngles, 
+			if ( G2_PositionEntityOnBolt( &eject,
+										  cent->ghoul2,
+										  cent->pe.weaponModelSpot,
+										  attackInfo->shellEjectBoltWorld,
+										  cent->lerpOrigin,
+										  newAngles,
 										  cent->modelScale ) )
 			{
 				vec3_t	angles;
@@ -202,7 +202,7 @@ void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, ve
 				vectoangles ( eject.axis[0], angles );
 				angles[YAW] += 90;
 				AnglesToAxis ( angles, eject.axis );
-				
+
 				trap_FX_PlayEntityEffectID ( attackInfo->shellEject, eject.origin, eject.axis, -1, -1, -1, -1  );
 			}
 		}
@@ -217,7 +217,7 @@ void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, ve
 				trap_FX_PlayEffectID(attackInfo->muzzleEffectInWorld, flash.origin, flash.axis[0], -1, -1 );
 			}
 			else
-			{				
+			{
 				trap_FX_PlayBoltedEffectID ( attackInfo->muzzleEffectInWorld, &cent->flashBoltInterface, -1, -1 );
 			}
 		}
@@ -230,7 +230,7 @@ void CG_PlayerWeaponEffects ( refEntity_t *parent, centity_t *cent, int team, ve
 	}
 }
 
-// FIMXE: This is defined in a C++ header file. 
+// FIMXE: This is defined in a C++ header file.
 // We need to break it up or somethin so we don't have mutliple defs.
 #define GHOUL2_NORENDER 2
 
@@ -243,9 +243,9 @@ Start a view animation for the given weapon and model index
 */
 void CG_StartViewWeaponAnimation ( int weapon, int modelindex, int choice, TAnimInfoWeapon* aIW )
 {
-	weaponInfo_t	*weaponInfo;	
+	weaponInfo_t	*weaponInfo;
 	int				boneMode;
-	
+
 	weaponInfo = &cg_weapons[weapon];
 	if ( weaponInfo->viewG2Indexes[modelindex] == -1 )
 	{
@@ -271,7 +271,7 @@ void CG_StartViewWeaponAnimation ( int weapon, int modelindex, int choice, TAnim
 						    cg.time,
 						    aIW->mStartFrame[choice],
 							150);
-	
+
 }
 
 /*
@@ -285,7 +285,7 @@ void CG_AnimateViewWeapon ( playerState_t *ps )
 {
 	int				i;
 	int				flags;
-	weaponInfo_t	*weaponInfo;	
+	weaponInfo_t	*weaponInfo;
 
 	if( ps->pm_type == PM_SPECTATOR )
 	{
@@ -419,12 +419,12 @@ void CG_UpdateViewWeaponSurfaces ( playerState_t* ps )
 			{
 				trap_G2API_SetSurfaceOnOff( weaponInfo->viewG2Model, weaponInfo->viewG2Indexes[0], va("bullet%d", i + 1), 0 );
 			}
-			
+
 			// Turn the rest off
 			for (; i < MAX_VIEWWEAPON_BULLETS; i++)
 			{
 				trap_G2API_SetSurfaceOnOff( weaponInfo->viewG2Model, weaponInfo->viewG2Indexes[0], va("bullet%d", i + 1), G2SURFACEFLAG_OFF );
-			}	
+			}
 			break;
 	}
 }
@@ -471,7 +471,7 @@ void CG_AddViewWeapon(playerState_t *ps)
 		return;
 	}
 
-	cent = &cg_entities[ps->clientNum]; 
+	cent = &cg_entities[ps->clientNum];
 
 	// allow the gun to be completely removed
 	if( !cg_drawGun.integer || (ps->pm_flags & PMF_ZOOMED) )
@@ -483,8 +483,8 @@ void CG_AddViewWeapon(playerState_t *ps)
 	if ( cg_fov.integer > 90 )
 	{
 		fovOffset = -0.2 * ( cg_fov.integer - 90 );
-	} 
-	else 
+	}
+	else
 	{
 		fovOffset = 0;
 	}
@@ -493,11 +493,11 @@ void CG_AddViewWeapon(playerState_t *ps)
 	weaponInfo = &cg_weapons[ps->weapon];
 	weaponDat  = &weaponData[ps->weapon];
 
-	// Add the weapon and hands models.	
+	// Add the weapon and hands models.
 	memset(&gun,0,sizeof(gun));
 	gun.ghoul2 = weaponInfo->viewG2Model;
 	if(!trap_G2_HaveWeGhoul2Models(gun.ghoul2))
-	{	
+	{
 		// No weapon to draw!
 		return;
 	}
@@ -510,16 +510,16 @@ void CG_AddViewWeapon(playerState_t *ps)
 		VectorMA ( gun.origin, (-20.0f * (float)cg.predictedPlayerState.stats[STAT_USEWEAPONDROP]/300.0f), cg.refdef.viewaxis[2], gun.origin );
 	}
 
-	// Add movement bobbing 
+	// Add movement bobbing
 	gun.origin[2] += cg.xyspeed * cg.bobfracsin * 0.0015f;
 
 	// Add landing offset
 	delta = cg.time - cg.landTime;
-	if ( delta < LAND_DEFLECT_TIME ) 
+	if ( delta < LAND_DEFLECT_TIME )
 	{
 		gun.origin[2] += cg.landChange * 0.25f * delta / LAND_DEFLECT_TIME;
-	} 
-	else if ( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME ) 
+	}
+	else if ( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME )
 	{
 		gun.origin[2] += cg.landChange * 0.25f * (LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta) / LAND_RETURN_TIME;
 	}
@@ -532,13 +532,13 @@ void CG_AddViewWeapon(playerState_t *ps)
 	vectoangles ( cg.predictedPlayerState.velocity, vangles );
 	vangles[1] += (360 - cg.predictedPlayerState.viewangles[1]);
 	vangles[2] += (360 - cg.predictedPlayerState.viewangles[2]);
-	AngleVectors ( vangles, forward, NULL, NULL);	
+	AngleVectors ( vangles, forward, NULL, NULL);
 
 	VectorScale ( forward, speed, forward );
 
 	VectorMA( gun.origin, forward[1] * 0.003f, cg.refdef.viewaxis[1], gun.origin );
 
-	// Set model scale	
+	// Set model scale
 	VectorSet ( gun.modelScale,weaponParseInfo[ps->weapon].mForeshorten,1.0f,1.0f );
 
 	vectoangles(cg.refdef.viewaxis[0],angles);
@@ -546,7 +546,7 @@ void CG_AddViewWeapon(playerState_t *ps)
 	CG_ScaleModelAxis(&gun);
 
 	VectorCopy(gun.origin,gun.oldorigin);
-	gun.renderfx=RF_DEPTHHACK|RF_FIRST_PERSON|RF_MINLIGHT|RF_NO_FOG;	
+	gun.renderfx=RF_DEPTHHACK|RF_FIRST_PERSON|RF_MINLIGHT|RF_NO_FOG;
 	gun.radius=64;
 
 	trap_R_AddRefEntityToScene(&gun);
@@ -573,9 +573,9 @@ void CG_AddViewWeapon(playerState_t *ps)
 	memset(&flash,0,sizeof(flash));
 	VectorCopy ( gun.modelScale, flash.modelScale );
 	if(!G2_PositionEntityOnBolt( &flash,
-								 gun.ghoul2, 
+								 gun.ghoul2,
 								 1,
-								 attackInfo->muzzleFlashBoltView, 
+								 attackInfo->muzzleFlashBoltView,
 								 gun.origin,
 								 angles,
 								 flash.modelScale ) )
@@ -588,10 +588,10 @@ void CG_AddViewWeapon(playerState_t *ps)
 	cg.flashBoltInterface.ghoul2	= gun.ghoul2;
 	cg.flashBoltInterface.modelNum	= 1;
 	cg.flashBoltInterface.boltNum	= attackInfo->muzzleFlashBoltView;
-	
+
 	VectorCopy(flash.axis[0],cg.flashBoltInterface.dir );
 	VectorCopy(flash.axis[0],cg.flashBoltInterface.forward );
-	VectorCopy(flash.origin,cg.flashBoltInterface.origin);	
+	VectorCopy(flash.origin,cg.flashBoltInterface.origin);
 	VectorCopy(flash.modelScale,cg.flashBoltInterface.scale);
 
 	// If no muzzle flash to handle then there is nothing left to do
@@ -652,7 +652,7 @@ void CG_AddViewWeapon(playerState_t *ps)
 				vec3_t origin;
 				VectorMA ( flash.origin, 500, gun.axis[0], origin );
 				trap_FX_PlayEffectID ( attackInfo->tracerEffect, origin, gun.axis[0], -1, -1  );
-			}			
+			}
 		}
 	}
 
@@ -676,11 +676,11 @@ WEAPON SELECTION
 CG_WeaponSelectable
 ===============
 */
-qboolean CG_WeaponSelectable( int i, qboolean allowEmpty ) 
+qboolean CG_WeaponSelectable( int i, qboolean allowEmpty )
 {
 	int ammo;
 
-	if ( ! (cg.predictedPlayerState.stats[ STAT_WEAPONS ] & ( 1 << i ) ) ) 
+	if ( ! (cg.predictedPlayerState.stats[ STAT_WEAPONS ] & ( 1 << i ) ) )
 	{
 		return qfalse;
 	}
@@ -719,29 +719,29 @@ CG_NextWeapon
 selects the next weapon in the players inventory
 ===============
 */
-void CG_NextWeapon ( qboolean allowEmpty, int exclude ) 
+void CG_NextWeapon ( qboolean allowEmpty, int exclude )
 {
 	int		i;
 	int		original;
 	int		selected;
 
-	if ( !cg.snap ) 
+	if ( !cg.snap )
 	{
 		return;
 	}
-	
+
 	if ( cg.predictedPlayerState.stats[STAT_USEWEAPONDROP] )
 	{
 		return;
 	}
 
-	if ( cg.snap->ps.pm_flags & PMF_FOLLOW ) 
+	if ( cg.snap->ps.pm_flags & PMF_FOLLOW )
 	{
 		return;
 	}
 
-	if ( cg.predictedPlayerState.weaponstate == WEAPON_CHARGING     || 
-	     cg.predictedPlayerState.weaponstate == WEAPON_CHARGING_ALT    ) 
+	if ( cg.predictedPlayerState.weaponstate == WEAPON_CHARGING     ||
+	     cg.predictedPlayerState.weaponstate == WEAPON_CHARGING_ALT    )
 	{
 		return;
 	}
@@ -758,20 +758,20 @@ void CG_NextWeapon ( qboolean allowEmpty, int exclude )
 
 	original = selected;
 
-	for ( i = WP_NONE + 1 ; i < WP_NUM_WEAPONS; i++ ) 
+	for ( i = WP_NONE + 1 ; i < WP_NUM_WEAPONS; i++ )
 	{
 		selected++;
-		if ( selected == WP_NUM_WEAPONS ) 
+		if ( selected == WP_NUM_WEAPONS )
 		{
 			selected = WP_NONE + 1;
 		}
-		if ( selected != exclude && CG_WeaponSelectable( selected, allowEmpty ) ) 
+		if ( selected != exclude && CG_WeaponSelectable( selected, allowEmpty ) )
 		{
 			break;
 		}
 	}
 
-	if ( i == WP_NUM_WEAPONS ) 
+	if ( i == WP_NUM_WEAPONS )
 	{
 		selected = original;
 	}
@@ -794,13 +794,13 @@ CG_PrevWeapon
 Selects the previous weapon in the players inventory
 ===============
 */
-void CG_PrevWeapon ( qboolean allowEmpty, int exclude ) 
+void CG_PrevWeapon ( qboolean allowEmpty, int exclude )
 {
 	int		i;
 	int		original;
 	int		selected;
 
-	if ( !cg.snap ) 
+	if ( !cg.snap )
 	{
 		return;
 	}
@@ -810,13 +810,13 @@ void CG_PrevWeapon ( qboolean allowEmpty, int exclude )
 		return;
 	}
 
-	if ( cg.snap->ps.pm_flags & PMF_FOLLOW ) 
+	if ( cg.snap->ps.pm_flags & PMF_FOLLOW )
 	{
 		return;
 	}
 
-	if ( cg.predictedPlayerState.weaponstate == WEAPON_CHARGING     || 
-	     cg.predictedPlayerState.weaponstate == WEAPON_CHARGING_ALT    ) 
+	if ( cg.predictedPlayerState.weaponstate == WEAPON_CHARGING     ||
+	     cg.predictedPlayerState.weaponstate == WEAPON_CHARGING_ALT    )
 	{
 		return;
 	}
@@ -833,20 +833,20 @@ void CG_PrevWeapon ( qboolean allowEmpty, int exclude )
 
 	original = selected;
 
-	for ( i = WP_NONE + 1 ; i < WP_NUM_WEAPONS ; i++ ) 
+	for ( i = WP_NONE + 1 ; i < WP_NUM_WEAPONS ; i++ )
 	{
 		selected--;
-		if ( selected == WP_NONE ) 
+		if ( selected == WP_NONE )
 		{
 			selected = WP_NUM_WEAPONS-1;
 		}
-		if ( selected != exclude && CG_WeaponSelectable( selected, allowEmpty ) ) 
+		if ( selected != exclude && CG_WeaponSelectable( selected, allowEmpty ) )
 		{
 			break;
 		}
 	}
 
-	if ( i == WP_NUM_WEAPONS ) 
+	if ( i == WP_NUM_WEAPONS )
 	{
 		selected = original;
 	}
@@ -867,13 +867,13 @@ void CG_PrevWeapon ( qboolean allowEmpty, int exclude )
 CG_Weapon_f
 ===============
 */
-void CG_Weapon_f( void ) 
+void CG_Weapon_f( void )
 {
 	int		num;
 	int		category;
 	int		last;
 
-	if ( !cg.snap ) 
+	if ( !cg.snap )
 	{
 		return;
 	}
@@ -883,20 +883,20 @@ void CG_Weapon_f( void )
 		return;
 	}
 
-	if ( (cg.snap->ps.pm_flags & PMF_FOLLOW) ) 
+	if ( (cg.snap->ps.pm_flags & PMF_FOLLOW) )
 	{
 		return;
 	}
 
-	if ( cg.predictedPlayerState.weaponstate == WEAPON_CHARGING     || 
-	     cg.predictedPlayerState.weaponstate == WEAPON_CHARGING_ALT    ) 
+	if ( cg.predictedPlayerState.weaponstate == WEAPON_CHARGING     ||
+	     cg.predictedPlayerState.weaponstate == WEAPON_CHARGING_ALT    )
 	{
 		return;
 	}
 
 	category = atoi( CG_Argv( 1 ) );
 
-	if (category < 0 || category > CAT_MAX) 
+	if (category < 0 || category > CAT_MAX)
 	{
 		return;
 	}
@@ -917,7 +917,7 @@ void CG_Weapon_f( void )
 	last = -1;
 	if (category == weaponData[cg.weaponMenuSelect].category)
 	{
-		last = cg.weaponMenuSelect;	
+		last = cg.weaponMenuSelect;
 	}
 
 	// Find next weapon in currently active category.
@@ -925,13 +925,13 @@ void CG_Weapon_f( void )
 	{
 		if(num>last && category==weaponData[num].category && (cg.predictedPlayerState.stats[STAT_WEAPONS]&(1<<num)))
 		{
-			if ( (cg.predictedPlayerState.stats[ STAT_WEAPONS ] & ( 1 << num ) ) ) 
+			if ( (cg.predictedPlayerState.stats[ STAT_WEAPONS ] & ( 1 << num ) ) )
 			{
 				break;
 			}
 		}
 	}
-	
+
 	// Ok... wrap around.. and try again.
 	if (WP_NUM_WEAPONS == num)
 	{
@@ -939,7 +939,7 @@ void CG_Weapon_f( void )
 		{
 			if(num!=last && category == weaponData[num].category && (cg.snap->ps.stats[STAT_WEAPONS]&(1<<num)))
 			{
-				if ( (cg.predictedPlayerState.stats[ STAT_WEAPONS ] & ( 1 << num ) ) ) 
+				if ( (cg.predictedPlayerState.stats[ STAT_WEAPONS ] & ( 1 << num ) ) )
 				{
 					break;
 				}
@@ -948,7 +948,7 @@ void CG_Weapon_f( void )
 	}
 
 	if (WP_NUM_WEAPONS == num)
-	{	
+	{
 		// Couldn't find one!
 		return;
 	}
@@ -970,7 +970,7 @@ CG_OutOfAmmoChange
 The current weapon has just run out of ammo
 ===================
 */
-void CG_OutOfAmmoChange( int weapon ) 
+void CG_OutOfAmmoChange( int weapon )
 {
 	// Get the best weapon thats not a grenade
 	cg.weaponSelect = WP_M84_GRENADE;
@@ -1051,14 +1051,14 @@ void CG_PredictedBullet ( centity_t* cent, attackType_t attack )
 			VectorCopy ( tr.endpos, end );
 		}
 
-		CG_PlayerTrace ( &tr, start, end, cent->currentState.number );			
+		CG_PlayerTrace ( &tr, start, end, cent->currentState.number );
 
 		if ( tr.entityNum >= cgs.maxclients && tr.entityNum != ENTITYNUM_NONE )
-		{		
-			CG_Bullet( tr.endpos, ent->number, ent->weapon, tr.plane.normal, ENTITYNUM_WORLD, 
+		{
+			CG_Bullet( tr.endpos, ent->number, ent->weapon, tr.plane.normal, ENTITYNUM_WORLD,
 					   tr.surfaceFlags & MATERIAL_MASK,
 					   attack );
-		}			
+		}
 #ifdef _SOF2_FLESHIMPACTPREDICTION
 		else if ( tr.entityNum < cgs.maxclients )
 		{
@@ -1106,7 +1106,7 @@ CG_FireWeapon
 Caused by an EV_FIRE_WEAPON event
 ================
 */
-void CG_FireWeapon( centity_t *cent, attackType_t attack ) 
+void CG_FireWeapon( centity_t *cent, attackType_t attack )
 {
 	entityState_t	*ent;
 	int				c;
@@ -1114,13 +1114,13 @@ void CG_FireWeapon( centity_t *cent, attackType_t attack )
 	attackInfo_t	*attackInfo;
 
 	ent = &cent->currentState;
-	
-	if ( ent->weapon == WP_NONE ) 
+
+	if ( ent->weapon == WP_NONE )
 	{
 		return;
 	}
 
-	if ( ent->weapon >= WP_NUM_WEAPONS ) 
+	if ( ent->weapon >= WP_NUM_WEAPONS )
 	{
 		Com_Error( ERR_FATAL, "CG_FireWeapon: ent->weapon >= WP_NUM_WEAPONS" );
 		return;
@@ -1179,7 +1179,7 @@ void CG_ProjectileThink( centity_t *cent, int weaponNum )
 	const weaponData_t	*weaponDat;
 	vec3_t				forward;
 	int					trailEffectId;
-	
+
 	weaponInfo = &cg_weapons[weaponNum];
 	weaponDat = &weaponData[weaponNum];
 
@@ -1194,7 +1194,7 @@ void CG_ProjectileThink( centity_t *cent, int weaponNum )
 
 	// use tracer effect for projectile trails
 	if (trailEffectId)
-	{	
+	{
 		// only calc normalize if there IS an effect
 		if ( VectorNormalize2( cent->currentState.pos.trDelta, forward ) == 0.0f )
 		{
@@ -1235,13 +1235,13 @@ void CG_FlashBang ( vec3_t origin, vec3_t dir )
 	}
 
 	VectorCopy ( origin, start );
-	start[2] += cg.snap->ps.viewheight;				
+	start[2] += cg.snap->ps.viewheight;
 
 	VectorCopy ( cg.refdef.vieworg, end );
-	end[2] += cg.snap->ps.viewheight;				
+	end[2] += cg.snap->ps.viewheight;
 
 	VectorSubtract( cg.refdef.vieworg, origin, delta );
-					
+
 	// distance to the flash bang
 	distance = VectorLength( delta );
 
@@ -1252,13 +1252,13 @@ void CG_FlashBang ( vec3_t origin, vec3_t dir )
 	}
 
 	// Can the player see the flashbang?
-	CG_Trace ( &trace, start, NULL, NULL, end, ENTITYNUM_NONE, MASK_SHOT ); 
-	if ( trace.contents & (CONTENTS_SOLID|CONTENTS_TERRAIN) ) 
+	CG_Trace ( &trace, start, NULL, NULL, end, ENTITYNUM_NONE, MASK_SHOT );
+	if ( trace.contents & (CONTENTS_SOLID|CONTENTS_TERRAIN) )
 	{
 		return;
 	}
 
-	VectorNormalize ( delta );		
+	VectorNormalize ( delta );
 	vectoangles ( delta, fromangles );
 
 	angle =  cg.snap->ps.viewangles[1] - fromangles[1];
@@ -1269,8 +1269,8 @@ void CG_FlashBang ( vec3_t origin, vec3_t dir )
 		angle += 360;
 	}
 
-	// add distance if not facing the grenade.. 
-	if(!(angle > 300 || angle < 60 )) 
+	// add distance if not facing the grenade..
+	if(!(angle > 300 || angle < 60 ))
 	{
 		angle = 120 - abs(angle-180);
 		distance += (MAX_FLASHBANG_AFFECT_DISTANCE * angle / 240);
@@ -1278,7 +1278,7 @@ void CG_FlashBang ( vec3_t origin, vec3_t dir )
 
 	if(distance > MAX_FLASHBANG_AFFECT_DISTANCE - 50 )
 	{
-		distance = MAX_FLASHBANG_AFFECT_DISTANCE - 50;				
+		distance = MAX_FLASHBANG_AFFECT_DISTANCE - 50;
 	}
 
 	distance = MAX_FLASHBANG_AFFECT_DISTANCE - distance;
@@ -1303,12 +1303,12 @@ Caused by an EV_MISSILE_MISS event, or directly by local bullet tracing
 =================
 */
 void CG_MissileHitWall (
- 	int			 weapon, 
-	vec3_t		 origin, 
-	vec3_t		 dir, 
-	int			 material, 
+ 	int			 weapon,
+	vec3_t		 origin,
+	vec3_t		 dir,
+	int			 material,
 	attackType_t attack
-	)	 
+	)
 {
 	qhandle_t	impactEffect;
 	int			ammoIndex;
@@ -1320,7 +1320,7 @@ void CG_MissileHitWall (
 	}
 
 	// Melee is handled specialol, the standard bullet routines are used
-	// to handle hit detection and what not, but the effects are handled 
+	// to handle hit detection and what not, but the effects are handled
 	// separately.
 	if ( weaponData[weapon].attack[attack].melee )
 	{
@@ -1351,19 +1351,25 @@ void CG_MissileHitWall (
 			}
 			break;
 
+		// #CL_ADD
 		case AMMO_40:
 		case AMMO_M15:
+		case AMMO_M67:
 		case AMMO_M84:
+		case AMMO_F1:
 		case AMMO_RPG7:
+		case AMMO_L2A2:
+		case AMMO_MDN11:
 		case AMMO_SMOHG92:
 		case AMMO_ANM14:
+		// #END CL_ADD
 
 			impactEffect = trap_MAT_GetEffect(ammoData[ammoIndex].name, material&MATERIAL_MASK);
 			if (impactEffect)
-			{			
+			{
 				trap_FX_PlayEffectID( impactEffect, origin, dir, -1, -1  );
 			}
-		
+
 			// grenade!
 			trap_FX_PlayEffectID( cg_weapons[weapon].attack[attack].explosionEffect, origin, dir, -1, 3000  );
 
@@ -1378,16 +1384,16 @@ CG_MissileHitPlayer
 =================
 */
 void CG_MissileHitPlayer (
-	int			 weapon, 
-	vec3_t		 origin, 
-	vec3_t		 dir, 
+	int			 weapon,
+	vec3_t		 origin,
+	vec3_t		 dir,
 	int			 entityNum,
 	attackType_t attack
-	) 
+	)
 {
 	qhandle_t	impactEffect = 0;
 	int			ammoIndex;
-	
+
 	ammoIndex = weaponData[weapon].attack[attack].ammoIndex;
 
 	switch( ammoIndex )
@@ -1409,7 +1415,7 @@ void CG_MissileHitPlayer (
 			}
 			else if (cg_lockBlood.integer)
 			{	// Only play the generic hit effect.
-				trap_FX_PlayEffectID( trap_MAT_GetEffect(ammoData[ammoIndex].name, MATERIAL_NONE), 
+				trap_FX_PlayEffectID( trap_MAT_GetEffect(ammoData[ammoIndex].name, MATERIAL_NONE),
 									origin, dir, -1, -1  );
 			}
 			else
@@ -1420,12 +1426,18 @@ void CG_MissileHitPlayer (
 
 			break;
 
+		// #CL_ADD
 		case AMMO_RPG7:
 		case AMMO_40:
 		case AMMO_M15:
+		case AMMO_M67:
 		case AMMO_M84:
+		case AMMO_F1:
+		case AMMO_L2A2:
+		case AMMO_MDN11:
 		case AMMO_SMOHG92:
 		case AMMO_ANM14:
+		// #END CL_ADD
 			if (cg_lockBlood.integer)
 			{	// Play the generic hit effect.
 				impactEffect = trap_MAT_GetEffect(ammoData[ammoIndex].name, MATERIAL_NONE);
@@ -1470,7 +1482,7 @@ void CG_HandleStickyMissile(centity_t *cent,entityState_t *es,vec3_t dir,int tar
 	{
 		ammoIndex = weaponData[es->weapon].attack[ATTACK_NORMAL].ammoIndex;
 	}
-	
+
 	// Currently the only type of sticky missile is the thrown knife. Others might be added in future though.
 	addBoltedMiss=qfalse;
 	switch(es->weapon)
@@ -1533,7 +1545,7 @@ BULLETS
 CG_Tracer
 ===============
 */
-void CG_Tracer(int tracerEffectID, vec3_t source, vec3_t dest ) 
+void CG_Tracer(int tracerEffectID, vec3_t source, vec3_t dest )
 {
 	vec3_t		forward;
 	float		len;
@@ -1567,12 +1579,12 @@ CG_Bullet
 Renders bullet effects.
 ======================
 */
-void CG_Bullet( 
-	vec3_t		 end, 
-	int			 sourceEntityNum, 
-	int			 weapon, 
-	vec3_t		 normal, 
-	int			 fleshEntityNum, 
+void CG_Bullet(
+	vec3_t		 end,
+	int			 sourceEntityNum,
+	int			 weapon,
+	vec3_t		 normal,
+	int			 fleshEntityNum,
 	int			 material,
 	attackType_t attack
 	)
@@ -1589,8 +1601,8 @@ void CG_Bullet(
 		if ( CG_CalcMuzzlePoint( sourceEntityNum, start ) )
 		{
 			int	tracerEffectID = cg_weapons[weapon].attack[attack].tracerEffect;;
-		
-			if (0 != tracerEffectID ) 
+
+			if (0 != tracerEffectID )
 			{
 				sourceContentType = trap_CM_PointContents( start, 0 );
 				destContentType = trap_CM_PointContents( end, 0 );
@@ -1630,11 +1642,11 @@ void CG_Bullet(
 	}
 
 	// impact splash and mark
-	if ( fleshEntityNum != ENTITYNUM_WORLD ) 
+	if ( fleshEntityNum != ENTITYNUM_WORLD )
 	{
-		CG_MissileHitPlayer(weapon, end, normal, fleshEntityNum, qfalse); 
+		CG_MissileHitPlayer(weapon, end, normal, fleshEntityNum, qfalse);
 	}
-	else 
+	else
 	{
 		CG_MissileHitWall( weapon, end, normal, material, attack );
 	}
@@ -1673,13 +1685,13 @@ static void CG_StartModelAnims ( TAnimWeapon *aW, playerState_t *ps )
 			if(!Q_stricmp(aIW->mName,"right"))
 			{
 				// Right.
-				cg.viewWeaponAnim[2] = aIW;	
+				cg.viewWeaponAnim[2] = aIW;
 				cg.weaponHideModels&=~(1<<2);
 			}
 			else if(!Q_stricmp(aIW->mName,"left"))
 			{
 				// Left.
-				cg.viewWeaponAnim[3] = aIW;	
+				cg.viewWeaponAnim[3] = aIW;
 				cg.weaponHideModels&=~(1<<3);
 			}
 		}
@@ -1698,7 +1710,7 @@ static void CG_StartModelAnims ( TAnimWeapon *aW, playerState_t *ps )
 		{
 			Com_Printf("Anim unknown for model %s\n",aIW->mType);
 		}
-		
+
 		// Follow link to next model.
 		aIW=aIW->mNext;
 	}
@@ -1728,7 +1740,7 @@ void CG_WeaponCallback ( playerState_t* ps, centity_t* cent, int weapon, int ani
 {
 	int				i,j;
 	TNoteTrack		*note;
-	entityState_t	*ent;	
+	entityState_t	*ent;
 	weaponInfo_t	*weaponInfo;
 	char			*surfName;
 	int				surfFlags;

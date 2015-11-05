@@ -36,14 +36,18 @@ typedef enum
 	MOD_RPG7_LAUNCHER,
 
 	// Grenades
-    MOD_M67_GRENADE,
     MOD_M84_GRENADE,
-    MOD_F1_GRENADE,
-    MOD_L2A2_GRENADE,
-    MOD_MDN11_GRENADE,
     MOD_SMOHG92_GRENADE,
     MOD_ANM14_GRENADE,
     MOD_M15_GRENADE,
+
+    // #CL_ADD
+    // Boe!Man 7/27/15: Extra grenades for 1fx. Client Additions.
+    MOD_M67_GRENADE,
+    MOD_F1_GRENADE,
+    MOD_L2A2_GRENADE,
+    MOD_MDN11_GRENADE,
+    // #END CL_ADD
 
 	MOD_WATER,
 	MOD_CRUSH,
