@@ -105,7 +105,9 @@ void CG_ParseServerinfo( void )
 	trap_Cvar_Set ( "ui_about_hostname", Info_ValueForKey( info, "sv_hostname" ) );
 	trap_Cvar_Set ( "ui_about_needpass", Info_ValueForKey( info, "g_needpass" ) );
 	trap_Cvar_Set ( "ui_about_botminplayers", Info_ValueForKey ( info, "bot_minplayers" ) );
-	trap_Cvar_Set ( "ui_info_availableweapons", Info_ValueForKey ( info, "g_availableWeapons" ) );
+
+	// 1.03 CHANGE - (unofficial) fix for disabled weapons showing up in outfitting
+	trap_Cvar_Set ( "ui_info_availableweapons", Info_ValueForKey ( info, "g_available" ) );
 	trap_Cvar_Set ( "ui_info_teamgame", va("%i", cgs.gametypeData->teams ? 1 : 0 ) );
 
 	BG_SetAvailableOutfitting ( Info_ValueForKey ( info, "g_availableWeapons" ) );
