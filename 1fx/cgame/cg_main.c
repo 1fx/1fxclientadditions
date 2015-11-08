@@ -341,6 +341,10 @@ vmCvar_t	cg_zoomWeaponChange;
 
 vmCvar_t	rw_enabled;
 
+// #CL_ADD
+vmCvar_t	cg_thirdPersonSaved;
+// #END CL_ADD
+
 typedef struct
 {
 	vmCvar_t	*vmCvar;
@@ -477,6 +481,10 @@ static cvarTable_t cvarTable[] =
 	{ &cg_bodyTime,		"cg_bodyTime",			"0",	CVAR_ARCHIVE,	0.0f, 0.0f },
 
 	{ &cg_zoomWeaponChange,	"cg_zoomWeaponChange", "1", CVAR_ARCHIVE, 0.0f, 0.0f },
+
+	// #CL_ADD
+	{ &cg_thirdPersonSaved, "cg_thirdPersonSaved", "0", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0.0f, 1.0f },
+	// #END CL_ADD
 };
 
 static int  cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

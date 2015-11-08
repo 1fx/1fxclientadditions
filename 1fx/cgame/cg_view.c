@@ -1297,7 +1297,9 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		}
 		else
 		{
-			cg.renderingThirdPerson = cg_thirdPerson.integer || (cg.snap->ps.stats[STAT_HEALTH] <= 0);
+			// #CL_ADD
+			cg.renderingThirdPerson = cg.snap->ps.stats[STAT_HEALTH] <= 0 || (cg_thirdPerson.integer && (cgs.allowThirdPerson || cg.cheats));
+			// #END CL_ADD
 		}
 	}
 

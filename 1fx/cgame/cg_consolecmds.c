@@ -14,10 +14,10 @@ CG_Viewpos_f
 Debugging command to print the current position
 =============
 */
-static void CG_Viewpos_f (void) 
+static void CG_Viewpos_f (void)
 {
 	Com_Printf ("(%i %i %i) : %i\n", (int)cg.refdef.vieworg[0],
-		(int)cg.refdef.vieworg[1], (int)cg.refdef.vieworg[2], 
+		(int)cg.refdef.vieworg[1], (int)cg.refdef.vieworg[2],
 		(int)cg.refdef.viewangles[YAW]);
 }
 
@@ -26,9 +26,9 @@ static void CG_Viewpos_f (void)
 CG_ScoresDown_f
 =============
 */
-static void CG_ScoresDown_f( void ) 
+static void CG_ScoresDown_f( void )
 {
-	if ( cg.scoresRequestTime + 2000 < cg.time ) 
+	if ( cg.scoresRequestTime + 2000 < cg.time )
 	{
 		// the scores are more than two seconds out of data,
 		// so request new ones
@@ -37,13 +37,13 @@ static void CG_ScoresDown_f( void )
 
 		// leave the current scores up if they were already
 		// displayed, but if this is the first hit, clear them out
-		if ( !cg.showScores ) 
+		if ( !cg.showScores )
 		{
 			cg.showScores = qtrue;
 			cg.numScores = 0;
 		}
-	} 
-	else 
+	}
+	else
 	{
 		// show the cached contents even if they just pressed if it
 		// is within two seconds
@@ -56,9 +56,9 @@ static void CG_ScoresDown_f( void )
 CG_ScoresUp_f
 =============
 */
-static void CG_ScoresUp_f( void ) 
+static void CG_ScoresUp_f( void )
 {
-	if ( cg.showScores ) 
+	if ( cg.showScores )
 	{
 		cg.showScores = qfalse;
 		cg.scoreFadeTime = cg.time;
@@ -70,7 +70,7 @@ static void CG_ScoresUp_f( void )
 CG_AutomapDown_f
 =============
 */
-static void CG_AutomapDown_f( void ) 
+static void CG_AutomapDown_f( void )
 {
 	cg.showAutomap = qtrue;
 }
@@ -80,7 +80,7 @@ static void CG_AutomapDown_f( void )
 CG_AutomapUp_f
 =============
 */
-static void CG_AutomapUp_f( void ) 
+static void CG_AutomapUp_f( void )
 {
 	cg.showAutomap = qfalse;
 }
@@ -92,12 +92,12 @@ CG_ReloadHud_f
 */
 static void CG_ReloadHud_f ( void )
 {
-	// Reset the string table used for menus  
+	// Reset the string table used for menus
 	String_Init();
 
 	// Clear all menus
 	Menu_Reset();
-	
+
 	// Reload the menus
 	CG_LoadMenus ( "ui/hud.txt" );
 }
@@ -200,6 +200,79 @@ static void CG_Team_f ( void )
 	trap_UI_SetActiveMenu ( UIMENU_TEAM );
 }
 
+// #CL_ADD
+
+/*
+=============
+CG_firstPersonView_f
+
+Toggles view to first person.
+=============
+*/
+
+static void CG_firstPersonView_f (void)
+{
+	// Check if the user already set their state to first person.
+	if(cg_thirdPersonState.integer == 0){
+		Com_Printf("^3[Info] ^7View already set to first person");
+
+		if(cg_thirdPerson.integer){
+			Com_Printf(", wait for the next spawn.\n");
+		}else{
+			Com_Printf(".\n");
+		}
+
+		return;
+	}
+
+	// Set the saved state.
+	trap_Cvar_Set("cg_thirdPersonSaved", "0");
+	trap_Cvar_Update(&cg_thirdPersonSaved);
+
+	Com_Printf("^3[Info] ^7Your view has been set to 1st person, changes take effect upon next spawn.\n");
+}
+
+/*
+=============
+CG_thirdPersonView_f
+
+Toggles view to third person.
+=============
+*/
+
+static void CG_thirdPersonView_f (void)
+{
+	// Check if the user already set their state to third person.
+	if(cg_thirdPersonState.integer == 1){
+		if(cgs.allowThirdPerson){
+			Com_Printf("^3[Info] ^7View already set to third person");
+
+			if(!cg_thirdPerson.integer){
+				Com_Printf(", wait for the next spawn.\n");
+			}else{
+				Com_Printf(".\n");
+			}
+		}else{
+			Com_Printf("^3[Info] ^7View already set to third person, but server doesn't allow this.\n");
+		}
+
+		return;
+	}
+
+	// Set the saved state.
+	trap_Cvar_Set("cg_thirdPersonSaved", "1");
+	trap_Cvar_Update(&cg_thirdPersonSaved);
+
+	if(cgs.allowThirdPerson){
+		Com_Printf("^3[Info] ^7Your view has been set to 3rd person, changes take effect upon next spawn.\n");
+	}else{
+		Com_Printf("^3[Info] ^7Your view has been set to 3rd person, but the server doesn't allow this.\n");
+		Com_Printf("^3[Info] ^7Will take effect when you enter a third person enabled server.\n");
+	}
+}
+
+// #END CL_ADD
+
 /*
 =============
 CG_Drop_f
@@ -207,7 +280,7 @@ CG_Drop_f
 Drops the selected weapon
 =============
 */
-void CG_Drop_f ( void ) 
+void CG_Drop_f ( void )
 {
 	char	cmd[128];
 	int		exclude;
@@ -239,7 +312,7 @@ void CG_Drop_f ( void )
 	// Close the menu since a weapon is being dropped
 	cg.weaponMenuUp = qfalse;
 
-	// Build the server command		
+	// Build the server command
 	Com_sprintf( cmd, 128, "drop %i", cg.weaponSelect );
 
 	// Go to next weapon before the current drops
@@ -300,23 +373,23 @@ static void CG_WeaponToggle_f ( void )
 	gitem_t*	item;
 	int			i;
 
-	if ( !cg.snap ) 
+	if ( !cg.snap )
 	{
 		return;
 	}
-	
+
 	if ( cg.predictedPlayerState.stats[STAT_USEWEAPONDROP] )
 	{
 		return;
 	}
 
-	if ( cg.snap->ps.pm_flags & PMF_FOLLOW ) 
+	if ( cg.snap->ps.pm_flags & PMF_FOLLOW )
 	{
 		return;
 	}
 
-	if ( cg.predictedPlayerState.weaponstate == WEAPON_CHARGING     || 
-	     cg.predictedPlayerState.weaponstate == WEAPON_CHARGING_ALT    ) 
+	if ( cg.predictedPlayerState.weaponstate == WEAPON_CHARGING     ||
+	     cg.predictedPlayerState.weaponstate == WEAPON_CHARGING_ALT    )
 	{
 		return;
 	}
@@ -335,7 +408,7 @@ static void CG_WeaponToggle_f ( void )
 	weapon1 = WP_NONE;
 	weapon2 = WP_NONE;
 	for ( i = WP_KNIFE; i < WP_NUM_WEAPONS; i ++ )
-	{	
+	{
 		// Make sure this weapon is selectable.
 		if ( !CG_WeaponSelectable ( i, qtrue ) )
 		{
@@ -352,7 +425,7 @@ static void CG_WeaponToggle_f ( void )
 			weapon2 = i;
 		}
 	}
-	
+
 	// IF only one of the two weapons is available then go to it
 	if ( weapon1 == WP_NONE && weapon2 == WP_NONE )
 	{
@@ -368,7 +441,7 @@ static void CG_WeaponToggle_f ( void )
 		cg.weaponSelect = weapon1;
 		return;
 	}
-		
+
 	// They have both weapons, so figure out which to go to
 	item = BG_FindWeaponItem ( cg.weaponSelect );
 
@@ -492,14 +565,14 @@ static void CG_StartOrbit_f( void ) {
 	}
 }
 
-typedef struct 
+typedef struct
 {
 	char	*cmd;
 	void	(*function)(void);
 
 } consoleCommand_t;
 
-static consoleCommand_t	commands[] = 
+static consoleCommand_t	commands[] =
 {
 	{ "testmodel",		CG_TestModel_f			},
 	{ "nextframe",		CG_TestModelNextFrame_f },
@@ -528,6 +601,10 @@ static consoleCommand_t	commands[] =
 	{ "ui_objectives",	CG_Objectives_f },
 	{ "ui_outfitting",	CG_Outfitting_f },
 	{ "ui_team",		CG_Team_f },
+	// #CL_ADD
+	{ "1st",			CG_firstPersonView_f },
+	{ "3rd",			CG_thirdPersonView_f },
+	// #END CL_ADD
 };
 
 /*
@@ -538,7 +615,7 @@ The string has been tokenized and can be retrieved with
 Cmd_Argc() / Cmd_Argv()
 =================
 */
-qboolean CG_ConsoleCommand( void ) 
+qboolean CG_ConsoleCommand( void )
 {
 	const char	*cmd;
 	int		i;
@@ -551,9 +628,9 @@ qboolean CG_ConsoleCommand( void )
 
 	cmd = CG_Argv(0);
 
-	for ( i = 0 ; i < sizeof( commands ) / sizeof( commands[0] ) ; i++ ) 
+	for ( i = 0 ; i < sizeof( commands ) / sizeof( commands[0] ) ; i++ )
 	{
-		if ( !Q_stricmp( cmd, commands[i].cmd ) ) 
+		if ( !Q_stricmp( cmd, commands[i].cmd ) )
 		{
 			commands[i].function();
 			return qtrue;
@@ -571,11 +648,11 @@ Let the client system know about all of our commands
 so it can perform tab completion
 =================
 */
-void CG_InitConsoleCommands( void ) 
+void CG_InitConsoleCommands( void )
 {
 	int		i;
 
-	for ( i = 0 ; i < sizeof( commands ) / sizeof( commands[0] ) ; i++ ) 
+	for ( i = 0 ; i < sizeof( commands ) / sizeof( commands[0] ) ; i++ )
 	{
 		trap_AddCommand( commands[i].cmd );
 	}

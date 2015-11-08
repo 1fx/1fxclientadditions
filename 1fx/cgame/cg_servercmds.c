@@ -94,6 +94,26 @@ void CG_ParseServerinfo( void )
 	mapname = Info_ValueForKey( info, "mapname" );
 	Com_sprintf( cgs.mapname, sizeof( cgs.mapname ), "maps/%s.bsp", mapname );
 
+	// #CL_ADD
+	// Boe!Man 11/8/15: Check if third person is allowed by the server.
+	char *s = Info_ValueForKey(info, "g_allowThirdPerson");
+
+	if(*s){
+		cgs.allowThirdPerson = atoi(s);
+	}else{
+		cgs.allowThirdPerson = 0;
+	}
+
+	// Also determine what gametype the server is running.
+	// We use this to recommend 3rd person in H&S/H&Z.
+	s = Info_ValueForKey(info, "current_gametype");
+	if(*s){
+		cgs.current_gametype = atoi(s);
+	}else{
+		cgs.current_gametype = 0;
+	}
+	// #END CL_ADD
+
 	trap_Cvar_Set ( "ui_about_gametype", va("%i", cgs.gametype ) );
 	trap_Cvar_Set ( "ui_about_gametypename", cgs.gametypeData->displayName );
 	trap_Cvar_Set ( "ui_about_scorelimit", va("%i", cgs.scorelimit ) );

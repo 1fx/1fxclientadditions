@@ -585,6 +585,10 @@ typedef struct
 	animation_t			hitAnimations[MAX_ANIMATIONS];
 	TGhoul2				hitModel;
 
+	// #CL_ADD
+	int					thirdViewMsgShown; 	// Last cg.time of when the message was displayed.
+	// #END CL_ADD
+
 } cg_t;
 
 extern centity_t			cg_entities[MAX_GENTITIES];
@@ -733,6 +737,11 @@ typedef struct
 
 	int				scores1;
 	int				scores2;
+
+	// #CL_ADD
+	int				allowThirdPerson;		// If third person is allowed on this server.
+	int				current_gametype;		// Current gametype on the 1fx. Mod-based server.
+	// #END CL_ADD
 
 	// locally derived information from gamestate
 	qhandle_t		gameModels[MAX_MODELS];
@@ -890,6 +899,10 @@ extern	vmCvar_t		cg_bodyTime;
 extern	vmCvar_t		rw_enabled;
 
 extern	vmCvar_t		cg_zoomWeaponChange;
+
+// #CL_ADD
+extern	vmCvar_t		cg_thirdPersonSaved;
+// #END CL_ADD
 
 //
 // cg_main.c

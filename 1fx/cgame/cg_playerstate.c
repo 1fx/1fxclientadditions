@@ -12,7 +12,7 @@
 CG_DamageFeedback
 ==============
 */
-void CG_DamageFeedback( int yawByte, int pitchByte, int damage ) 
+void CG_DamageFeedback( int yawByte, int pitchByte, int damage )
 {
 	float		kick;
 	int			health;
@@ -25,11 +25,11 @@ void CG_DamageFeedback( int yawByte, int pitchByte, int damage )
 
 	// the lower on health you are, the greater the view kick will be
 	health = cg.snap->ps.stats[STAT_HEALTH];
-	if ( health < 40 ) 
+	if ( health < 40 )
 	{
 		scale = 1;
-	} 
-	else 
+	}
+	else
 	{
 		scale = 40.0 / health;
 	}
@@ -42,14 +42,14 @@ void CG_DamageFeedback( int yawByte, int pitchByte, int damage )
 		kick = 10;
 
 	// if yaw and pitch are both 255, make the damage always centered (falling, etc)
-	if ( yawByte == 255 && pitchByte == 255 ) 
+	if ( yawByte == 255 && pitchByte == 255 )
 	{
 		cg.damageX = 0;
 		cg.damageY = 0;
 		cg.v_dmg_roll = 255;
 		cg.v_dmg_pitch = -kick;
-	} 
-	else 
+	}
+	else
 	{
 		float front;
 		float left;
@@ -64,7 +64,7 @@ void CG_DamageFeedback( int yawByte, int pitchByte, int damage )
 		front = DotProduct (dir, cg.refdef.viewaxis[0] );
 		left = DotProduct (dir, cg.refdef.viewaxis[1] );
 
-		cg.v_dmg_roll = kick * left;		
+		cg.v_dmg_roll = kick * left;
 		cg.v_dmg_pitch = -kick * front;
 
 		cg.damageY = -AngleNormalize180(angles[PITCH]);
@@ -72,7 +72,7 @@ void CG_DamageFeedback( int yawByte, int pitchByte, int damage )
 	}
 
 	// don't let the screen flashes vary as much
-	if ( kick > 10 ) 
+	if ( kick > 10 )
 	{
 		kick = 10;
 	}
@@ -90,7 +90,7 @@ CG_Respawn
 A respawn happened this snapshot
 ================
 */
-void CG_Respawn( void ) 
+void CG_Respawn( void )
 {
 	// no error decay on player movement
 	cg.thisFrameTeleport = qtrue;
@@ -116,6 +116,22 @@ void CG_Respawn( void )
 	// Update the view weapon surfaces
 	CG_UpdateViewWeaponSurfaces ( &cg.snap->ps );
 
+	// #CL_ADD
+	// Boe!Man 11/8/15: Check for the third person saved state.
+	trap_Cvar_Set("cg_thirdPerson", (cg_thirdPersonSaved.integer == 1) ? "1" : "0");
+	trap_Cvar_Update(&cg_thirdPerson);
+
+	// Check for H&S/H&Z on, and if we're playing in 1st, give the player an info message.
+	if(cg.thirdViewMsgShown != cg.time && cgs.allowThirdPerson && cg_thirdPerson.integer == 0 && (cgs.current_gametype == 1 || cgs.current_gametype == 8)){
+		Com_Printf("^3[Info] ^7You're playing %s.\n", (cgs.current_gametype == 1) ? "Hide&Seek" : "Zombies");
+		Com_Printf("^3[Info] ^7This is mostly done in 3rd person. Switch to it using ^1/3rd^7.\n");
+		Com_Printf("^3[Info] ^7You can always switch back to 1st person using ^1/1st^7.\n");
+
+		// Don't spam this too often.
+		cg.thirdViewMsgShown = cg.time;
+	}
+	// #END CL_ADD
+
 	trap_ResetAutorun ( );
 }
 
@@ -126,13 +142,13 @@ extern char *eventnames[];
 CG_CheckPlayerstateEvents
 ==============
 */
-void CG_CheckPlayerstateEvents( playerState_t *ps, playerState_t *ops ) 
+void CG_CheckPlayerstateEvents( playerState_t *ps, playerState_t *ops )
 {
 	int			i;
 	int			event;
 	centity_t	*cent;
 
-	if ( ps->externalEvent && ps->externalEvent != ops->externalEvent ) 
+	if ( ps->externalEvent && ps->externalEvent != ops->externalEvent )
 	{
 		cent = CG_GetEntity ( ps->clientNum );
 		cent->currentState.event = ps->externalEvent;
@@ -167,25 +183,25 @@ void CG_CheckPlayerstateEvents( playerState_t *ps, playerState_t *ops )
 CG_CheckChangedPredictableEvents
 ==================
 */
-void CG_CheckChangedPredictableEvents( playerState_t *ps ) 
+void CG_CheckChangedPredictableEvents( playerState_t *ps )
 {
 	int			i;
 	int			event;
 	centity_t	*cent;
 
 	cent = &cg_entities[ps->clientNum];
-	for ( i = ps->eventSequence - MAX_PS_EVENTS ; i < ps->eventSequence ; i++ ) 
+	for ( i = ps->eventSequence - MAX_PS_EVENTS ; i < ps->eventSequence ; i++ )
 	{
 		//
-		if (i >= cg.eventSequence) 
+		if (i >= cg.eventSequence)
 		{
 			continue;
 		}
 		// if this event is not further back in than the maximum predictable events we remember
-		if (i > cg.eventSequence - MAX_PREDICTED_EVENTS) 
+		if (i > cg.eventSequence - MAX_PREDICTED_EVENTS)
 		{
 			// if the new playerstate event is different from a previously predicted one
-			if ( ps->events[i & (MAX_PS_EVENTS-1)] != cg.predictableEvents[i & (MAX_PREDICTED_EVENTS-1) ] ) 
+			if ( ps->events[i & (MAX_PS_EVENTS-1)] != cg.predictableEvents[i & (MAX_PREDICTED_EVENTS-1) ] )
 			{
 				event = ps->events[ i & (MAX_PS_EVENTS-1) ];
 				cent->currentState.event = event;
@@ -194,7 +210,7 @@ void CG_CheckChangedPredictableEvents( playerState_t *ps )
 
 				cg.predictableEvents[ i & (MAX_PREDICTED_EVENTS-1) ] = event;
 
-				if ( cg_showmiss.integer ) 
+				if ( cg_showmiss.integer )
 				{
 					Com_Printf("WARNING: changed predicted event\n");
 				}
@@ -208,18 +224,18 @@ void CG_CheckChangedPredictableEvents( playerState_t *ps )
 CG_CheckLocalSounds
 ==================
 */
-void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) 
+void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
 {
 	// don't play the sounds if the player just changed teams
-	if ( ps->persistant[PERS_TEAM] != ops->persistant[PERS_TEAM] ) 
+	if ( ps->persistant[PERS_TEAM] != ops->persistant[PERS_TEAM] )
 	{
 		return;
 	}
 
 	// health changes of more than -1 should make pain sounds
-	if ( ps->stats[STAT_HEALTH] < ops->stats[STAT_HEALTH] - 1 ) 
+	if ( ps->stats[STAT_HEALTH] < ops->stats[STAT_HEALTH] - 1 )
 	{
-		if ( ps->stats[STAT_HEALTH] > 0 ) 
+		if ( ps->stats[STAT_HEALTH] > 0 )
 		{
 			CG_PainEvent( &cg_entities[ps->clientNum], ps->stats[STAT_HEALTH] );
 		}
@@ -237,17 +253,17 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
 CG_TransitionPlayerState
 ===============
 */
-void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops ) 
+void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops )
 {
-	// respawning.  This is done before the follow mode check because spawn count is 
+	// respawning.  This is done before the follow mode check because spawn count is
 	// maintained into the following client
-	if ( ps->persistant[PERS_SPAWN_COUNT] != ops->persistant[PERS_SPAWN_COUNT] ) 
+	if ( ps->persistant[PERS_SPAWN_COUNT] != ops->persistant[PERS_SPAWN_COUNT] )
 	{
 		CG_Respawn();
 	}
 
 	// check for changing follow mode
-	if ( ps->clientNum != ops->clientNum ) 
+	if ( ps->clientNum != ops->clientNum )
 	{
 		cg.thisFrameTeleport = qtrue;
 		// make sure we don't get any unwanted transition effects
@@ -258,7 +274,7 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops )
 	}
 
 	// damage events (player is getting wounded)
-	if ( ps->damageEvent != ops->damageEvent && ps->damageCount ) 
+	if ( ps->damageEvent != ops->damageEvent && ps->damageCount )
 	{
 		CG_DamageFeedback( ps->damageYaw, ps->damagePitch, ps->damageCount );
 	}
@@ -274,13 +290,13 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops )
 		}
 	}
 
-	if ( cg.mapRestart ) 
+	if ( cg.mapRestart )
 	{
 		CG_Respawn();
 		cg.mapRestart = qfalse;
 	}
 
-	if ( cg.snap->ps.pm_type != PM_INTERMISSION && ps->persistant[PERS_TEAM] != TEAM_SPECTATOR ) 
+	if ( cg.snap->ps.pm_type != PM_INTERMISSION && ps->persistant[PERS_TEAM] != TEAM_SPECTATOR )
 	{
 		CG_CheckLocalSounds( ps, ops );
 	}
@@ -301,7 +317,7 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops )
 	CG_CheckPlayerstateEvents( ps, ops );
 
 	// smooth the ducking viewheight change and not crouch jumping
-	if ( ps->viewheight != ops->viewheight && !(ps->pm_flags & PMF_CROUCH_JUMP) ) 
+	if ( ps->viewheight != ops->viewheight && !(ps->pm_flags & PMF_CROUCH_JUMP) )
 	{
 		cg.duckChange = ps->viewheight - ops->viewheight;
 		cg.duckTime = cg.time;
