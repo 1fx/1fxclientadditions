@@ -4489,9 +4489,7 @@ void _UI_Init( qboolean inGameLoad )
 	_1fx_coreUI_checkDLL();
 
 	// Set some essential CVARs.
-	// Also no annoying "Q3 Arena Unauthorized DLL" popups.
-	// Yes, this isn't a real CVAR in SoF2, but it is actively being checked in the engine nonetheless.
-	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; vm_cgame 0 ; seta com_blindlyLoadDLLs 1 ; writeconfig sof2mp.cfg ; ");
+	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; vm_cgame 0 ; ");
 
 	trap_Cvar_VariableStringBuffer("com_errorMessage", error, sizeof(error));
 	if(strlen(error)){
@@ -4516,6 +4514,12 @@ void _UI_Init( qboolean inGameLoad )
 		}
 	}
 	#endif // not Q3_VM
+
+	// No annoying "Q3 Arena Unauthorized DLL" popups.
+	// Yes, this isn't a real CVAR in SoF2, but it is actively being checked in the engine nonetheless.
+	trap_Cvar_Register(NULL, "com_blindlyLoadDLLs", "1", CVAR_ARCHIVE, 0.0f, 0.0f);
+	trap_Cmd_ExecuteText(EXEC_APPEND, "writeconfig sof2mp.cfg ; \n");
+
 	// #END CORE_UI
 
 	// cache redundant calulations
