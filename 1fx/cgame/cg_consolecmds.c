@@ -213,7 +213,7 @@ Toggles view to first person.
 static void CG_firstPersonView_f (void)
 {
 	// Check if the user already set their state to first person.
-	if(cg_thirdPersonState.integer == 0){
+	if(cg_thirdPersonSaved.integer == 0){
 		Com_Printf("^3[Info] ^7View already set to first person");
 
 		if(cg_thirdPerson.integer){
@@ -243,7 +243,7 @@ Toggles view to third person.
 static void CG_thirdPersonView_f (void)
 {
 	// Check if the user already set their state to third person.
-	if(cg_thirdPersonState.integer == 1){
+	if(cg_thirdPersonSaved.integer == 1){
 		if(cgs.allowThirdPerson){
 			Com_Printf("^3[Info] ^7View already set to third person");
 
