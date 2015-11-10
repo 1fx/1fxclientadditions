@@ -130,17 +130,19 @@ typedef enum
 
 	// #CL_ADD
 	// Boe!Man 7/27/15: Extra grenade ammo types for 1fx. Client Additions.
+	// Note that the 762_BELT is used for the F1 and the MP5_9 is used for the MDN11.
     AMMO_M67,
-    AMMO_F1,
     AMMO_L2A2,
-    AMMO_MDN11,
-    // #END CL_ADD
 
     AMMO_MAX,
 
 	AMMO_NONE,
 
 } ammo_t;
+
+#define AMMO_F1 	AMMO_762_BELT
+#define AMMO_MDN11 	AMMO_MP5_9
+// #END CL_ADD
 
 #define WP_FIREMODE_NONE		0
 #define WP_FIREMODE_AUTO		1

@@ -55,13 +55,11 @@ char *ammoNames[AMMO_MAX] =
 	"M84",			//	AMMO_M84,
 	"SMOHG92",		//	AMMO_SMOHG92,
 	"ANM14", 		//	AMMO_ANM14,
-	"7.62mm belt",	//  AMMO_762_BELT,
-	"9mm|mp5",		//  AMMO_9_MP5
+	"7.62mm belt",	//  AMMO_762_BELT or AMMO_F1,
+	"9mm|mp5",		//  AMMO_9_MP5 or AMMO MDN11,
 	// #CL_ADD
-	"M67",			//  AMMO_M67
-	"F1",			//  AMMO_F1
+	"M67",			//  AMMO_M67,
 	"L2A2",			//  AMMO_L2A2
-	"MDN11",		//  AMMO_MDN11
 	// #END CL_ADD
 };
 
@@ -229,11 +227,15 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	attack->ammoIndex = AMMO_NONE;
 	for (i = 0; i < AMMO_MAX; i++)
 	{
-		if (0 == Q_stricmp(tmpStr, ammoNames[i]))
+		// #CL_ADD
+		if (0 == Q_stricmp(tmpStr, ammoNames[i])
+			|| (i == AMMO_762_BELT && 0 == Q_stricmp(tmpStr, "F1"))
+			|| (i == AMMO_MP5_9 && 0 == Q_stricmp(tmpStr, "MDN11")))
 		{
 			attack->ammoIndex = i;
 			break;
 		}
+		// #END CL_ADD
 	}
 
 #ifdef _DEBUG

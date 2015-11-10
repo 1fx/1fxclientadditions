@@ -1362,7 +1362,15 @@ void CG_MissileHitWall (
 		case AMMO_MDN11:
 		case AMMO_SMOHG92:
 		case AMMO_ANM14:
-		// #END CL_ADD
+			if(cgs.current_gametype != 1 && (ammoIndex == AMMO_F1 || ammoIndex == AMMO_MDN11)){
+				impactEffect = trap_MAT_GetEffect(ammoData[ammoIndex].name, material&MATERIAL_MASK);
+				if (impactEffect)
+				{
+					trap_FX_PlayEffectID( impactEffect, origin, dir, -1, -1  );
+				}
+				break;
+			}
+			// #END CL_ADD
 
 			impactEffect = trap_MAT_GetEffect(ammoData[ammoIndex].name, material&MATERIAL_MASK);
 			if (impactEffect)
@@ -1437,7 +1445,29 @@ void CG_MissileHitPlayer (
 		case AMMO_MDN11:
 		case AMMO_SMOHG92:
 		case AMMO_ANM14:
-		// #END CL_ADD
+			if(cgs.current_gametype != 1 && (ammoIndex == AMMO_F1 || ammoIndex == AMMO_MDN11)){
+				if ( entityNum == cg.clientNum )
+				{	// The person hit is the local player.
+					if (!cg_lockBlood.integer)
+					{	// Only play the exit wound effect
+						trap_FX_PlayEffectID( cgs.media.playerFleshImpactEffect, origin, dir, -1, -1  );
+					}
+				}
+				else if (cg_lockBlood.integer)
+				{	// Only play the generic hit effect.
+					trap_FX_PlayEffectID( trap_MAT_GetEffect(ammoData[ammoIndex].name, MATERIAL_NONE),
+										origin, dir, -1, -1  );
+				}
+				else
+				{
+					trap_FX_PlayEffectID( cgs.media.mBloodSmall, origin, dir, -1, -1  );
+					trap_FX_PlayEffectID( cgs.media.playerFleshImpactEffect, origin, dir, -1, -1  );	// Exit wound too.
+				}
+
+				break;
+			}
+			// #END CL_ADD
+
 			if (cg_lockBlood.integer)
 			{	// Play the generic hit effect.
 				impactEffect = trap_MAT_GetEffect(ammoData[ammoIndex].name, MATERIAL_NONE);
