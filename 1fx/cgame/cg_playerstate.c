@@ -122,7 +122,7 @@ void CG_Respawn( void )
 	trap_Cvar_Update(&cg_thirdPerson);
 
 	// Check for H&S/H&Z on, and if we're playing in 1st, give the player an info message.
-	if(cg.thirdViewMsgShown != cg.time && cgs.allowThirdPerson && cg_thirdPerson.integer == 0 && (cgs.current_gametype == 1 || cgs.current_gametype == 8)){
+	if(cg.thirdViewMsgShown != cg.time && cgs.allowThirdPerson && cgs.clientinfo[cg.predictedPlayerState.clientNum].team != TEAM_SPECTATOR && cg_thirdPerson.integer == 0 && (cgs.current_gametype == 1 || cgs.current_gametype == 8)){
 		Com_Printf("^3[Info] ^7You're playing %s.\n", (cgs.current_gametype == 1) ? "Hide&Seek" : "Zombies");
 		Com_Printf("^3[Info] ^7This is mostly done in 3rd person. Switch to it using ^1/3rd^7.\n");
 		Com_Printf("^3[Info] ^7You can always switch back to 1st person using ^1/1st^7.\n");
