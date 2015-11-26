@@ -37,9 +37,9 @@ set cc=sof2lcc -DQ3_VM -S -Wf-target=bytecode -Wf-g -I..\..\cgame -I..\..\game -
 sof2asm -f ../ui
 @if errorlevel 1 goto quit
 
-mkdir "..\..\..\base\vm"
-copy *.map "..\..\..\base\vm"
-copy *.qvm "..\..\..\base\vm"
+mkdir "..\..\..\base\1fx\vm"
+copy *.map "..\..\..\base\1fx\vm"
+copy *.qvm "..\..\..\base\1fx\vm"
 
 :quit
 pause

@@ -9,6 +9,9 @@
 #if !defined(CL_LIGHT_H_INC)
 	#include "cg_lights.h"
 #endif
+// #CL_ADD
+#include "../ui/1fx_local.h"
+// #END CL_ADD
 
 /*
 =================
@@ -1067,14 +1070,14 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
-	// #CORE_UI
+	// #CL_ADD
 	// Boe!Man 11/4/15: Let the server know we use client additions.
 	if ( !strcmp( cmd, "ca_verify" ) )
 	{
-		trap_SendClientCommand("ca_verified");
+		trap_SendClientCommand(va("ca_verified %s", _1FX_CLADD_VER));
 		return;
 	}
-	// #END CORE_UI
+	// #END CL_ADD
 
 	Com_Printf( "Unknown client game command: %s\n", cmd );
 }
