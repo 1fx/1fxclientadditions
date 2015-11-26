@@ -4,7 +4,7 @@
 
 #include "cg_local.h"
 #include "..\ghoul2\g2.h"
-#include "../../ui/menudef.h"
+#include "../ui/menudef.h"
 
 //==========================================================================
 
