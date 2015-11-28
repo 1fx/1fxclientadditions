@@ -39,7 +39,7 @@ void CG_LoadingStage ( int stage )
 CG_LoadingString
 ======================
 */
-void CG_LoadingString( const char *s ) 
+void CG_LoadingString( const char *s )
 {
 	if ( !cg.loading )
 	{
@@ -56,7 +56,7 @@ void CG_LoadingString( const char *s )
 CG_LoadingItem
 ===================
 */
-void CG_LoadingItem( int itemNum ) 
+void CG_LoadingItem( int itemNum )
 {
 	gitem_t		*item;
 
@@ -66,7 +66,7 @@ void CG_LoadingItem( int itemNum )
 	}
 
 	item = &bg_itemlist[itemNum];
-	
+
 	if ( item->icon && loadingItemIconCount < MAX_LOADING_ITEM_ICONS ) {
 		loadingItemIcons[loadingItemIconCount++] = trap_R_RegisterShaderNoMip( item->icon );
 	}
@@ -79,7 +79,7 @@ void CG_LoadingItem( int itemNum )
 CG_LoadingClient
 ===================
 */
-void CG_LoadingClient( int clientNum ) 
+void CG_LoadingClient( int clientNum )
 {
 	const char		*info;
 	char			personality[MAX_QPATH];
@@ -105,7 +105,7 @@ CG_DrawInformation
 Draw all the status / pacifier stuff during level loading
 ====================
 */
-void CG_DrawInformation( void ) 
+void CG_DrawInformation( void )
 {
 	static qhandle_t	levelshot = 0;
 	static char			levelshotShader[MAX_QPATH] = "";
@@ -163,9 +163,9 @@ void CG_DrawInformation( void )
 
 	Q_strncpyz(buf, Info_ValueForKey( sysInfo, "sv_logo" ), 1024);
 
-	overlay = trap_R_RegisterShaderNoMip( "gfx/menus/levelshots/unknownmap_mp" );	
-	logo = trap_R_RegisterShaderNoMip( "gfx/roclogo" );	
-	logo2 = trap_R_RegisterShaderNoMip( buf );	
+	overlay = trap_R_RegisterShaderNoMip( "gfx/menus/levelshots/unknownmap_mp" );
+	logo = trap_R_RegisterShaderNoMip( "gfx/roclogo" );
+	logo2 = trap_R_RegisterShaderNoMip( buf );
 
 	// Draw the level shot
 	trap_R_SetColor( NULL );
@@ -180,7 +180,7 @@ void CG_DrawInformation( void )
 		fade[3] = 1.0f - ((float)cg.loadStage / 15.0f);
 
 		CG_DrawPic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, levelshot );
-		
+
 		trap_R_SetColor ( fade );
 
 		CG_DrawPic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, overlay );
@@ -203,24 +203,10 @@ void CG_DrawInformation( void )
 	CG_DrawText( 564, 470, cgs.media.hudFont, 0.3f, color, va("ROCmod %s", ROCMOD_VERSION), 0, DT_OUTLINE );
 	text = "Server:";
 	CG_DrawText( 560 - trap_R_GetTextWidth ( text, cgs.media.hudFont, 0.3f, 0 ), 460, cgs.media.hudFont, 0.3f, color, text, 0, DT_OUTLINE );
-	Q_strncpyz(buf, Info_ValueForKey( sysInfo, "sv_modVersion" ), 1024);
+	Q_strncpyz(buf, Info_ValueForKey( info, "^3Mod Version" ), 1024);
 	if ( buf[0] )
 	{
-		i = Q_stricmpn( buf, ROCMOD_VERSION, 10 );
-		if ( i == 1 )
-		{
-			color[0] = 0;
-			color[1] = 1;
-			color[2] = 0;
-		}
-		else if ( i == -1 )
-		{
-			color[0] = 0.3f;
-			color[1] = 0.3f;
-			color[2] = 0.3f;
-		}
-
-		text = va("ROCmod %s", buf);
+		text = va("^71fx^1. ^3Mod^7 %s", buf);
 	}
 	else
 	{
@@ -232,10 +218,10 @@ void CG_DrawInformation( void )
 	CG_DrawText( 564, 460, cgs.media.hudFont, 0.3f, color, text, 0, DT_OUTLINE );
 
 	// Draw the progress bar
-	CG_LoadBar();			   
+	CG_LoadBar();
 
 	// Determine the string to print
-	if ( cg.infoScreenText[0] ) 
+	if ( cg.infoScreenText[0] )
 	{
 		s = va("Loading... %s", cg.infoScreenText);
 	}
@@ -244,7 +230,7 @@ void CG_DrawInformation( void )
 		s = "Awaiting snapshot...";
 	}
 
-	// Render the string 
+	// Render the string
 	CG_DrawText( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, 198 - 32,
 				 cgs.media.hudFont, 0.53f, colorWhite, s, 0, 0 );
 
@@ -254,7 +240,7 @@ void CG_DrawInformation( void )
 
 	// don't print server lines if playing a local game
 	trap_Cvar_VariableStringBuffer( "sv_running", buf, sizeof( buf ) );
-	if ( !atoi( buf ) ) 
+	if ( !atoi( buf ) )
 	{
 		// server hostname
 		Q_strncpyz(buf, Info_ValueForKey( info, "sv_hostname" ), 1024);
@@ -267,7 +253,7 @@ void CG_DrawInformation( void )
 
 		// pure server
 		s = Info_ValueForKey( sysInfo, "sv_pure" );
-		if ( atoi(s) ) 
+		if ( atoi(s) )
 		{
 			s = "Pure Server";
 			CG_DrawText( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y,
@@ -278,7 +264,7 @@ void CG_DrawInformation( void )
 
 		// server-specific message of the day
 		s = CG_ConfigString( CS_MOTD );
-		if ( s[0] ) 		
+		if ( s[0] )
 		{
 			CG_DrawText ( 320 - trap_R_GetTextWidth ( s,  cgs.media.hudFont, 0.53f, 0 ) / 2, y,
 							  cgs.media.hudFont, 0.53f, colorWhite, s, 0, 0 );
@@ -292,7 +278,7 @@ void CG_DrawInformation( void )
 
 	// map-specific message (long map name)
 	s = CG_ConfigString( CS_MESSAGE );
-	if ( s[0] ) 
+	if ( s[0] )
 	{
 		CG_DrawText ( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y,
 						  cgs.media.hudFont, 0.53f, colorWhite, s, 0, 0 );
@@ -302,7 +288,7 @@ void CG_DrawInformation( void )
 
 	// cheats warning
 	s = Info_ValueForKey( sysInfo, "sv_cheats" );
-	if ( s[0] == '1' ) 
+	if ( s[0] == '1' )
 	{
 		s = "CHEATS ARE ENABLED";
 		CG_DrawText ( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y,
@@ -328,12 +314,12 @@ void CG_DrawInformation( void )
 	}
 
 	s = cgs.gametypeData->displayName;
-	CG_DrawText ( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y, 
+	CG_DrawText ( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y,
 					  cgs.media.hudFont, 0.53f, colorWhite, s, 0, 0 );
 	y += PROP_HEIGHT;
-		
+
 	value = atoi( Info_ValueForKey( info, "timelimit" ) );
-	if ( value ) 
+	if ( value )
 	{
 		s = va( "Timelimit %i", value );
 		CG_DrawText ( 320 - trap_R_GetTextWidth( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y,
@@ -342,19 +328,19 @@ void CG_DrawInformation( void )
 	}
 
 	value = atoi( Info_ValueForKey( info, "scorelimit" ) );
-	if ( value ) 
+	if ( value )
 	{
 		s = va( "Scorelimit %i", value );
-		CG_DrawText ( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y, 
+		CG_DrawText ( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y,
 					  cgs.media.hudFont, 0.53f, colorWhite, s, 0, 0 );
 		y += PROP_HEIGHT;
 	}
 
 	value = atoi( Info_ValueForKey( info, "g_friendlyFire" ) );
-	if ( value ) 
+	if ( value )
 	{
 		s = "FRIENDLY FIRE ON";
-		CG_DrawText ( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y, 
+		CG_DrawText ( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 ) / 2, y,
 					  cgs.media.hudFont, 0.53f, colorWhite, s, 0, 0 );
 		y += PROP_HEIGHT;
 	}
