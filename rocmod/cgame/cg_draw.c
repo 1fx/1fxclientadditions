@@ -20,7 +20,7 @@ void CG_DrawBestStats( void );
 CG_Draw3DModel
 ================
 */
-void CG_Draw3DModel( float x, float y, float w, float h, qhandle_t model, qhandle_t skin, vec3_t origin, vec3_t angles ) 
+void CG_Draw3DModel( float x, float y, float w, float h, qhandle_t model, qhandle_t skin, vec3_t origin, vec3_t angles )
 {
 	refdef_t		refdef;
 	refEntity_t		ent;
@@ -55,7 +55,7 @@ void CG_Draw3DModel( float x, float y, float w, float h, qhandle_t model, qhandl
 	trap_R_RenderScene( &refdef );
 }
 
-void CG_Draw3DG2Model( float x, float y, float w, float h, void *ghoul2, qhandle_t skin, vec3_t origin, vec3_t angles ) 
+void CG_Draw3DG2Model( float x, float y, float w, float h, void *ghoul2, qhandle_t skin, vec3_t origin, vec3_t angles )
 {
 	refdef_t		refdef;
 	refEntity_t		ent;
@@ -95,12 +95,12 @@ void CG_Draw3DG2Model( float x, float y, float w, float h, void *ghoul2, qhandle
 CG_DrawSnapshot
 ==================
 */
-static float CG_DrawSnapshot( float y ) 
+static float CG_DrawSnapshot( float y )
 {
 	char		*s;
 	int			w;
 
-	s = va( "time:%i snap:%i cmd:%i", cg.snap->serverTime, 
+	s = va( "time:%i snap:%i cmd:%i", cg.snap->serverTime,
 		cg.latestSnapshotNum, cgs.serverCommandSequence );
 
 	w = trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 );
@@ -116,7 +116,7 @@ CG_DrawFPS
 ==================
 */
 #define	FPS_FRAMES	4
-static float CG_DrawFPS( float y ) 
+static float CG_DrawFPS( float y )
 {
 	char		*s;
 	int			w;
@@ -135,8 +135,8 @@ static float CG_DrawFPS( float y )
 
 	previousTimes[index % FPS_FRAMES] = frameTime;
 	index++;
-	
-	if ( index > FPS_FRAMES ) 
+
+	if ( index > FPS_FRAMES )
 	{
 		// average multiple frames together to smooth changes out a bit
 		total = 0;
@@ -235,9 +235,9 @@ void CG_DrawRadar ( void )
 	teamColor[3] = 1.0f;
 
 	// Draw all of the radar entities.  Draw them backwards so players are drawn last
-	for ( i = cg.radarEntityCount -1 ; i >= 0 ; i-- ) 
-	{	
-		vec3_t		dirLook;	
+	for ( i = cg.radarEntityCount -1 ; i >= 0 ; i-- )
+	{
+		vec3_t		dirLook;
 		vec3_t		dirPlayer;
 		float		angleLook;
 		float		anglePlayer;
@@ -248,11 +248,11 @@ void CG_DrawRadar ( void )
 		cent = cg.radarEntities[i];
 
 		// Get the distances first
-		VectorSubtract ( cg.predictedPlayerState.origin, cent->lerpOrigin, dirPlayer );		
+		VectorSubtract ( cg.predictedPlayerState.origin, cent->lerpOrigin, dirPlayer );
 		dirPlayer[2] = 0;
 		distance = VectorNormalize ( dirPlayer );
 
-		if ( distance > RADAR_RANGE * 0.8f) 
+		if ( distance > RADAR_RANGE * 0.8f)
 		{
 			continue;
 		}
@@ -263,7 +263,7 @@ void CG_DrawRadar ( void )
 		AngleVectors ( cg.predictedPlayerState.viewangles, dirLook, NULL, NULL );
 
 		dirLook[2] = 0;
-		anglePlayer = atan2(dirPlayer[0],dirPlayer[1]);		
+		anglePlayer = atan2(dirPlayer[0],dirPlayer[1]);
 		VectorNormalize ( dirLook );
 		angleLook = atan2(dirLook[0],dirLook[1]);
 		angle = angleLook - anglePlayer;
@@ -275,7 +275,7 @@ void CG_DrawRadar ( void )
 				{
 					float  x;
 					float  y;
-		
+
 					x = (float)RADAR_X + (float)RADAR_RADIUS + (float)sin (angle) * distance;
 					y = (float)RADAR_Y + (float)RADAR_RADIUS + (float)cos (angle) * distance;
 
@@ -291,8 +291,8 @@ void CG_DrawRadar ( void )
 				cl = &cgs.clientinfo[ cent->currentState.number ];
 
 				// not valid then dont draw it
-				if ( !cl->infoValid ) 
-				{	
+				if ( !cl->infoValid )
+				{
 					continue;
 				}
 
@@ -326,8 +326,8 @@ void CG_DrawRadar ( void )
 				}
 
 				CG_DrawRotatePic2( RADAR_X + RADAR_RADIUS + sin (angle) * distance,
-								   RADAR_Y + RADAR_RADIUS + cos (angle) * distance, 
-								   arrow_w, arrow_h, 
+								   RADAR_Y + RADAR_RADIUS + cos (angle) * distance,
+								   arrow_w, arrow_h,
 								   (360 - cent->lerpAngles[YAW]) + cg.predictedPlayerState.viewangles[YAW], cgs.media.mAutomapPlayerIcon );
 				break;
 			}
@@ -335,7 +335,7 @@ void CG_DrawRadar ( void )
 	}
 
 	trap_R_SetColor ( colorWhite );
-	CG_DrawRotatePic2( RADAR_X + RADAR_RADIUS, RADAR_Y + RADAR_RADIUS, arrow_w, arrow_h, 
+	CG_DrawRotatePic2( RADAR_X + RADAR_RADIUS, RADAR_Y + RADAR_RADIUS, arrow_w, arrow_h,
 					   0, cgs.media.mAutomapPlayerIcon );
 }
 
@@ -354,7 +354,7 @@ static void CG_DrawTeamScores ( float y )
 	float		y1;
 	float		x2;
 	float		y2;
-	
+
 	// Make sure the radar should be showing
 	if ( cg.weaponMenuUp )
 	{
@@ -366,23 +366,23 @@ static void CG_DrawTeamScores ( float y )
 		return;
 	}
 
-	if ( cgs.scores1 == SCORE_NOT_PRESENT ) 
+	if ( cgs.scores1 == SCORE_NOT_PRESENT )
 	{
 		Com_sprintf (scores[0], sizeof(scores[0]), "-");
 	}
-	else 
+	else
 	{
 		Com_sprintf (scores[0], sizeof(scores[0]), "%i", cgs.scores1);
 	}
 
-	if ( cgs.scores2 == SCORE_NOT_PRESENT ) 
+	if ( cgs.scores2 == SCORE_NOT_PRESENT )
 	{
 		Com_sprintf (scores[1], sizeof(scores[1]), "-");
 	}
-	else 
+	else
 	{
 		Com_sprintf (scores[1], sizeof(scores[1]), "%i", cgs.scores2);
-	}		
+	}
 
 	if ( cg_drawTeamScores.integer > 0 && cg_drawTeamScores.integer < 5 )
 	{
@@ -442,7 +442,7 @@ static void CG_DrawTeamScores ( float y )
 
 		trap_R_SetColor ( NULL );
 	}
-	else 
+	else
 	{
 		s = va ( "Red: %s  Blue: %s", scores[0], scores[1] );
 		w = trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.35f, 0 );
@@ -465,7 +465,7 @@ static void CG_DrawTeamScoresROC ( float y )
 	float		y1;
 	float		x2;
 	float		y2;
-	
+
 	// Make sure the radar should be showing
 	if ( cg.weaponMenuUp )
 	{
@@ -477,23 +477,23 @@ static void CG_DrawTeamScoresROC ( float y )
 		return;
 	}
 
-	if ( cgs.scores1 == SCORE_NOT_PRESENT ) 
+	if ( cgs.scores1 == SCORE_NOT_PRESENT )
 	{
 		Com_sprintf (scores[0], sizeof(scores[0]), "-");
 	}
-	else 
+	else
 	{
 		Com_sprintf (scores[0], sizeof(scores[0]), "%i", cgs.scores1);
 	}
 
-	if ( cgs.scores2 == SCORE_NOT_PRESENT ) 
+	if ( cgs.scores2 == SCORE_NOT_PRESENT )
 	{
 		Com_sprintf (scores[1], sizeof(scores[1]), "-");
 	}
-	else 
+	else
 	{
 		Com_sprintf (scores[1], sizeof(scores[1]), "%i", cgs.scores2);
-	}		
+	}
 
 	if ( cg_drawTeamScores.integer > 0 && cg_drawTeamScores.integer < 5 )
 	{
@@ -501,7 +501,7 @@ static void CG_DrawTeamScoresROC ( float y )
 		{
 			default:
 			case 1:
-				x1 = 524;  
+				x1 = 524;
 				y1 = 454;
 				x2 = 584;
 				y2 = 454;
@@ -560,7 +560,7 @@ static void CG_DrawTeamScoresROC ( float y )
 
 		trap_R_SetColor ( NULL );
 	}
-	else 
+	else
 	{
 		s = va ( "Red: %s  Blue: %s", scores[0], scores[1] );
 		w = trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.35f, 0 );
@@ -573,7 +573,7 @@ static void CG_DrawTeamScoresROC ( float y )
 CG_DrawUpperRight
 =====================
 */
-static void CG_DrawUpperRight( void ) 
+static void CG_DrawUpperRight( void )
 {
 	float	y;
 
@@ -584,11 +584,11 @@ static void CG_DrawUpperRight( void )
 		return;
 	}
 
-	if ( cg_drawSnapshot.integer ) 
+	if ( cg_drawSnapshot.integer )
 	{
 		y = CG_DrawSnapshot( y );
 	}
-	
+
 	switch ( cg_drawRadar.integer  )
 	{
 		// Off unless the key is pressed
@@ -607,7 +607,7 @@ static void CG_DrawUpperRight( void )
 				}
 			}
 			break;
-		
+
 		// Draw the radar unless the automap key is down
 		case 1:
 			if ( cg.showAutomap && cg.mInRMG )
@@ -620,7 +620,7 @@ static void CG_DrawUpperRight( void )
 				CG_DrawRadar ( );
 			}
 			break;
-		
+
 		// Draw the automap only, but if the key is pressed show the radar
 		case 2:
 			if ( cgs.gametypeData->teams && (cg.showAutomap || !cg.mInRMG) )
@@ -628,13 +628,13 @@ static void CG_DrawUpperRight( void )
 				CG_DrawRadar ( );
 			}
 			else
-			{			
+			{
 				CG_DrawAutomap ( );
 			}
 			break;
-	}	
+	}
 
-	if ( cg_drawFPS.integer ) 
+	if ( cg_drawFPS.integer )
 	{
 		y = CG_DrawFPS( y );
 		y = 18;
@@ -687,7 +687,7 @@ CG_AddLagometerFrameInfo
 Adds the current interpolate / extrapolate bar for this frame
 ==============
 */
-void CG_AddLagometerFrameInfo( void ) 
+void CG_AddLagometerFrameInfo( void )
 {
 	int			offset;
 
@@ -706,10 +706,10 @@ the number of snapshots that were dropped before it.
 Pass NULL for a dropped packet.
 ==============
 */
-void CG_AddLagometerSnapshotInfo( snapshot_t *snap ) 
+void CG_AddLagometerSnapshotInfo( snapshot_t *snap )
 {
 	// dropped packet
-	if ( !snap ) 
+	if ( !snap )
 	{
 		lagometer.snapshotSamples[ lagometer.snapshotCount & ( LAG_SAMPLES - 1) ] = -1;
 		lagometer.snapshotCount++;
@@ -726,11 +726,11 @@ void CG_AddLagometerSnapshotInfo( snapshot_t *snap )
 ==============
 CG_DrawDisconnect
 
-Draws a little connection icon on the screen when connection to the 
+Draws a little connection icon on the screen when connection to the
 server is lost
 ==============
 */
-static void CG_DrawDisconnect ( void ) 
+static void CG_DrawDisconnect ( void )
 {
 	float		x;
 	float		y;
@@ -742,13 +742,13 @@ static void CG_DrawDisconnect ( void )
 	trap_GetUserCmd( cmdNum, &cmd );
 
 	// special check for map_restart
-	if ( cmd.serverTime <= cg.snap->ps.commandTime || cmd.serverTime > cg.time ) 
-	{	
+	if ( cmd.serverTime <= cg.snap->ps.commandTime || cmd.serverTime > cg.time )
+	{
 		return;
 	}
 
 	// blink the icon
-	if ( ( cg.time >> 9 ) & 1 ) 
+	if ( ( cg.time >> 9 ) & 1 )
 	{
 		return;
 	}
@@ -772,7 +772,7 @@ CG_DrawAutomap
 Draws the rmg map with any radar items placed on it.
 ==============
 */
-void CG_DrawAutomap ( void ) 
+void CG_DrawAutomap ( void )
 {
 	TCGConvertPos	*pos = (TCGConvertPos *)cg.sharedBuffer;
 	clientInfo_t	*cl, *local;
@@ -798,7 +798,7 @@ void CG_DrawAutomap ( void )
 		cg_automap_h.integer < 32 || cg_automap_h.integer > 480 ||
 		cg_automap_x.integer + cg_automap_w.integer > 640 ||
 		cg_automap_y.integer + cg_automap_h.integer > 480)
-	{	
+	{
 		Com_Printf("Automap drawing coordinates out of range!\n");
 		return;
 	}
@@ -806,7 +806,7 @@ void CG_DrawAutomap ( void )
 	// Register the automap image if not already registerd
 	if ( !cgs.media.mAutomap )
 	{
-		trap_CM_TM_Upload(0, 0);		
+		trap_CM_TM_Upload(0, 0);
 		cgs.media.mAutomap = trap_R_RegisterShader( "gfx/menus/rmg/automap" );
 	}
 
@@ -866,8 +866,8 @@ void CG_DrawAutomap ( void )
 	if ( cgs.gametypeData->teams )
 	{
 		// Draw all of the radar entities.  Draw them backwards so players are drawn last
-		for ( i = cg.radarEntityCount -1 ; i >= 0 ; i-- ) 
-		{	
+		for ( i = cg.radarEntityCount -1 ; i >= 0 ; i-- )
+		{
 			centity_t*	cent;
 
 			cent = cg.radarEntities[i];
@@ -881,10 +881,10 @@ void CG_DrawAutomap ( void )
 						pos->mWidth = cg_automap_w.integer;
 						pos->mHeight = cg_automap_h.integer;
 						trap_CM_TM_ConvertPosition();
-			
+
 						trap_R_SetColor ( NULL );
-						CG_DrawPic ( pos->mX - item_w / 2 + cg_automap_x.integer, 
-									 pos->mY - item_h / 2 + cg_automap_y.integer, 
+						CG_DrawPic ( pos->mX - item_w / 2 + cg_automap_x.integer,
+									 pos->mY - item_h / 2 + cg_automap_y.integer,
 									 item_w, item_h, cg_items[cent->currentState.modelindex].icon );
 					}
 					break;
@@ -894,8 +894,8 @@ void CG_DrawAutomap ( void )
 					cl = &cgs.clientinfo[ cent->currentState.number ];
 
 					// not valid then dont draw it
-					if ( !cl->infoValid ) 
-					{	
+					if ( !cl->infoValid )
+					{
 						continue;
 					}
 
@@ -924,9 +924,9 @@ void CG_DrawAutomap ( void )
 					pos->mHeight = cg_automap_h.integer;
 					trap_CM_TM_ConvertPosition();
 
-					CG_DrawRotatePic2( pos->mX + cg_automap_x.integer, 
-									   pos->mY + cg_automap_y.integer, 
-									   arrow_w*scale, arrow_h*scale, 
+					CG_DrawRotatePic2( pos->mX + cg_automap_x.integer,
+									   pos->mY + cg_automap_y.integer,
+									   arrow_w*scale, arrow_h*scale,
 									   (360 - cent->lerpAngles[1]) - 90.0, teamIcon );
 					break;
 				}
@@ -947,7 +947,7 @@ void CG_DrawAutomap ( void )
 	trap_R_SetColor ( teamColor );
 	scale = 1.0;
 
-	CG_DrawRotatePic2( pos->mX + cg_automap_x.integer, pos->mY + cg_automap_y.integer, arrow_w*scale, arrow_h*scale, 
+	CG_DrawRotatePic2( pos->mX + cg_automap_x.integer, pos->mY + cg_automap_y.integer, arrow_w*scale, arrow_h*scale,
 		(360 - cg.refdef.viewangles[1]) - 90.0, cgs.media.mAutomapPlayerIcon );
 }
 
@@ -959,7 +959,7 @@ void CG_DrawAutomap ( void )
 CG_DrawLagometer
 ==============
 */
-static void CG_DrawLagometer( void ) 
+static void CG_DrawLagometer( void )
 {
 	int		a, x, y, i;
 	float	v;
@@ -969,7 +969,7 @@ static void CG_DrawLagometer( void )
 
 	trap_R_SetColor( NULL );
 
-	if ( !cg_lagometer.integer || cgs.localServer ) 
+	if ( !cg_lagometer.integer || cgs.localServer )
 	{
 		CG_DrawDisconnect();
 		return;
@@ -1082,7 +1082,7 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
-void CG_CenterPrint( const char *str, float scale ) 
+void CG_CenterPrint( const char *str, float scale )
 {
 	char	*s;
 
@@ -1094,7 +1094,7 @@ void CG_CenterPrint( const char *str, float scale )
 	// count the number of lines for centering
 	cg.centerPrintLines = 1;
 	s = cg.centerPrint;
-	while( *s ) 
+	while( *s )
 	{
 		if (*s == '\n')
 		{
@@ -1110,7 +1110,7 @@ void CG_CenterPrint( const char *str, float scale )
 CG_DrawCenterString
 ===================
 */
-static void CG_DrawCenterString( void ) 
+static void CG_DrawCenterString( void )
 {
 	char	*start;
 	int		l;
@@ -1123,14 +1123,14 @@ static void CG_DrawCenterString( void )
 		return;
 	}
 
-	if ( !cg.centerPrintTime ) 
+	if ( !cg.centerPrintTime )
 	{
 		cg.centerPrintPriority = qfalse;
 		return;
 	}
 
 	color = CG_FadeColor( cg.centerPrintTime, 1000 * cg_centertime.value );
-	if ( !color ) 
+	if ( !color )
 	{
 		cg.centerPrintPriority = qfalse;
 		return;
@@ -1142,17 +1142,17 @@ static void CG_DrawCenterString( void )
 
 	y = cg_centerY.integer + 20;		// print it below the gametype message
 
-	while ( 1 ) 
+	while ( 1 )
 	{
 		char linebuffer[1024];
 
-		for ( l = 0; l < 100; l++ ) 
+		for ( l = 0; l < 100; l++ )
 		{
-			if ( !start[l] || start[l] == '\n' ) 
+			if ( !start[l] || start[l] == '\n' )
 			{
 				break;
 			}
-			
+
 			linebuffer[l] = start[l];
 		}
 		linebuffer[l] = 0;
@@ -1163,12 +1163,12 @@ static void CG_DrawCenterString( void )
 		CG_DrawText (x, y + h, cgs.media.hudFont, cg.centerPrintScale, color, linebuffer, 0, DT_OUTLINE );
 		y += h + 6;
 
-		while ( *start && ( *start != '\n' ) ) 
+		while ( *start && ( *start != '\n' ) )
 		{
 			start++;
 		}
-		
-		if ( !*start ) 
+
+		if ( !*start )
 		{
 			break;
 		}
@@ -1203,7 +1203,7 @@ static void CG_DrawCenterText ( void )
 CG_DrawCrosshair
 =================
 */
-static void CG_DrawCrosshair(void) 
+static void CG_DrawCrosshair(void)
 {
 	float		w;
 	float		h;
@@ -1214,7 +1214,7 @@ static void CG_DrawCrosshair(void)
 	int			ca;
 	qboolean	zoomed;
 
-	if ( !cg_drawCrosshair.integer ) 
+	if ( !cg_drawCrosshair.integer )
 	{
 		return;
 	}
@@ -1231,12 +1231,12 @@ static void CG_DrawCrosshair(void)
 		return;
 	}
 
-	if ( cg.snap->ps.pm_type == PM_SPECTATOR ) 
+	if ( cg.snap->ps.pm_type == PM_SPECTATOR )
 	{
 		return;
 	}
 
-	if ( cg.renderingThirdPerson ) 
+	if ( cg.renderingThirdPerson )
 	{
 		return;
 	}
@@ -1245,7 +1245,7 @@ static void CG_DrawCrosshair(void)
 	trap_R_SetColor( cg.crosshairRGBA );
 
 	// Change the crosshair color when its on friendly targets
-	if ( cg.crosshairColorClientNum != -1 && cgs.gametypeData->teams )	
+	if ( cg.crosshairColorClientNum != -1 && cgs.gametypeData->teams )
 	{
 		// Is the crosshair over a friendly target?
 		if ( cgs.clientinfo[ cg.crosshairColorClientNum ].team == cgs.clientinfo[ cg.snap->ps.clientNum ].team )
@@ -1256,18 +1256,18 @@ static void CG_DrawCrosshair(void)
 
 	w = h = cg_crosshairSize.value;
 
-	// Determine the 
+	// Determine the
 	if ( cg_crosshairGrow.integer )
 	{
 		scale = ((float)cg.predictedPlayerState.inaccuracy / ((float)weaponData[cg.predictedPlayerState.weapon].attack[ATTACK_NORMAL].maxInaccuracy+1));
-		scale = 1 + scale * 1; 
+		scale = 1 + scale * 1;
 	}
 	else
 	{
 		scale = 1;
 	}
 
-	if ( scale > 2 ) 
+	if ( scale > 2 )
 	{
 		scale = 2;
 	}
@@ -1283,15 +1283,15 @@ static void CG_DrawCrosshair(void)
 	CG_AdjustFrom640( &x, &y, &w, &h );
 
 	ca = cg_drawCrosshair.integer;
-	if (ca < 0) 
+	if (ca < 0)
 	{
 		ca = 0;
 	}
 
 	hShader = cgs.media.crosshairShader[ ca % NUM_CROSSHAIRS ];
 
-	trap_R_DrawStretchPic( x + cg.refdef.x + 0.5 * (cg.refdef.width - w), 
-		y + cg.refdef.y + 0.5 * (cg.refdef.height - h), 
+	trap_R_DrawStretchPic( x + cg.refdef.x + 0.5 * (cg.refdef.width - w),
+		y + cg.refdef.y + 0.5 * (cg.refdef.height - h),
 		w, h, 0, 0, 1, 1, NULL, hShader );
 }
 
@@ -1307,7 +1307,7 @@ qboolean CG_WorldCoordToScreenCoordFloat(vec3_t worldCoord, float *x, float *y)
 
 //	xcenter = cg.refdef.width / 2;//gives screen coords adjusted for resolution
 //	ycenter = cg.refdef.height / 2;//gives screen coords adjusted for resolution
-	
+
 	//NOTE: did it this way because most draw functions expect virtual 640x480 coords
 	//	and adjust them for current resolution
 	xcenter = 640 / 2;//gives screen coords in virtual 640x480, to be adjusted when drawn
@@ -1319,7 +1319,7 @@ qboolean CG_WorldCoordToScreenCoordFloat(vec3_t worldCoord, float *x, float *y)
 
 	transformed[0] = DotProduct(local,vright);
 	transformed[1] = DotProduct(local,vup);
-	transformed[2] = DotProduct(local,vfwd);		
+	transformed[2] = DotProduct(local,vfwd);
 
 	// Make sure Z is not negative.
 	if(transformed[2] < 0.01)
@@ -1351,7 +1351,7 @@ qboolean CG_WorldCoordToScreenCoord( vec3_t worldCoord, int *x, int *y )
 CG_ScanForCrosshairEntity
 =================
 */
-static void CG_ScanForCrosshairEntity( void ) 
+static void CG_ScanForCrosshairEntity( void )
 {
 	trace_t		trace;
 	vec3_t		start;
@@ -1363,7 +1363,7 @@ static void CG_ScanForCrosshairEntity( void )
 
 	cg.crosshairColorClientNum = -1;
 
-	CG_Trace( &trace, start, vec3_origin, vec3_origin, end, 
+	CG_Trace( &trace, start, vec3_origin, vec3_origin, end,
 		cg.snap->ps.clientNum, MASK_SHOT );
 	if ( trace.entityNum >= MAX_CLIENTS ) {
 		return;
@@ -1399,7 +1399,7 @@ static void CG_ScanForCrosshairEntity( void )
 CG_DrawCrosshairNames
 =====================
 */
-static void CG_DrawCrosshairNames( void ) 
+static void CG_DrawCrosshairNames( void )
 {
 	float		*color;
 	char		*name;
@@ -1408,7 +1408,7 @@ static void CG_DrawCrosshairNames( void )
 	float		h;
 	int			y;
 
-	char weaponlist[21][32] = {
+	char weaponlist[25][32] = {
 		{ "Knife" },
 		{ "M1911A1 Pistol" },
 		{ "USSOCOM Pistol" },
@@ -1432,19 +1432,23 @@ static void CG_DrawCrosshairNames( void )
 		{ "SMOHG92 Frag Grenade" },
 		{ "ANM14 Incendiary Grenade" },
 		{ "M15 Smoke Grenade" },
+		{ "M67 Grenade" },
+		{ "F1 Grenade" },
+		{ "L2A2 Grenade" },
+		{ "MDN11 Grenade" },
 	};
 
-	if ( !cg_drawCrosshair.integer ) 
+	if ( !cg_drawCrosshair.integer )
 	{
 		return;
 	}
-	
-	if ( !cg_drawCrosshairNames.integer ) 
+
+	if ( !cg_drawCrosshairNames.integer )
 	{
 		return;
 	}
-	
-	if ( cg.renderingThirdPerson ) 
+
+	if ( cg.renderingThirdPerson )
 	{
 		return;
 	}
@@ -1534,7 +1538,7 @@ static void CG_DrawCrosshairNames( void )
 CG_DrawSpectator
 =================
 */
-static void CG_DrawSpectator(void) 
+static void CG_DrawSpectator(void)
 {
 	const char* s;
 	float		y;
@@ -1576,12 +1580,12 @@ static void CG_DrawSpectator(void)
 
 	CG_DrawText ( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.45f, 0 ) / 2,
 					y, cgs.media.hudFont, 0.45f, colorWhite, s, 0, DT_OUTLINE );
-	
+
 	// Draw some instructions on the screen for joining the game when the client is a spectator
 	if ( cgs.clientinfo[cg.clientNum].team == TEAM_SPECTATOR )
 	{
-		// Make sure they arent following someone and arent a ghost 
-		if ( !(cg.predictedPlayerState.pm_flags & (PMF_GHOST|PMF_FOLLOW)) ) 
+		// Make sure they arent following someone and arent a ghost
+		if ( !(cg.predictedPlayerState.pm_flags & (PMF_GHOST|PMF_FOLLOW)) )
 		{
 			s = "press ESC and use the PLAYER menu to play";
 			CG_DrawText( 320 - trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.43f, 0 ) / 2,
@@ -1595,26 +1599,26 @@ static void CG_DrawSpectator(void)
 CG_DrawVote
 =================
 */
-static void CG_DrawVote(void) 
+static void CG_DrawVote(void)
 {
 	char	*s;
 	int		sec;
 
-	if ( !cgs.voteTime ) 
+	if ( !cgs.voteTime )
 	{
 		return;
 	}
 
 	// play a talk beep whenever it is modified
-	if ( cgs.voteModified ) 
+	if ( cgs.voteModified )
 	{
 		cgs.voteModified = qfalse;
 		trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
 	}
 
 	sec = ( cgs.voteDuration - ( cg.time - cgs.voteTime ) ) / 1000;
-	
-	if ( sec < 0 ) 
+
+	if ( sec < 0 )
 	{
 		sec = 0;
 	}
@@ -1631,7 +1635,7 @@ static void CG_DrawVote(void)
 CG_DrawIntermission
 =================
 */
-static void CG_DrawIntermission( void ) 
+static void CG_DrawIntermission( void )
 {
 	cg.scoreFadeTime = cg.time;
 	cg.scoreBoardShowing = CG_DrawScoreboard();
@@ -1642,7 +1646,7 @@ static void CG_DrawIntermission( void )
 CG_DrawFollow
 =================
 */
-static qboolean CG_DrawFollow( void ) 
+static qboolean CG_DrawFollow( void )
 {
 	const char *s;
 
@@ -1651,7 +1655,7 @@ static qboolean CG_DrawFollow( void )
 		return qfalse;
 	}
 
-	if ( !(cg.snap->ps.pm_flags & PMF_FOLLOW) ) 
+	if ( !(cg.snap->ps.pm_flags & PMF_FOLLOW) )
 	{
 		return qfalse;
 	}
@@ -1670,21 +1674,21 @@ static qboolean CG_DrawFollow( void )
 CG_DrawWarmup
 =================
 */
-static void CG_DrawWarmup( void ) 
+static void CG_DrawWarmup( void )
 {
 	int				w;
 	int				sec;
 	const char		*s;
 
 	sec = cg.warmup;
-	if ( !sec ) 
+	if ( !sec )
 	{
 		return;
 	}
 
-	if ( sec < 0 ) 
+	if ( sec < 0 )
 	{
-		s = "Waiting for players";		
+		s = "Waiting for players";
 
 		w = trap_R_GetTextWidth ( s, cgs.media.hudFont, 0.53f, 0 );
 		CG_DrawText ( 320 - w / 2, 24, cgs.media.hudFont, 0.53f, colorWhite, s, 0, DT_OUTLINE );
@@ -1694,14 +1698,14 @@ static void CG_DrawWarmup( void )
 	}
 
 	sec = ( sec - cg.time ) / 1000;
-	if ( sec < 0 ) 
+	if ( sec < 0 )
 	{
 		cg.warmup = 0;
 		sec = 0;
 	}
 
 	s = va( "map restart in: %i", sec + 1 );
-	if ( sec != cg.warmupCount ) 
+	if ( sec != cg.warmupCount )
 	{
 		cg.warmupCount = sec;
 	}
@@ -1710,12 +1714,12 @@ static void CG_DrawWarmup( void )
 	CG_DrawText (320 - w / 2, 155, cgs.media.hudFont, 0.53f, colorWhite, s, 0, DT_OUTLINE );
 }
 
-/* 
+/*
 =================
 CG_DrawChat
 =================
 */
-static void CG_DrawChat ( void ) 
+static void CG_DrawChat ( void )
 {
 	float	w;
 	int		h;
@@ -1723,7 +1727,7 @@ static void CG_DrawChat ( void )
 	int		chatHeight;
 	float	y;
 	float	x;
-	
+
 	// Grab the users text height but dont let it get bigger than the define
 	chatHeight = cg_chatHeight.integer;
 	if (chatHeight > CHAT_HEIGHT )
@@ -1734,17 +1738,17 @@ static void CG_DrawChat ( void )
 	// Is the chat enabled right now?
 	if ( chatHeight <= 0 )
 	{
-		return; 
+		return;
 	}
 
-	// Nothing to draw 
-	if (cgs.chatLastPos == cgs.chatPos ) 
+	// Nothing to draw
+	if (cgs.chatLastPos == cgs.chatPos )
 	{
 		return;
 	}
 
 	// Is it time to stop drawing the current chat message?
-	if ( cg.time - cgs.chatTime[cgs.chatLastPos % chatHeight] > cg_chatTime.integer) 
+	if ( cg.time - cgs.chatTime[cgs.chatLastPos % chatHeight] > cg_chatTime.integer)
 	{
 		cgs.chatLastPos++;
 	}
@@ -1790,7 +1794,7 @@ static void CG_DrawChat ( void )
 	}
 
 	// Find the greatest width out of the strings rendered
-	for (w = 0, i = cgs.chatLastPos; i < cgs.chatPos; i++) 
+	for (w = 0, i = cgs.chatLastPos; i < cgs.chatPos; i++)
 	{
 		float tw = trap_R_GetTextWidth ( cgs.chatText[i % chatHeight], cgs.media.hudFont, 0.43f, 0 );
 
@@ -1800,7 +1804,7 @@ static void CG_DrawChat ( void )
 		}
 	}
 
-	for (i = cgs.chatPos - 1; i >= cgs.chatLastPos ; i--) 
+	for (i = cgs.chatPos - 1; i >= cgs.chatLastPos ; i--)
 	{
 		qhandle_t font = cgs.media.hudFont;
 		float     scale = 0.38f;
@@ -1810,17 +1814,17 @@ static void CG_DrawChat ( void )
 	}
 }
 
-/* 
+/*
 =================
 CG_DrawTimedMenus
 =================
 */
-void CG_DrawTimedMenus() 
+void CG_DrawTimedMenus()
 {
-	if (cg.voiceTime) 
+	if (cg.voiceTime)
 	{
 		int t = cg.time - cg.voiceTime;
-		if ( t > 2500 ) 
+		if ( t > 2500 )
 		{
 			Menus_CloseByName("voiceMenu");
 			trap_Cvar_Set("cl_conXOffset", "0");
@@ -1841,7 +1845,7 @@ void CG_DrawMapChange ( void )
 	float		x;
 
 	// Draw a nice background image
-	CG_DrawStretchPic ( 0, 0, 640, 480, 0, 0, 1, 1, colorWhite, 
+	CG_DrawStretchPic ( 0, 0, 640, 480, 0, 0, 1, 1, colorWhite,
 						trap_R_RegisterShaderNoMip ( "gfx/menus/backdrop/pra1_sof2_logo" ) );
 
 	s = "Server Changing Maps";
@@ -1888,11 +1892,11 @@ void CG_DrawTimers ( void )
 		CG_DrawTimer ( x, y, cgs.media.hudFont, 0.53f, colorGreen, DT_OUTLINE, -cg.predictedPlayerState.stats[STAT_FROZEN] );
 	}
 	else if ( cgs.gametypeTimerTime != 0  )
-	{		
+	{
 		if ( cgs.gametypeTimerTime < cg.time )
 		{
 			return;
-		}	
+		}
 
 		CG_DrawTimer ( x, y, cgs.media.hudFont, 0.53f, colorGreen, DT_OUTLINE, cgs.gametypeTimerTime - cg.time );
 	}
@@ -1902,7 +1906,7 @@ void CG_DrawTimers ( void )
 ==================
 CG_DrawFlashBang
 
-Renders and handles the progression of the flashgrenade.  The flash grenade is just a white 
+Renders and handles the progression of the flashgrenade.  The flash grenade is just a white
 overlay on the whole screen which fades out over time
 ==================
 */
@@ -1922,7 +1926,7 @@ static void CG_DrawFlashBang ( void )
 		cg.flashbangTime = 0;
 		return;
 	}
-	
+
 	VectorCopy ( colorWhite, color );
 	color[3] = cg.flashbangAlpha * (1.0f - ((float)(cg.time - cg.flashbangTime) / (float)cg.flashbangFadeTime));
 
@@ -1931,8 +1935,8 @@ static void CG_DrawFlashBang ( void )
 	{
 		color[3]=0;
 	}
-	
-	if (color[3]>1) 
+
+	if (color[3]>1)
 	{
 		color[3]=1;
 	}
@@ -1972,7 +1976,7 @@ static void CG_DrawHUDIcons ( void )
 	}
 	else if ( cg_drawEnhancedHUD.integer && BG_RelatedGametype( cgs.gametype, "dem" ) ) {
 		if ( cgs.hudIcons[0] )
-			CG_DrawPic ( 398, 397, 32, 32, cgs.gameIcons[ cgs.hudIcons[0] ] );//01/20/05 pimpy		
+			CG_DrawPic ( 398, 397, 32, 32, cgs.gameIcons[ cgs.hudIcons[0] ] );//01/20/05 pimpy
 	}
 	else {
 		x = 25;
@@ -1997,7 +2001,7 @@ static void CG_DrawHUDIcons ( void )
 CG_DrawSpecList
 =================
 */
-static void CG_DrawSpecList( void ) 
+static void CG_DrawSpecList( void )
 {
 	int			i;
 	int			y;
@@ -2019,7 +2023,7 @@ static void CG_DrawSpecList( void )
 	}
 	shown = qfalse;
 
-	for ( i = 0 ; i < cgs.maxclients ; i++ ) 
+	for ( i = 0 ; i < cgs.maxclients ; i++ )
 	{
 		clientInfo_t* cl;
 
@@ -2070,7 +2074,7 @@ static void CG_DrawSpecList( void )
 CG_DrawTeamOverlay
 =================
 */
-static void CG_DrawTeamOverlay( void ) 
+static void CG_DrawTeamOverlay( void )
 {
 	int			i;
 	int			weaponx;
@@ -2081,7 +2085,7 @@ static void CG_DrawTeamOverlay( void )
 	qboolean	goodlocation;
 	vec4_t		colorText = {1.0f, 1.0f, 1.0f, 0.8f};
 
-	static weaponOverlay_t weaponlist[21] = {
+	static weaponOverlay_t weaponlist[25] = {
 		{ WP_KNIFE, qtrue },
 		{ WP_M1911A1_PISTOL, qtrue },
 		{ WP_USSOCOM_PISTOL, qtrue },
@@ -2105,6 +2109,10 @@ static void CG_DrawTeamOverlay( void )
 		{ WP_SMOHG92_GRENADE, qfalse },
 		{ WP_ANM14_GRENADE, qfalse },
 		{ WP_M15_GRENADE, qfalse },
+		{ WP_M67_GRENADE, qfalse },
+		{ WP_F1_GRENADE, qfalse },
+		{ WP_L2A2_GRENADE, qfalse },
+		{ WP_MDN11_GRENADE, qfalse },
 	};
 
 	cgs.teamData.redShade[3] = 0.5f;
@@ -2132,7 +2140,7 @@ static void CG_DrawTeamOverlay( void )
 		return;
 	}
 
-	for ( i = 0 ; i < cgs.maxclients ; i++ ) 
+	for ( i = 0 ; i < cgs.maxclients ; i++ )
 	{
 		clientInfo_t* cl;
 
@@ -2200,7 +2208,7 @@ static void CG_DrawTeamOverlay( void )
 CG_DrawPlayerNames
 =================
 */
-static void CG_DrawPlayerNames( void ) 
+static void CG_DrawPlayerNames( void )
 {
 	int		i;
 	int		w;
@@ -2256,7 +2264,7 @@ static void CG_DrawPlayerNames( void )
 CG_Draw2D
 =================
 */
-static void CG_Draw2D( void ) 
+static void CG_Draw2D( void )
 {
 	char var[MAX_TOKEN_CHARS];
 
@@ -2266,7 +2274,7 @@ static void CG_Draw2D( void )
 	cg.overlayHeight = 0;
 
 	// if we are taking a levelshot for the menu, don't draw anything
-	if ( cg.levelShot ) 
+	if ( cg.levelShot )
 	{
 		return;
 	}
@@ -2277,7 +2285,7 @@ static void CG_Draw2D( void )
 		return;
 	}
 
-	if ( cg_draw2D.integer == 0 ) 
+	if ( cg_draw2D.integer == 0 )
 	{
 		CG_DrawFlashBang ( );
 		return;
@@ -2305,7 +2313,7 @@ static void CG_Draw2D( void )
 //		oldScoreBoardShowing = cg.scoreBoardShowing;
 //	}
 
-	if ( cg.snap->ps.pm_type == PM_INTERMISSION ) 
+	if ( cg.snap->ps.pm_type == PM_INTERMISSION )
 	{
 		CG_DrawIntermission();
 		if ( cg_drawBestStats.integer && cg.bestStats && cg.scoreBoardShowing )
@@ -2321,48 +2329,48 @@ static void CG_Draw2D( void )
 	// scan the known entities to see if the crosshair is sighted on one
 	CG_ScanForCrosshairEntity();
 
-	if ( cg.snap->ps.pm_type == PM_SPECTATOR || cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ) 
+	if ( cg.snap->ps.pm_type == PM_SPECTATOR || cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR )
 	{
 		CG_DrawSpectator();
 		CG_DrawCrosshair();
 		CG_DrawCrosshairNames();
 		CG_DrawHUDIcons();
-	} 
-	else 
+	}
+	else
 	{
 		// don't draw any status if dead or the scoreboard is being explicitly shown
-		if ( cg.snap->ps.stats[STAT_HEALTH] > 0 ) 
+		if ( cg.snap->ps.stats[STAT_HEALTH] > 0 )
 		{
 			Menu_PaintAll();
-			
+
 			if ( !cg.showScores )
 			{
 				CG_DrawHUDIcons();
-				CG_DrawTimedMenus();   
+				CG_DrawTimedMenus();
 				CG_DrawCrosshair();
 				CG_DrawCrosshairNames();
 				CG_DrawTeamOverlay();
 				CG_DrawSpecList();
 				CG_DrawPlayerNames();
 			}
-		} 
+		}
 	}
 
 	CG_DrawVote();
 
 	CG_DrawLagometer();
 
-//	if (!cg_paused.integer) 
+//	if (!cg_paused.integer)
 //	{
 		CG_DrawUpperRight();
 //	}
 
 	// don't draw center string if scoreboard is up
 	cg.scoreBoardShowing = CG_DrawScoreboard();
-	if ( !cg.scoreBoardShowing) 
+	if ( !cg.scoreBoardShowing)
 	{
 		CG_DrawCenterText();
-		if ( !CG_DrawFollow() ) 
+		if ( !CG_DrawFollow() )
 		{
 			CG_DrawWarmup();
 		}
@@ -2379,14 +2387,14 @@ CG_DrawActive
 Perform all drawing needed to completely fill the screen
 =====================
 */
-void CG_DrawActive( stereoFrame_t stereoView ) 
+void CG_DrawActive( stereoFrame_t stereoView )
 {
 	float		separation;
 	vec3_t		baseOrg;
 	float		parm1, parm2;
 
 	// optionally draw the info screen instead
-	if ( !cg.snap ) 
+	if ( !cg.snap )
 	{
 		CG_DrawInformation();
 		return;
@@ -2400,7 +2408,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
 
 	// Handle the start of an inf match
 	if ( cg.predictedPlayerState.persistant[PERS_TEAM] != TEAM_SPECTATOR &&
-		 !(cg.predictedPlayerState.pm_flags & PMF_GHOST) && 
+		 !(cg.predictedPlayerState.pm_flags & PMF_GHOST) &&
 	     !(cg.predictedPlayerState.pm_flags & PMF_FOLLOW) )
 	{
 		if ( cgs.gametypeTimerTime >= cg.time && !cg.predictedPlayerState.stats[STAT_FROZEN] && cgs.gametypeTimerTime != 0 && !cg.gametypeStarted )
@@ -2443,7 +2451,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
 				{
 					trap_Cvar_Set ( "ui_info_seenobjectives", "1" );
 				}
-		
+
 				trap_SendConsoleCommand ( "ui_objectives;" );
 			}
 
@@ -2453,7 +2461,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
 		cg.popupObjectives = qfalse;
 	}
 
-	switch ( stereoView ) 
+	switch ( stereoView )
 	{
 		case STEREO_CENTER:
 			separation = 0;
@@ -2518,7 +2526,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
 	}
 
 	// restore original viewpoint if running stereo
-	if ( separation != 0 ) 
+	if ( separation != 0 )
 	{
 		VectorCopy( baseOrg, cg.refdef.vieworg );
 	}

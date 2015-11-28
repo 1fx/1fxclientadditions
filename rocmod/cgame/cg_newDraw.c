@@ -71,7 +71,7 @@ static void CG_DrawPlayerWeaponImage(rectDef_t *rect, vec4_t color, int flags )
 	float x, y, w, h;
 	int item;
 
-	static weaponDraw_t weaponlist[21] = {
+	static weaponDraw_t weaponlist[25] = {
 		{ WP_KNIFE, 0.0f, -8.0f, 0, (128 * 0.67f), (64 * 0.67f) },
 		{ WP_M1911A1_PISTOL, 9.0f, 0.0f, 0, (128 * 0.33f), (64 * 0.33f) },
 		{ WP_USSOCOM_PISTOL, 10.0f, 0.0f, 0, (128 * 0.33f), (64 * 0.33f) },
@@ -95,6 +95,10 @@ static void CG_DrawPlayerWeaponImage(rectDef_t *rect, vec4_t color, int flags )
 		{ WP_SMOHG92_GRENADE, 0.0f, 0.0f, 0, (64 * 0.33f), (64 * 0.33f) },
 		{ WP_ANM14_GRENADE, 0.0f, 0.0f, 0, (64 * 0.33f), (64 * 0.33f) },
 		{ WP_M15_GRENADE, 0.0f, 0.0f, 0, (64 * 0.33f), (64 * 0.33f) },
+		{ WP_M67_GRENADE, 0.0f, 0.0f, 0, (64 * 0.33f), (64 * 0.33f) },
+		{ WP_F1_GRENADE, 0.0f, 0.0f, 0, (64 * 0.33f), (64 * 0.33f) },
+		{ WP_L2A2_GRENADE, 0.0f, 0.0f, 0, (64 * 0.33f), (64 * 0.33f) },
+		{ WP_MDN11_GRENADE, 0.0f, 0.0f, 0, (64 * 0.33f), (64 * 0.33f) },
 	};
 
 	if ( cg.weaponSelect <= WP_NONE )
@@ -444,7 +448,7 @@ static void CG_DrawPlayerWeaponList(rectDef_t *rect, qhandle_t font, vec4_t colo
 
 	vec4_t colorGrey = {0.50f,0.50f,0.50f,0.80f};
 
-	static weaponDraw_t weaponlist[21] = {
+	static weaponDraw_t weaponlist[25] = {
 		{ WP_KNIFE, 0.0f, 0.0f, 1.0f, (128 * 0.35f), (64 * 0.35f) },
 		{ WP_M1911A1_PISTOL, 0.0f, 0.0f, -8.0f, (128 * 0.35f), (64 * 0.35f) },
 		{ WP_USSOCOM_PISTOL, 0.0f, 0.0f, -8.0f, (128 * 0.35f), (64 * 0.35f) },
@@ -468,6 +472,10 @@ static void CG_DrawPlayerWeaponList(rectDef_t *rect, qhandle_t font, vec4_t colo
 		{ WP_SMOHG92_GRENADE, 0.0f, 0.0f, -3.0f, (64 * 0.35f), (64 * 0.35f) },
 		{ WP_ANM14_GRENADE, 0.0f, 0.0f, -4.0f, (64 * 0.35f), (64 * 0.35f) },
 		{ WP_M15_GRENADE, 0.0f, 0.0f, -4.0f, (64 * 0.35f), (64 * 0.35f) },
+		{ WP_M67_GRENADE, 0.0f, 0.0f, -4.0f, (64 * 0.35f), (64 * 0.35f) },
+		{ WP_F1_GRENADE, 0.0f, 0.0f, -4.0f, (64 * 0.35f), (64 * 0.35f) },
+		{ WP_L2A2_GRENADE, 0.0f, 0.0f, -4.0f, (64 * 0.35f), (64 * 0.35f) },
+		{ WP_MDN11_GRENADE, 0.0f, 0.0f, -4.0f, (64 * 0.35f), (64 * 0.35f) },
 	};
 
 //	CG_FillRect ( rect->x + rect->w, rect->y, 50, rect->h, color ); // pimpy the 50

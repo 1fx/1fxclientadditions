@@ -274,6 +274,10 @@ static void CG_Obituary( entityState_t *ent )
 			case MOD_SMOHG92_GRENADE:
 			case MOD_ANM14_GRENADE:
 			case MOD_M15_GRENADE:
+			case MOD_M67_GRENADE:
+			case MOD_F1_GRENADE:
+			case MOD_L2A2_GRENADE:
+			case MOD_MDN11_GRENADE:
 				if ( gender == GENDER_FEMALE )
 					message = "blew herself up";
 				else if ( gender == GENDER_NEUTER )
