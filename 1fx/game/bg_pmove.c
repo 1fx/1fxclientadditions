@@ -3111,7 +3111,9 @@ static void PM_Weapon( void )
 		PM_StartRefillClip( ATTACK_NORMAL );
 		return;
 	}
+	// #CL_ADD
 	else if( pm->ps->weapon==WP_KNIFE || (pm->ps->weapon>=WP_RPG7_LAUNCHER && pm->ps->weapon<=WP_MDN11_GRENADE) )
+	// #END CL_ADD
 	{
 		if(pm->ps->clip[ATTACK_NORMAL][pm->ps->weapon]<1)
 		{
