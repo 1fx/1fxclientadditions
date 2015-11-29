@@ -131,7 +131,7 @@ static void CG_Obituary( entityState_t *ent )
 	{
 		shotstr = "^1[TEAMKILL]";
 	}
-	else if ( shotlocation == HL_HEAD && mod != MOD_ADMIN_STRIKE && mod != MOD_ADMIN_FRY && mod != MOD_ADMIN_EXPLODE && mod != MOD_ADMIN_TELEFRAG && mod != MOD_ADMIN_SLAP && mod != MOD_TELEFRAG && mod != MOD_SMOHG92_GRENADE && mod != (MOD_M4_ASSAULT_RIFLE|(ATTACK_ALTERNATE << 8)) )
+	else if ( shotlocation == HL_HEAD && mod != MOD_POP && mod != MOD_TELEFRAG && mod != MOD_SMOHG92_GRENADE && mod != (MOD_M4_ASSAULT_RIFLE|(ATTACK_ALTERNATE << 8)) )
 	{
 		shotstr = "^3[HEADSHOT]";
 	}
@@ -226,10 +226,20 @@ static void CG_Obituary( entityState_t *ent )
 
 	gender = ci->gender;
 
+	if(mod == MOD_TEAMCHANGE
+	|| mod == MOD_POP
+	|| mod == MOD_DUGUP
+	|| mod == MOD_BURN){
+		return;
+	}
+
 	switch( mod )
 	{
 		case MOD_SUICIDE:
 			message = "suicides";
+			break;
+		case MOD_REFRESH:
+			message = "refreshed";
 			break;
 		case MOD_FALLING:
 			if ( gender == GENDER_FEMALE )
@@ -247,16 +257,11 @@ static void CG_Obituary( entityState_t *ent )
 			message = "saw the light";
 			break;
 		case MOD_TRIGGER_HURT:
-		case MOD_TRIGGER_HURT_NOSUICIDE:
 			message = "was in the wrong place";
 			break;
-		case MOD_TEAMCHANGE:
-		case MOD_ADMIN_STRIKE:
-		case MOD_ADMIN_SLAP:
-		case MOD_ADMIN_FRY:
-		case MOD_ADMIN_EXPLODE:
-		case MOD_ADMIN_TELEFRAG:
-			return;
+		case MOD_CAR:
+			message = "was killed in a terrible car accident";
+			break;
 
 		default:
 			message = NULL;
