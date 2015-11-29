@@ -61,11 +61,14 @@ typedef enum
 	MOD_TARGET_LASER,
 	MOD_TRIGGER_HURT,
 
+	// #CL_ADD
+	// Boe!Man 11/29/15: Extra MODs for 1fx. Client Additions.
     MOD_CAR,
     MOD_POP,
     MOD_REFRESH,
     MOD_DUGUP,
-    MOD_BURN,
+    MOD_BURN
+    // #END CL_ADD
 } meansOfDeath_t;
 
 typedef enum

@@ -232,10 +232,14 @@ static void CG_Obituary( entityState_t *ent )
 			message = "saw the light";
 			break;
 		case MOD_TRIGGER_HURT:
-		case MOD_TRIGGER_HURT_NOSUICIDE:
 			message = "was in the wrong place";
 			break;
 		case MOD_TEAMCHANGE:
+		// #CL_ADD
+		case MOD_POP:
+		case MOD_DUGUP:
+		case MOD_BURN:
+		// #END CL_ADD
 			return;
 
 		default:
@@ -254,6 +258,12 @@ static void CG_Obituary( entityState_t *ent )
 			case MOD_SMOHG92_GRENADE:
 			case MOD_ANM14_GRENADE:
 			case MOD_M15_GRENADE:
+			// #CL_ADD
+			case MOD_M67_GRENADE:
+			case MOD_F1_GRENADE:
+			case MOD_L2A2_GRENADE:
+			case MOD_MDN11_GRENADE:
+			// #END CL_ADD
 				if ( gender == GENDER_FEMALE )
 					message = "blew herself up";
 				else if ( gender == GENDER_NEUTER )
