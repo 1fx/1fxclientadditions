@@ -94,6 +94,11 @@ static void CG_GameOver ( entityState_t *ent )
 	Com_Printf ( "@%s\n", cgs.gameover );
 }
 
+#ifdef __GNUC__
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+#endif // __GNUC__
+
 /*
 =============
 CG_Obituary
@@ -226,13 +231,6 @@ static void CG_Obituary( entityState_t *ent )
 
 	gender = ci->gender;
 
-	if(mod == MOD_TEAMCHANGE
-	|| mod == MOD_POP
-	|| mod == MOD_DUGUP
-	|| mod == MOD_BURN){
-		return;
-	}
-
 	switch( mod )
 	{
 		case MOD_SUICIDE:
@@ -262,6 +260,11 @@ static void CG_Obituary( entityState_t *ent )
 		case MOD_CAR:
 			message = "was killed in a terrible car accident";
 			break;
+		case MOD_TEAMCHANGE:
+		case MOD_POP:
+		case MOD_DUGUP:
+		case MOD_BURN:
+			return;
 
 		default:
 			message = NULL;
@@ -590,6 +593,10 @@ static void CG_Obituary( entityState_t *ent )
 	// we don't know what it was
 	Com_Printf( "%s%s died.\n", targetColor, targetName );
 }
+
+#ifdef __GNUC__
+#pragma GCC push_options
+#endif // __GNUC__
 
 /*
 ================
