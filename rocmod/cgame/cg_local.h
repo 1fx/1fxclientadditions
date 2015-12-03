@@ -1054,6 +1054,17 @@ void		CG_DrawActiveFrame				( int serverTime, stereoFrame_t stereoView, qboolean
 void		CG_CameraShake					( float* origin, float intensity, int radius, int time );
 void		CG_UpdateCameraShake			( vec3_t origin, vec3_t angles );
 
+// #CL_ADD
+#ifdef _CRASHLOGGER
+//
+// cg_crash.c
+//
+
+void        enableCrashHandler      ( void );
+void        disableCrashHandler     ( void );
+#endif // _CRASHLOGGER
+// #END CL_ADD
+
 //
 // cg_drawtools.c
 //
