@@ -127,7 +127,8 @@ static void CG_Obituary( entityState_t *ent )
 	targetColor   = S_COLOR_WHITE;
 
 	shotlocation = ent->time & (~HL_DISMEMBERBIT);
-	if ( cgs.gametypeData->teams && cgs.clientinfo[target].team == cgs.clientinfo[attacker].team )
+
+	if ( cgs.gametypeData->teams && attacker >= 0 && attacker < MAX_CLIENTS && cgs.clientinfo[target].team == cgs.clientinfo[attacker].team )
 	{
 		shotstr = "^1[TEAMKILL]";
 	}
@@ -226,13 +227,6 @@ static void CG_Obituary( entityState_t *ent )
 
 	gender = ci->gender;
 
-	if(mod == MOD_TEAMCHANGE
-	|| mod == MOD_POP
-	|| mod == MOD_DUGUP
-	|| mod == MOD_BURN){
-		return;
-	}
-
 	switch( mod )
 	{
 		case MOD_SUICIDE:
@@ -262,6 +256,11 @@ static void CG_Obituary( entityState_t *ent )
 		case MOD_CAR:
 			message = "was killed in a terrible car accident";
 			break;
+		case MOD_TEAMCHANGE:
+		case MOD_POP:
+		case MOD_DUGUP:
+		case MOD_BURN:
+			return;
 
 		default:
 			message = NULL;
