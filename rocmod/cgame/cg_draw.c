@@ -2315,11 +2315,17 @@ static void CG_Draw2D( void )
 
 	if ( cg.snap->ps.pm_type == PM_INTERMISSION )
 	{
-		CG_DrawIntermission();
-		if ( cg_drawBestStats.integer && cg.bestStats && cg.scoreBoardShowing )
-		{
-			CG_DrawBestStats();
+		if(cgs.current_gametype != GT_HS){
+			CG_DrawIntermission();
+			if ( cg_drawBestStats.integer && cg.bestStats && cg.scoreBoardShowing )
+			{
+				CG_DrawBestStats();
+			}
+		}else{
+			// Draw the scores in Hide&Seek (they are sent as a center print).
+			CG_DrawCenterText();
 		}
+
 		CG_DrawChat ( );
 		return;
 	}

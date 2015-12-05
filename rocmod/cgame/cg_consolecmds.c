@@ -258,16 +258,16 @@ static void CG_thirdPersonView_f (void)
 {
 	// Check if the user already set their state to third person.
 	if(cg_thirdPersonSaved.integer == 1){
-		if(cgs.allowThirdPerson){
-			Com_Printf("^3[Info] ^7View already set to third person");
+		Com_Printf("^3[Info] ^7View already set to third person");
 
+		if(cgs.allowThirdPerson){
 			if(!cg_thirdPerson.integer){
 				Com_Printf(", wait for the next spawn.\n");
 			}else{
 				Com_Printf(".\n");
 			}
 		}else{
-			Com_Printf("^3[Info] ^7View already set to third person, but server doesn't allow this.\n");
+			Com_Printf(", but server doesn't allow this.\n");
 		}
 
 		return;
@@ -277,10 +277,11 @@ static void CG_thirdPersonView_f (void)
 	trap_Cvar_Set("cg_thirdPersonSaved", "1");
 	trap_Cvar_Update(&cg_thirdPersonSaved);
 
+	Com_Printf("^3[Info] ^7Your view has been set to 3rd person, ");
 	if(cgs.allowThirdPerson){
-		Com_Printf("^3[Info] ^7Your view has been set to 3rd person, changes take effect upon next spawn.\n");
+		Com_Printf("changes take effect upon next spawn.\n");
 	}else{
-		Com_Printf("^3[Info] ^7Your view has been set to 3rd person, but the server doesn't allow this.\n");
+		Com_Printf("but the server doesn't allow this.\n");
 		Com_Printf("^3[Info] ^7Will take effect when you enter a third person enabled server.\n");
 	}
 }

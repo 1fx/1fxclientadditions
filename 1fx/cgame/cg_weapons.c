@@ -1362,7 +1362,7 @@ void CG_MissileHitWall (
 		case AMMO_MDN11:
 		case AMMO_SMOHG92:
 		case AMMO_ANM14:
-			if(cgs.current_gametype != 1 && (ammoIndex == AMMO_F1 || ammoIndex == AMMO_MDN11)){
+			if(cgs.current_gametype != GT_HS && (ammoIndex == AMMO_F1 || ammoIndex == AMMO_MDN11)){
 				impactEffect = trap_MAT_GetEffect(ammoData[ammoIndex].name, material&MATERIAL_MASK);
 				if (impactEffect)
 				{
@@ -1445,7 +1445,7 @@ void CG_MissileHitPlayer (
 		case AMMO_MDN11:
 		case AMMO_SMOHG92:
 		case AMMO_ANM14:
-			if(cgs.current_gametype != 1 && (ammoIndex == AMMO_F1 || ammoIndex == AMMO_MDN11)){
+			if(cgs.current_gametype != GT_HS && (ammoIndex == AMMO_F1 || ammoIndex == AMMO_MDN11)){
 				if ( entityNum == cg.clientNum )
 				{	// The person hit is the local player.
 					if (!cg_lockBlood.integer)

@@ -390,7 +390,7 @@ void CG_ParseServerinfo( void )
 	if(*s){
 		cgs.current_gametype = atoi(s);
 	}else{
-		cgs.current_gametype = 0;
+		cgs.current_gametype = GT_NONE;
 	}
 	// #END CL_ADD
 

@@ -779,6 +779,20 @@ typedef struct
 
 } cgs_t;
 
+// #CL_ADD
+typedef enum {
+    GT_NONE,
+    GT_HS,
+    GT_DEM,
+    GT_INF,
+    GT_CTF,
+    GT_DM,
+    GT_TDM,
+    GT_ELIM,
+    GT_HZ
+} gameTypes_t;
+// #END CL_ADD
+
 //==============================================================================
 
 extern	cgs_t			cgs;
