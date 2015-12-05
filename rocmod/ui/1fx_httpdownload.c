@@ -624,6 +624,12 @@ static void *_1fx_httpDL_mainDownloader()
     Com_Printf("Checking 1fx. Client Additions..\n");
 
     // Start checking the core Mod files.
+
+    // We never really use this core file,
+    // but it's good practice to keep this in
+    // sync with the server.
+    _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.00.pk3");
+
 	_1fx_httpDL_checkModFile("sof2mp_uix86.dll");
 	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll");
 	_1fx_httpDL_checkModFile("ROCmod_1fx_client.pk3");

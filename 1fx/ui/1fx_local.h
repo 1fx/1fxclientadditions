@@ -10,7 +10,7 @@
 // 1fx. Client Additions version number.
 // They are the same for the UI and CGAME module,
 // so rebuild both when pushing a new build.
-#define _1FX_CLADD_VER "0.53"
+#define _1FX_CLADD_VER "1.00"
 
 //
 // 1fx_httpdownload.c
