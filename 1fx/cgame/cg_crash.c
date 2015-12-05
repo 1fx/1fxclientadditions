@@ -10,9 +10,35 @@
 
 #ifdef _CRASHLOGGER
 
+#include <windows.h>
+#include <process.h>
+#include <imagehlp.h>
+
+// Assign types.
+typedef BOOL (WINAPI *PFNSYMINITIALIZE)(HANDLE, LPSTR, BOOL);
+typedef BOOL (WINAPI *PFNSYMCLEANUP)(HANDLE);
+typedef PGET_MODULE_BASE_ROUTINE PFNSYMGETMODULEBASE;
+typedef BOOL (WINAPI *PFNSTACKWALK)(DWORD, HANDLE, HANDLE, LPSTACKFRAME, LPVOID, PREAD_PROCESS_MEMORY_ROUTINE, PFUNCTION_TABLE_ACCESS_ROUTINE, PGET_MODULE_BASE_ROUTINE, PTRANSLATE_ADDRESS_ROUTINE);
+typedef BOOL (WINAPI *PFNSYMGETSYMFROMADDR)(HANDLE, DWORD, LPDWORD, PIMAGEHLP_SYMBOL);
+typedef BOOL (WINAPI *PFNSYMENUMERATEMODULES)(HANDLE, PSYM_ENUMMODULES_CALLBACK, PVOID);
+typedef PFUNCTION_TABLE_ACCESS_ROUTINE PFNSYMFUNCTIONTABLEACCESS;
+
+// Function declarations.
+LONG CALLBACK   crashHandler    (LPEXCEPTION_POINTERS e);
+
 // Local variables.
-fileHandle_t    f               = 0;
-int             numStackFrames  = 0;
+fileHandle_t                f                           = 0;
+int                         numStackFrames              = 0;
+char                        *filename                   = NULL;
+char                        *gamepath                   = NULL;
+HMODULE                     imagehlp                    = NULL;
+PFNSYMINITIALIZE            pfnSymInitialize            = NULL;
+PFNSYMCLEANUP               pfnSymCleanup               = NULL;
+PFNSYMGETMODULEBASE         pfnSymGetModuleBase         = NULL;
+PFNSTACKWALK                pfnStackWalk                = NULL;
+PFNSYMGETSYMFROMADDR        pfnSymGetSymFromAddr        = NULL;
+PFNSYMENUMERATEMODULES      pfnSymEnumerateModules      = NULL;
+PFNSYMFUNCTIONTABLEACCESS   pfnSymFunctionTableAccess   = NULL;
 
 /*
 ==========================
@@ -35,6 +61,77 @@ void crashLogger(char *s)
 
 /*
 ==========================
+getWindowsOSVersion
+12/05/15 - 10:38 AM
+Gets the Windows OS version
+and returns the full name.
+==========================
+*/
+
+char *getWindowsOSVersion()
+{
+    OSVERSIONINFOEX osvi;
+
+    // Determine windows OS version.
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+
+    // Boe!Man 12/05/15: Get some basic info.
+    if(!GetVersionEx((OSVERSIONINFO *) &osvi)){
+        // If the extended info failed, fall back to the smaller structure.
+        osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
+        if(!GetVersionEx((OSVERSIONINFO *) &osvi)){
+            return "Unknown";
+        }
+    }
+
+    // Get the associated name.
+    switch(osvi.dwMajorVersion){
+        case 5:
+            if(osvi.dwMinorVersion == 0){
+                return "Win 2K";
+            }else if(osvi.dwMinorVersion == 1){
+                return "Win XP";
+            }else if(osvi.dwMinorVersion == 2){
+                if(osvi.wProductType == VER_NT_WORKSTATION){
+                    return "Win XP 64";
+                }else{
+                    return "Server 2003";
+                }
+            }
+
+            break;
+        case 6:
+            if(osvi.dwMinorVersion == 0){
+                if(osvi.wProductType == VER_NT_WORKSTATION){
+                    return "Win Vista";
+                }else{
+                    return "Server 2008";
+                }
+            }else if(osvi.dwMinorVersion == 1){
+                if(osvi.wProductType == VER_NT_WORKSTATION){
+                    return "Win 7";
+                }else{
+                    return "Server 2008 R2";
+                }
+            }else if(osvi.dwMinorVersion == 2){
+                if(osvi.wProductType == VER_NT_WORKSTATION){
+                    return "Win 8 or higher";
+                }else{
+                    return "Server 2012 or higher";
+                }
+            }
+
+            break;
+        default:
+            break;
+    }
+
+    return va("Unknown version %d.%d", osvi.dwMajorVersion, osvi.dwMinorVersion);
+}
+
+/*
+==========================
 openCrashLog
 10/11/15 - 6:19 PM
 Opens a new crash log for writing.
@@ -46,9 +143,11 @@ qboolean openCrashLog()
     // Determine current time.
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
+    static char fileName[FILENAME_MAX];
 
     // Determine filename.
-    char *filename = va("logs/crashdumps/%d%02d%02d%02d%02d%02d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    Q_strncpyz(fileName, va("crashdumps/%d%02d%02d%02d%02d%02d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec), sizeof(fileName));
+    filename = fileName;
 
     // Open the file.
     trap_FS_FOpenFile(filename, &f, FS_WRITE);
@@ -92,7 +191,7 @@ void logStart()
 {
     // Inform the user of what just happened.
     Com_Printf("\n-------------- FATAL ERROR ------------\n");
-    Com_Printf("--        Server has crashed!        --\n");
+    Com_Printf("--         Game has crashed!         --\n");
     Com_Printf("---------------------------------------\n");
     Com_Printf("Now gathering information regarding the crash.\n");
 
@@ -108,19 +207,17 @@ void logStart()
     crashLogger("---------------------------------------\n");
     crashLogger("Client Additions version: " _1FX_CLADD_VER "\n");
 
-    // Determine SoF2 version.
-    #ifdef _GOLD
-    crashLogger("SoF2 version: v1.03\n");
-    #else
-    crashLogger("SoF2 version: v1.00\n");
-    #endif // _GOLD
+    // Log SoF2 version.
+    crashLogger(va("SoF2 version: %s\n", GAME_VERSION));
 
     // Log Operating System.
-    crashLogger("OS: WIN32\n"); // FIXME: Specific Windows version.
+    crashLogger(va("OS: %s\n", getWindowsOSVersion()));
 
     // See if we can log the map played.
     // During init this may be empty.
-    crashLogger(va("Map: %s\n", cgs.mapname));
+    if(cgs.mapname[0]){
+        crashLogger(va("Map: %s\n", cgs.mapname));
+    }
 }
 
 /*
@@ -138,36 +235,8 @@ void logStop()
     crashLogger("---------------------------------------\n");
     closeCrashLog();
 
-    Com_Error(ERR_FATAL, "Game crashed! Please forward the crashdump to the 1fx. Developers.");
+    Com_Error(ERR_FATAL, "Game crashed! Please forward the crashdump to boe@1fxmod.org\n\nCrash dump file: %s/%s", gamepath, filename);
 }
-
-//==================================================================
-
-#include <windows.h>
-#include <process.h>
-#include <imagehlp.h>
-
-// Assign types.
-typedef BOOL (WINAPI *PFNSYMINITIALIZE)(HANDLE, LPSTR, BOOL);
-typedef BOOL (WINAPI *PFNSYMCLEANUP)(HANDLE);
-typedef PGET_MODULE_BASE_ROUTINE PFNSYMGETMODULEBASE;
-typedef BOOL (WINAPI *PFNSTACKWALK)(DWORD, HANDLE, HANDLE, LPSTACKFRAME, LPVOID, PREAD_PROCESS_MEMORY_ROUTINE, PFUNCTION_TABLE_ACCESS_ROUTINE, PGET_MODULE_BASE_ROUTINE, PTRANSLATE_ADDRESS_ROUTINE);
-typedef BOOL (WINAPI *PFNSYMGETSYMFROMADDR)(HANDLE, DWORD, LPDWORD, PIMAGEHLP_SYMBOL);
-typedef BOOL (WINAPI *PFNSYMENUMERATEMODULES)(HANDLE, PSYM_ENUMMODULES_CALLBACK, PVOID);
-typedef PFUNCTION_TABLE_ACCESS_ROUTINE PFNSYMFUNCTIONTABLEACCESS;
-
-// Function declarations.
-LONG CALLBACK   crashHandler    (LPEXCEPTION_POINTERS e);
-
-// Local variables.
-HMODULE                     imagehlp                    = NULL;
-PFNSYMINITIALIZE            pfnSymInitialize            = NULL;
-PFNSYMCLEANUP               pfnSymCleanup               = NULL;
-PFNSYMGETMODULEBASE         pfnSymGetModuleBase         = NULL;
-PFNSTACKWALK                pfnStackWalk                = NULL;
-PFNSYMGETSYMFROMADDR        pfnSymGetSymFromAddr        = NULL;
-PFNSYMENUMERATEMODULES      pfnSymEnumerateModules      = NULL;
-PFNSYMFUNCTIONTABLEACCESS   pfnSymFunctionTableAccess   = NULL;
 
 /*
 ==========================
@@ -395,13 +464,14 @@ Original code from ETpub.
 
 LONG CALLBACK crashHandler(LPEXCEPTION_POINTERS e)
 {
-    char basepath[MAX_PATH];
-    char gamepath[MAX_PATH];
+    char        basePath[MAX_PATH];
+    static char gamePath[MAX_PATH];
 
     // Try to load the symbols.
-    trap_Cvar_VariableStringBuffer("fs_basepath", basepath, sizeof(basepath));
-    trap_Cvar_VariableStringBuffer("fs_game", gamepath, sizeof(gamepath));
-    pfnSymInitialize(GetCurrentProcess(), va("%s\\%s", basepath, gamepath), TRUE);
+    trap_Cvar_VariableStringBuffer("fs_basepath", basePath, sizeof(basePath));
+    trap_Cvar_VariableStringBuffer("fs_game", gamePath, sizeof(gamePath));
+    pfnSymInitialize(GetCurrentProcess(), va("%s\\%s", basePath, gamePath), TRUE);
+    gamepath = gamePath;
 
     // Open the crash log and log the generic information
     // such as header, operating system and such.
