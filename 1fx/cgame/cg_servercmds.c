@@ -94,8 +94,6 @@ void CG_ParseServerinfo( void )
 	cgs.maxclients = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
 	cgs.friendlyFire = atoi( Info_ValueForKey( info, "g_friendlyFire" ) ) ? qtrue : qfalse;
 	cgs.punkbuster = atoi( Info_ValueForKey( info, "sv_punkbster" ) ) ? qtrue : qfalse;
-	mapname = Info_ValueForKey( info, "mapname" );
-	Com_sprintf( cgs.mapname, sizeof( cgs.mapname ), "maps/%s.bsp", mapname );
 
 	// #CL_ADD
 	// Boe!Man 11/8/15: Check if third person is allowed by the server.
@@ -115,6 +113,9 @@ void CG_ParseServerinfo( void )
 	}else{
 		cgs.current_gametype = GT_NONE;
 	}
+
+	mapname = Info_ValueForKey( info, "mapname" );
+	Com_sprintf( cgs.mapname, sizeof( cgs.mapname ), "maps/%s.bsp", mapname );
 	// #END CL_ADD
 
 	trap_Cvar_Set ( "ui_about_gametype", va("%i", cgs.gametype ) );
