@@ -114,12 +114,22 @@ void CG_ParseServerinfo( void )
 		cgs.current_gametype = GT_NONE;
 	}
 
+	// Set correct gametype name in the about screen.
+	// This is also used for determining H&S/H&Z in the UI code.
+	if(cgs.current_gametype == GT_HS){
+		trap_Cvar_Set ( "ui_about_gametypename", "Hide&Seek" );
+	}else if(cgs.current_gametype == GT_HZ){
+		trap_Cvar_Set ( "ui_about_gametypename", "Humans&Zombies" );
+	}else{
+		trap_Cvar_Set ( "ui_about_gametypename", cgs.gametypeData->displayName );
+	}
+
 	mapname = Info_ValueForKey( info, "mapname" );
 	Com_sprintf( cgs.mapname, sizeof( cgs.mapname ), "maps/%s.bsp", mapname );
-	// #END CL_ADD
 
 	trap_Cvar_Set ( "ui_about_gametype", va("%i", cgs.gametype ) );
-	trap_Cvar_Set ( "ui_about_gametypename", cgs.gametypeData->displayName );
+	//trap_Cvar_Set ( "ui_about_gametypename", cgs.gametypeData->displayName );
+	// #END CL_ADD
 	trap_Cvar_Set ( "ui_about_scorelimit", va("%i", cgs.scorelimit ) );
 	trap_Cvar_Set ( "ui_about_timelimit", va("%i", cgs.timelimit ) );
 	trap_Cvar_Set ( "ui_about_friendlyfire", va("%i", cgs.friendlyFire) );

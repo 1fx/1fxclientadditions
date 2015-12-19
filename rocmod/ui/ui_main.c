@@ -1034,11 +1034,17 @@ static void UI_DrawPlayerModel(rectDef_t *rect)
 	vec3_t	viewangles;
 	vec3_t	moveangles;
 	char	identity[MAX_QPATH];
+	// #CL_ADD
+	char	gametypeName[MAX_CVAR_VALUE_STRING];
 
-	if ( (int)trap_Cvar_VariableValue ( "ui_info_teamgame" ) )
+	// Show all skins for H&S and H&Z, not just the ones defined for the red/blue teams.
+	trap_Cvar_VariableStringBuffer("ui_about_gametypename", gametypeName, sizeof(gametypeName));
+
+	if ( (int)trap_Cvar_VariableValue ( "ui_info_teamgame" ) && Q_stricmp(gametypeName, "Hide&Seek") && Q_stricmp(gametypeName, "Humans&Zombies") )
 	{
 		strcpy(identity, UI_Cvar_VariableString("team_identity"));
 	}
+	// #END CL_ADD
 	else
 	{
 		strcpy(identity, UI_Cvar_VariableString("identity"));
