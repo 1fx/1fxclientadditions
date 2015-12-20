@@ -669,6 +669,10 @@ typedef struct
 
 	TIdentity*		identityTeams[TEAM_NUM_TEAMS][MAX_TEAMIDENTITIES];
 	int				identitySelected;
+	// #CL_ADD
+	qboolean		forceSkinChecked;
+	qboolean		forceAllPlayerSkins;
+	// #END CL_ADD
 
 	qboolean		inGameLoad;
 

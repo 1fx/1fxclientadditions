@@ -1034,13 +1034,9 @@ static void UI_DrawPlayerModel(rectDef_t *rect)
 	vec3_t	viewangles;
 	vec3_t	moveangles;
 	char	identity[MAX_QPATH];
+
 	// #CL_ADD
-	char	gametypeName[MAX_CVAR_VALUE_STRING];
-
-	// Show all skins for H&S and H&Z, not just the ones defined for the red/blue teams.
-	trap_Cvar_VariableStringBuffer("ui_about_gametypename", gametypeName, sizeof(gametypeName));
-
-	if ( (int)trap_Cvar_VariableValue ( "ui_info_teamgame" ) && Q_stricmp(gametypeName, "Hide&Seek") && Q_stricmp(gametypeName, "Humans&Zombies") )
+	if ( (int)trap_Cvar_VariableValue ( "ui_info_teamgame" ) && !uiInfo.forceAllPlayerSkins )
 	{
 		strcpy(identity, UI_Cvar_VariableString("team_identity"));
 	}
@@ -4171,6 +4167,55 @@ UI_FeederCount
 */
 static int UI_FeederCount(float feederID)
 {
+	// #CL_ADD
+	char 	gametypeName[MAX_CVAR_VALUE_STRING];
+	int 	i;
+	char	identity[256];
+
+	// Boe!Man 12/19/15: Keep track of gametypes that use all skins but are team-based.
+	if(!uiInfo.forceSkinChecked){
+		trap_Cvar_VariableStringBuffer("ui_about_gametypename", gametypeName, sizeof(gametypeName));
+		trap_Cvar_VariableStringBuffer("identity", identity, sizeof(identity));
+
+		if(gametypeName[0] && identity[0]){
+			if(strcmp(gametypeName, "Hide&Seek") == 0 || strcmp(gametypeName, "Humans&Zombies") == 0){
+				// We're switching from team skins to all skins, enforce this in the UI by
+				// selecting our new skin in the player menu.
+				for(i = 0; i < bg_identityCount; i++){
+					if (Q_stricmp(bg_identities[i].mName, identity) == 0){
+						Menu_SetFeederSelection(NULL, FEEDER_TEAMIDENTITIES, i, "player_menu");
+						break;
+					}
+				}
+
+				uiInfo.forceAllPlayerSkins = qtrue;
+			}
+
+			uiInfo.forceSkinChecked = qtrue;
+		}
+	}
+
+	if((int)feederID == FEEDER_TEAMIDENTITIES){
+		if(uiInfo.forceAllPlayerSkins){
+			feederID = FEEDER_IDENTITIES;
+		}else{
+			// For some reason the UI never updates the team identity in the player menu.
+			// We can do this by just updating it every time the team identity count is requested.
+			team_t team = ui_info_team.integer;
+			trap_Cvar_VariableStringBuffer("team_identity", identity, sizeof(identity));
+
+			if(team == TEAM_RED || team == TEAM_BLUE){
+				for(i = 0; i < MAX_TEAMIDENTITIES; i++){
+					if(Q_stricmp(uiInfo.identityTeams[team][i]->mName, identity) == 0){
+						Menu_SetFeederSelection(NULL, FEEDER_TEAMIDENTITIES, i, "player_menu");
+						break;
+					}
+				}
+			}
+		}
+	}
+	// #END CL_ADD
+
 	switch ( (int)feederID )
 	{
 		case FEEDER_IDENTITIES:
@@ -4312,6 +4357,12 @@ static const char *UI_FeederItemText(float feederID, int index, int column, qhan
 	static int	lastTime = 0;
 
 	*handle = -1;
+
+	// #CL_ADD
+	if(uiInfo.forceAllPlayerSkins && (int)feederID == FEEDER_TEAMIDENTITIES){
+		feederID = FEEDER_IDENTITIES;
+	}
+	// #END CL_ADD
 
 	switch ( (int)feederID )
 	{
@@ -4532,6 +4583,12 @@ static const char *UI_FeederItemText(float feederID, int index, int column, qhan
 
 static qhandle_t UI_FeederItemImage ( float feederID, int index )
 {
+	// #CL_ADD
+	if(uiInfo.forceAllPlayerSkins && (int)feederID == FEEDER_TEAMIDENTITIES){
+		feederID = FEEDER_IDENTITIES;
+	}
+	// #END CL_ADD
+
 	switch ( (int)feederID )
 	{
 		case FEEDER_IDENTITIES:
@@ -4576,6 +4633,12 @@ static qhandle_t UI_FeederItemImage ( float feederID, int index )
 static void UI_FeederSelection(float feederID, int index)
 {
 	static char info[MAX_STRING_CHARS];
+
+	// #CL_ADD
+	if(uiInfo.forceAllPlayerSkins && (int)feederID == FEEDER_TEAMIDENTITIES){
+		feederID = FEEDER_IDENTITIES;
+	}
+	// #END CL_ADD
 
 	switch ( (int)feederID )
 	{

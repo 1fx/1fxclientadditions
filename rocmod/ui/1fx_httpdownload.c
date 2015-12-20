@@ -670,7 +670,7 @@ static void *_1fx_httpDL_mainDownloader()
 
     // Give the signal to reconnect.
     httpDL.httpDLStatus = HTTPDL_FINISHED;
-    trap_Cmd_ExecuteText(EXEC_APPEND, "reconnect ; \n");
+    trap_Cmd_ExecuteText(EXEC_APPEND, va("connect %s\n", ui_lastConnectedServer.string));
 }
 
 /*
