@@ -60,6 +60,7 @@ typedef enum
 	MOD_TEAMCHANGE,
 	MOD_TARGET_LASER,
 	MOD_TRIGGER_HURT,
+	MOD_TRIGGER_HURT_NOSUICIDE,
 
 	// #CL_ADD
 	// Boe!Man 11/29/15: Extra MODs for 1fx. Client Additions.

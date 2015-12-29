@@ -232,6 +232,7 @@ static void CG_Obituary( entityState_t *ent )
 			message = "saw the light";
 			break;
 		case MOD_TRIGGER_HURT:
+		case MOD_TRIGGER_HURT_NOSUICIDE:
 			message = "was in the wrong place";
 			break;
 		case MOD_TEAMCHANGE:
