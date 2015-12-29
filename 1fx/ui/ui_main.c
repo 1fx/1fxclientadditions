@@ -4572,7 +4572,7 @@ void _UI_Init( qboolean inGameLoad )
 
 	// Boe!Man 10/19/15: Start the HTTP downloader thread if
 	// the connected server is different from the previous one.
-	if(strcmp(ui_connectedServer.string, ui_lastConnectedServer.string) && strcmp(ui_connectedServer.string, "localhost")){
+	if(_1fx_misc_shouldInitDownload()){
 		if(inGameLoad){
 			// Ensure we stop connecting right about now.
 			trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; \n");
@@ -5292,7 +5292,7 @@ void UI_DrawLoadingScreen( void )
 		trap_Cvar_Update(&ui_connectedServer);
 
 		// Boe!Man 11/2/15: See if we should disconnect and download pk3 files.
-		if(Q_stricmp(ui_connectedServer.string, ui_lastConnectedServer.string) && Q_stricmp(cstate.servername,"localhost")){
+		if(_1fx_misc_shouldInitDownload()){
 			trap_Cmd_ExecuteText(EXEC_APPEND, "disconnect ; \n");
 		}
 		#ifdef Q3_VM

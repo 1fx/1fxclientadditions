@@ -40,10 +40,16 @@ typedef struct {
 } httpDownloadLocals_t;
 extern httpDownloadLocals_t httpDL;
 
-void	_1fx_httpDL_initialize	( void );
-void 	_1fx_joinHTTPThread		( void );
+void	    _1fx_httpDL_initialize	        ( void );
+void 	    _1fx_joinHTTPThread		        ( void );
 #endif // not CGAME
 #endif // not Q3_VM
+
+//
+// 1fx_misc.c
+//
+
+qboolean    _1fx_misc_shouldInitDownload    ( void );
 
 //
 // 1fx_qvmfuncs.c
@@ -52,7 +58,7 @@ void 	_1fx_joinHTTPThread		( void );
 #ifdef Q3_VM
 #define CHUNK_SIZE 131072 // Write in chunks of 128K to avoid exceeding the temporary memory buffer limit.
 
-void 	_1fx_coreUI_checkDLL 	( void );
+void 	    _1fx_coreUI_checkDLL 	        ( void );
 #endif // Q3_VM
 
 #endif // _1FX_LOCAL

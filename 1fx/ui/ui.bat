@@ -31,6 +31,8 @@ set cc=sof2lcc -DQ3_VM -S -Wf-target=bytecode -Wf-g -I..\..\cgame -I..\..\game -
 %cc% ../ui_gameinfo.c
 @if errorlevel 1 goto quit
 
+%cc% ../1fx_misc.c
+@if errorlevel 1 goto quit
 %cc% ../1fx_qvmfuncs.c
 @if errorlevel 1 goto quit
 
