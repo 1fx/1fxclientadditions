@@ -343,6 +343,95 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
 
 /*
 ==========================
+_1fx_httpDL_getRemoteFileList
+1/2/16 - 10:37 AM
+Gets a remote file list,
+if present and specified.
+==========================
+*/
+
+static char *_1fx_httpDL_getRemoteFileList(char *baseURL, char *paks)
+{
+    FILE    *f;
+    char    *iPaks = NULL;
+    char    fileExtension[5];
+    size_t  fsize;
+
+    // If the referenced paks contain a space, this can't be a file list.
+    if(strstr(paks, " ")){
+        return NULL;
+    }
+
+    // The server owner should redirect us to a .txt file with the containing paks,
+    // or this is not a file list.
+    Q_strncpyz(fileExtension, paks + strlen(paks) - 4, sizeof(fileExtension));
+    if(Q_stricmp(fileExtension, ".txt") != 0){
+        return NULL;
+    }
+
+    // Try to download the file list.
+    if(!_1fx_httpDL_getRemoteFile(va("%s%s", baseURL, paks), va("%s\\%s.tmp", fs_game, paks), paks)){
+        return NULL;
+    }
+
+    // Move to the new location and remove the old file.
+    MoveFile(va("%s\\%s.tmp", fs_game, paks), va("%s\\%s", fs_game, paks));
+    DeleteFile(va("%s\\%s.tmp", fs_game, paks));
+
+    // Open the file in read mode.
+    f = fopen(va("%s\\%s", fs_game, paks), "r");
+
+    // Verify success.
+    if(f == NULL){
+        DeleteFile(va("%s\\%s", fs_game, paks));
+        return NULL;
+    }
+
+    // Get the size of the retrieved data.
+    fseek(f, 0, SEEK_END);
+    fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    // Not valid if the file is smaller than 5 bytes.
+    // For the sake of safety we maintain a max of 16KB.
+    if(fsize < 5 || fsize > 16384){
+        fclose(f);
+        DeleteFile(va("%s\\%s", fs_game, paks));
+        return NULL;
+    }
+
+    // Allocate memory.
+    iPaks = calloc(fsize, sizeof(char));
+    if(iPaks == NULL){
+        fclose(f);
+        DeleteFile(va("%s\\%s", fs_game, paks));
+        return NULL;
+    }
+
+    // Read the first line from the file.
+    if(fgets(iPaks, fsize, f) == NULL){
+        fclose(f);
+        DeleteFile(va("%s\\%s", fs_game, paks));
+        free(iPaks);
+        return NULL;
+    }
+
+    // Remove newline characters from the fetched line.
+    if(iPaks[strlen(iPaks) - 2] == '\r'){
+        iPaks[strlen(iPaks) - 2] = '\0';
+    }else if(iPaks[strlen(iPaks) - 1] == '\n'){
+        iPaks[strlen(iPaks) - 1] = '\0';
+    }
+
+    // Close the file, and delete it.
+    fclose(f);
+    DeleteFile(va("%s\\%s", fs_game, paks));
+
+    return iPaks;
+}
+
+/*
+==========================
 _1fx_httpDL_replaceModFile
 10/30/15 - 3:30 PM
 Updates Mod file with
@@ -492,26 +581,40 @@ locally but are available on the remote server.
 
 static void _1fx_httpDL_checkExtraPaks()
 {
-	char        *s;
-	char        paks[MAX_CVAR_VALUE_STRING], currentPak[MAX_CVAR_VALUE_STRING], fileExtension[5];
+	char        *s, *iPaks;
+	char        baseURL[MAX_CVAR_VALUE_STRING], paks[MAX_CVAR_VALUE_STRING], currentPak[MAX_CVAR_VALUE_STRING], fileExtension[5];
     int         pakLength;
 
     // Check if the server owner made files available to download.
-    if(!strlen(ui_httpRefPaks.string) || !strlen(ui_httpBaseURL.string)
-        || !strcmp(ui_httpRefPaks.string, "none") || !strcmp(ui_httpBaseURL.string, "none")){
+    if(strlen(ui_httpRefPaks.string) < 5 || strlen(ui_httpBaseURL.string) < 5){
         #ifdef _DEBUG
-        Com_Printf("[CoreUI_DLL]: No extra files available to be downloaded (CVARs empty).\n");
+        Com_Printf("[CoreUI_DLL]: No extra files available to be downloaded (CVARs invalid/empty).\n");
         #endif // _DEBUG
         return;
     }
 
+    // Make a copy of the base URL, and check if there's a trailing space.
+    // If not, append one.
+    Q_strncpyz(baseURL, ui_httpBaseURL.string, sizeof(baseURL) - 1);
+    if(baseURL[strlen(baseURL) - 1] != '/'){
+        strcat(baseURL, "/");
+    }
+
     #ifdef _DEBUG
-	Com_Printf("[CoreUI_DLL]: Downloading extra .pk3 files from: %s\n", ui_httpBaseURL.string);
+	Com_Printf("[CoreUI_DLL]: Trying to download extra .pk3 files from: %s\n", baseURL);
 	#endif // _DEBUG
 
 	// Loop through the paks available on the server.
     Q_strncpyz(paks, ui_httpRefPaks.string, sizeof(paks));
-    s = paks;
+
+    // Check if the specified string should be parsed as file list.
+    iPaks = _1fx_httpDL_getRemoteFileList(baseURL, paks);
+    if(iPaks != NULL){
+        s = iPaks;
+    }else{
+        s = paks;
+    }
+
     memset(currentPak, 0, sizeof(currentPak));
     do{
         // Determine if there's another package available for download.
@@ -529,9 +632,8 @@ static void _1fx_httpDL_checkExtraPaks()
         // We need a valid .pk3 extension to continue.
         if((int)s + pakLength > 4){
             Q_strncpyz(fileExtension, s + pakLength - 5, sizeof(fileExtension));
-            Q_strlwr(fileExtension);
 
-            if(strcmp(fileExtension, ".pk3") == 0){
+            if(Q_stricmp(fileExtension, ".pk3") == 0){
                 if(!PathFileExists(va("%s\\%s", fs_game, currentPak))){
                     // We can download this .pk3 file now.
 
@@ -540,7 +642,7 @@ static void _1fx_httpDL_checkExtraPaks()
                         currentPak[strlen(currentPak) -1] = '\0';
                     }
 
-                    if(_1fx_httpDL_getRemoteFile(va("%s%s", ui_httpBaseURL.string, currentPak), va("%s\\%s.tmp", fs_game, currentPak), currentPak)){
+                    if(_1fx_httpDL_getRemoteFile(va("%s%s", baseURL, currentPak), va("%s\\%s.tmp", fs_game, currentPak), currentPak)){
                         // Move to the new location and remove the old file.
                         // Don't bother too much with this, if it fails we'll download it again the next time.
                         MoveFile(va("%s\\%s.tmp", fs_game, currentPak), va("%s\\%s", fs_game, currentPak));
@@ -559,16 +661,20 @@ static void _1fx_httpDL_checkExtraPaks()
 
                     pthread_exit(0);
                 }
-
-                // Reset currentPak variable.
-                memset(currentPak, 0, sizeof(currentPak));
             }
+
+            // Reset currentPak variable.
+            memset(currentPak, 0, sizeof(currentPak));
         }
 
         // Increase to the next package,
         // or break if there's nothing available anymore.
         s = nextPak;
     }while(s != NULL && strlen(s) > 2 && s++);
+
+    if(iPaks != NULL){
+        free(iPaks);
+    }
 
     #ifdef _DEBUG
 	Com_Printf("[CoreUI_DLL]: Finished downloading extra .pk3 files.\n");
