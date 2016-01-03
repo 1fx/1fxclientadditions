@@ -734,7 +734,7 @@ static void *_1fx_httpDL_mainDownloader()
     // We never really use this core file,
     // but it's good practice to keep this in
     // sync with the server.
-    _1fx_httpDL_checkModFile("1fx_coreUI_1.00.pk3");
+    _1fx_httpDL_checkModFile("1fx_coreUI_1.01.pk3");
 
 	_1fx_httpDL_checkModFile("sof2mp_uix86.dll");
 	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll");

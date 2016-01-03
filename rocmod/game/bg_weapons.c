@@ -246,6 +246,26 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	}
 #endif
 
+	// #CL_ADD
+	// Determine recoil ratio.
+	char recoilRatioBuf[8];
+	float recoilRatio, recoilRatioInaccuracy, recoilRatioKickAngles;
+
+	trap_Cvar_VariableStringBuffer("cg_recoilRatio", recoilRatioBuf, sizeof(recoilRatioBuf));
+	if(recoilRatioBuf[0]){
+		recoilRatio = atof(recoilRatioBuf);
+	}else{
+		recoilRatio = 1.0f;
+	}
+
+    if(weaponNum == WP_M590_SHOTGUN){
+        recoilRatioInaccuracy = 1.0f;
+    }else{
+        recoilRatioInaccuracy = recoilRatio;
+    }
+    recoilRatioKickAngles = recoilRatio;
+	// #END CL_ADD
+
 	// Parse the weapon animations
 	trap_GPG_FindPairValue( attacksub, "mp_animFire", "TORSO_ATTACK_PISTOL", tmpStr );
 	attack->animFire = GetIDForString ( bg_animTable, tmpStr );
@@ -267,7 +287,9 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	trap_GPG_FindPairValue(attacksub, "mp_damage||damage", "0", tmpStr);
 	attack->damage = atoi(tmpStr);
 	trap_GPG_FindPairValue(attacksub, "mp_inaccuracy||inaccuracy", "0", tmpStr);
-	attack->inaccuracy = (int)(atof(tmpStr)*1000.0f);
+	// #CL_ADD
+	attack->inaccuracy = (int)(atof(tmpStr) * recoilRatioInaccuracy * 1000.0f);
+	// #END CL_ADD
 	trap_GPG_FindPairValue(attacksub, "mp_zoominaccuracy", "0", tmpStr);
 	attack->zoomInaccuracy = (int)(atof(tmpStr)*1000.0f);
 	trap_GPG_FindPairValue(attacksub, "mp_maxInaccuracy||maxInaccuracy", "0", tmpStr);
@@ -295,6 +317,14 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 		trap_GPG_FindPairValue(attacksub, "mp_spread||spread", "0", tmpStr);
 		attack->inaccuracy = atof(tmpStr);
 	}
+
+	// #CL_ADD
+	for(i = 0; i < 3; i++){
+		attack->minKickAngles[i] *= recoilRatioKickAngles;
+		attack->maxKickAngles[i] *= recoilRatioKickAngles;
+	}
+	// #END CL_ADD
+
 	trap_GPG_FindPairValue(attacksub, "mp_pellets||pellets", "1", tmpStr);
 	attack->pellets = atof(tmpStr);
 	attack->mod = (meansOfDeath_t)weaponNum;

@@ -916,6 +916,7 @@ extern	vmCvar_t		cg_zoomWeaponChange;
 
 // #CL_ADD
 extern	vmCvar_t		cg_thirdPersonSaved;
+extern	vmCvar_t		cg_recoilRatio;
 // #END CL_ADD
 
 //

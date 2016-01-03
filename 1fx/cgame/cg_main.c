@@ -357,6 +357,7 @@ vmCvar_t	rw_enabled;
 
 // #CL_ADD
 vmCvar_t	cg_thirdPersonSaved;
+vmCvar_t	cg_recoilRatio;
 // #END CL_ADD
 
 typedef struct
@@ -497,7 +498,8 @@ static cvarTable_t cvarTable[] =
 	{ &cg_zoomWeaponChange,	"cg_zoomWeaponChange", "1", CVAR_ARCHIVE, 0.0f, 0.0f },
 
 	// #CL_ADD
-	{ &cg_thirdPersonSaved, "cg_thirdPersonSaved", "0", CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0.0f, 1.0f },
+	{ &cg_thirdPersonSaved, "cg_thirdPersonSaved", 	"0",	CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0.0f, 1.0f },
+	{ &cg_recoilRatio, 		"cg_recoilRatio", 		"1.0",	CVAR_LOCK_RANGE | CVAR_INTERNAL, 0.0f, 1.0f },
 	// #END CL_ADD
 };
 

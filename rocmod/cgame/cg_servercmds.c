@@ -358,10 +358,14 @@ and whenever the server updates any serverinfo flagged cvars
 */
 void CG_ParseServerinfo( void )
 {
+	// #CL_ADD
 	const char	*info;
+	const char	*sysInfo;
 	char		*mapname;
 
 	info = CG_ConfigString( CS_SERVERINFO );
+	sysInfo = CG_ConfigString( CS_SYSTEMINFO );
+	// #END CL_ADD
 	cgs.gametype = BG_FindGametype ( Info_ValueForKey( info, "g_gametype" ) );
 	cgs.gametypeData = &bg_gametypeData[cgs.gametype];
 	cgs.dmflags = atoi( Info_ValueForKey( info, "dmflags" ) );
@@ -380,6 +384,14 @@ void CG_ParseServerinfo( void )
 		cgs.allowThirdPerson = atoi(s);
 	}else{
 		cgs.allowThirdPerson = 0;
+	}
+
+	// Boe!Man 1/2/16: Check for the recoil ratio.
+	s = Info_ValueForKey( sysInfo, "g_recoilRatio" );
+	if(*s)
+	{
+		trap_Cvar_Set("cg_recoilRatio", s);
+		trap_Cvar_Update(&cg_recoilRatio);
 	}
 
 	// Also determine what gametype the server is running.
