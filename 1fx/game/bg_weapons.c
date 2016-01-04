@@ -161,6 +161,10 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	void*	sub;
 	char	tmpStr[256];
 	int		i;
+	// #CL_ADD
+	char	recoilRatioBuf[8];
+	float 	recoilRatio, recoilRatioInaccuracy, recoilRatioKickAngles;
+	// #END CL_ADD
 
 	// No group is success.  This is to allow NULL to be passed
 	if ( NULL == attacksub )
@@ -247,9 +251,6 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 
 	// #CL_ADD
 	// Determine recoil ratio.
-	char recoilRatioBuf[8];
-	float recoilRatio, recoilRatioInaccuracy, recoilRatioKickAngles;
-
 	trap_Cvar_VariableStringBuffer("cg_recoilRatio", recoilRatioBuf, sizeof(recoilRatioBuf));
 	if(recoilRatioBuf[0]){
 		recoilRatio = atof(recoilRatioBuf);
