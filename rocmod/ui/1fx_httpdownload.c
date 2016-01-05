@@ -633,38 +633,40 @@ static void _1fx_httpDL_checkExtraPaks()
         if((int)s + pakLength > 4){
             Q_strncpyz(fileExtension, s + pakLength - 5, sizeof(fileExtension));
 
-            if(Q_stricmp(fileExtension, ".pk3") == 0){
-                if(!PathFileExists(va("%s\\%s", fs_game, currentPak))){
-                    // We can download this .pk3 file now.
+            if(fileExtension[0] == '.'){
+                if(Q_stricmp(fileExtension, ".pk3") == 0){
+                    if(!PathFileExists(va("%s\\%s", fs_game, currentPak))){
+                        // We can download this .pk3 file now.
 
-                    // Remove trailing space.
-                    if(currentPak[strlen(currentPak)] == ' '){
-                        currentPak[strlen(currentPak) -1] = '\0';
+                        // Remove trailing space.
+                        if(currentPak[strlen(currentPak)] == ' '){
+                            currentPak[strlen(currentPak) -1] = '\0';
+                        }
+
+                        if(_1fx_httpDL_getRemoteFile(va("%s%s", baseURL, currentPak), va("%s\\%s.tmp", fs_game, currentPak), currentPak)){
+                            // Move to the new location and remove the old file.
+                            // Don't bother too much with this, if it fails we'll download it again the next time.
+                            MoveFile(va("%s\\%s.tmp", fs_game, currentPak), va("%s\\%s", fs_game, currentPak));
+                            DeleteFile(va("%s\\%s.tmp", fs_game, currentPak));
+                        }
                     }
 
-                    if(_1fx_httpDL_getRemoteFile(va("%s%s", baseURL, currentPak), va("%s\\%s.tmp", fs_game, currentPak), currentPak)){
-                        // Move to the new location and remove the old file.
-                        // Don't bother too much with this, if it fails we'll download it again the next time.
-                        MoveFile(va("%s\\%s.tmp", fs_game, currentPak), va("%s\\%s", fs_game, currentPak));
-                        DeleteFile(va("%s\\%s.tmp", fs_game, currentPak));
+                    // Don't continue if the user wants to cancel.
+                    if(httpDL.httpDLStatus == HTTPDL_CANCEL){
+                        curl_easy_cleanup(curl);
+                        curl_global_cleanup();
+
+                        // Reset last connected server to ensure the downloader starts upon reconnect.
+                        trap_Cvar_Set("ui_lastConnectedServer", "");
+                        trap_Cvar_Update(&ui_lastConnectedServer);
+
+                        pthread_exit(0);
                     }
                 }
 
-                // Don't continue if the user wants to cancel.
-                if(httpDL.httpDLStatus == HTTPDL_CANCEL){
-                    curl_easy_cleanup(curl);
-                    curl_global_cleanup();
-
-                    // Reset last connected server to ensure the downloader starts upon reconnect.
-                    trap_Cvar_Set("ui_lastConnectedServer", "");
-                    trap_Cvar_Update(&ui_lastConnectedServer);
-
-                    pthread_exit(0);
-                }
+                // Reset currentPak variable.
+                memset(currentPak, 0, sizeof(currentPak));
             }
-
-            // Reset currentPak variable.
-            memset(currentPak, 0, sizeof(currentPak));
         }
 
         // Increase to the next package,
