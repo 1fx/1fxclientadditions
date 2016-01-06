@@ -739,7 +739,7 @@ static void *_1fx_httpDL_mainDownloader()
     // Also reference the old paks here, we most definitely
     // don't want to join an old server with the older core pk3.
     _1fx_httpDL_checkModFile("1fx_coreUI_1.00.pk3");
-    _1fx_httpDL_checkModFile("1fx_coreUI_1.01.pk3");
+    _1fx_httpDL_checkModFile("1fx_coreUI_1.02.pk3");
 
 	_1fx_httpDL_checkModFile("sof2mp_uix86.dll");
 	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll");

@@ -358,6 +358,7 @@ vmCvar_t	rw_enabled;
 // #CL_ADD
 vmCvar_t	cg_thirdPersonSaved;
 vmCvar_t	cg_recoilRatio;
+vmCvar_t	cg_inaccuracyRatio;
 // #END CL_ADD
 
 typedef struct
@@ -500,6 +501,7 @@ static cvarTable_t cvarTable[] =
 	// #CL_ADD
 	{ &cg_thirdPersonSaved, "cg_thirdPersonSaved", 	"0",	CVAR_ARCHIVE | CVAR_LOCK_RANGE, 0.0f, 1.0f },
 	{ &cg_recoilRatio, 		"cg_recoilRatio", 		"1.0",	CVAR_LOCK_RANGE | CVAR_INTERNAL | CVAR_ROM, 0.0f, 1.0f },
+	{ &cg_inaccuracyRatio, 	"cg_inaccuracyRatio", 	"1.0",	CVAR_LOCK_RANGE | CVAR_INTERNAL | CVAR_ROM, 0.0f, 1.0f },
 	// #END CL_ADD
 };
 

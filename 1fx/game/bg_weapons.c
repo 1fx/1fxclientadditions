@@ -162,8 +162,8 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	char	tmpStr[256];
 	int		i;
 	// #CL_ADD
-	char	recoilRatioBuf[8];
-	float 	recoilRatio, recoilRatioInaccuracy, recoilRatioKickAngles;
+	char	recoilRatioBuf[4], inaccuracyRatioBuf[4];
+	float 	recoilRatio, inaccuracyRatio;
 	// #END CL_ADD
 
 	// No group is success.  This is to allow NULL to be passed
@@ -250,20 +250,20 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 #endif
 
 	// #CL_ADD
-	// Determine recoil ratio.
+	// Determine recoil and inaccuracy ratio.
 	trap_Cvar_VariableStringBuffer("cg_recoilRatio", recoilRatioBuf, sizeof(recoilRatioBuf));
+	trap_Cvar_VariableStringBuffer("cg_inaccuracyRatio", inaccuracyRatioBuf, sizeof(inaccuracyRatioBuf));
 	if(recoilRatioBuf[0]){
 		recoilRatio = atof(recoilRatioBuf);
 	}else{
 		recoilRatio = 1.0f;
 	}
 
-    if(weaponNum == WP_M590_SHOTGUN){
-        recoilRatioInaccuracy = 1.0f;
+	if(inaccuracyRatioBuf[0] && weaponNum != WP_M590_SHOTGUN){
+		inaccuracyRatio = atof(inaccuracyRatioBuf);
     }else{
-        recoilRatioInaccuracy = recoilRatio;
+        inaccuracyRatio = 1.0f;
     }
-    recoilRatioKickAngles = recoilRatio;
 	// #END CL_ADD
 
 	// Parse the weapon animations
@@ -288,7 +288,7 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 	attack->damage = atoi(tmpStr);
 	trap_GPG_FindPairValue(attacksub, "mp_inaccuracy||inaccuracy", "0", tmpStr);
 	// #CL_ADD
-	attack->inaccuracy = (int)(atof(tmpStr) * recoilRatioInaccuracy * 1000.0f);
+	attack->inaccuracy = (int)(atof(tmpStr) * inaccuracyRatio * 1000.0f);
 	// #END CL_ADD
 	trap_GPG_FindPairValue(attacksub, "mp_zoominaccuracy", "0", tmpStr);
 	attack->zoomInaccuracy = (int)(atof(tmpStr)*1000.0f);
@@ -320,8 +320,8 @@ static qboolean BG_ParseAttackStats ( int weaponNum, attackData_t* attack, void 
 
 	// #CL_ADD
 	for(i = 0; i < 3; i++){
-		attack->minKickAngles[i] *= recoilRatioKickAngles;
-		attack->maxKickAngles[i] *= recoilRatioKickAngles;
+		attack->minKickAngles[i] *= recoilRatio;
+		attack->maxKickAngles[i] *= recoilRatio;
 	}
 	// #END CL_ADD
 

@@ -386,12 +386,19 @@ void CG_ParseServerinfo( void )
 		cgs.allowThirdPerson = 0;
 	}
 
-	// Boe!Man 1/2/16: Check for the recoil ratio.
+	// Boe!Man 1/2/16: Check for the recoil and inaccuracy ratio.
 	s = Info_ValueForKey( sysInfo, "g_recoilRatio" );
 	if(*s)
 	{
 		trap_Cvar_Set("cg_recoilRatio", s);
 		trap_Cvar_Update(&cg_recoilRatio);
+	}
+
+	s = Info_ValueForKey( sysInfo, "g_inaccuracyRatio" );
+	if(*s)
+	{
+		trap_Cvar_Set("cg_inaccuracyRatio", s);
+		trap_Cvar_Update(&cg_inaccuracyRatio);
 	}
 
 	// Also determine what gametype the server is running.
