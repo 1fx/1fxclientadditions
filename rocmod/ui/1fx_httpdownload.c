@@ -17,6 +17,8 @@
 static CURL             *curl;
 static pthread_t        downloadThread;
 static char             fs_game[MAX_CVAR_VALUE_STRING];
+static char             fs_cdpath[MAX_CVAR_VALUE_STRING];
+static qboolean         coreSecondaryLocation;
 
 static double           timeSinceNoProgress             = -1;
 static curl_off_t       downloadedBytes                 = 0;
@@ -95,6 +97,21 @@ static size_t _1fx_httpDL_cURL_checkProgress(void *ptr, curl_off_t dltotal, curl
 
     return 0;
 }
+
+/*
+==========================
+_1fx_httpDL_getFileChecksum
+3/20/16 - 4:45 PM
+Determines the location
+of core DLL files.
+==========================
+*/
+
+static qboolean _1fx_httpDL_useSecondaryLocation()
+{
+    return !PathFileExists(va("%s\\sof2mp_uix86.dll", fs_game));
+}
+
 
 /*
 ==========================
@@ -439,13 +456,18 @@ downloaded *.tmp file.
 ==========================
 */
 
-static void _1fx_httpDL_replaceModFile(char *filename, char *remoteChecksum)
+static void _1fx_httpDL_replaceModFile(char *filename, char *remoteChecksum, qboolean isDLL)
 {
     char fullFilename[MAX_PATH];
     char *newChecksum;
 
-    // Make a copy of the file name with the fs_game CVAR path embedded.
-    Q_strncpyz(fullFilename, va("%s\\%s", fs_game, filename), sizeof(fullFilename));
+    // Make a copy of the file name with the fs_game CVAR path embedded,
+    // or with also the fs_cdpath CVAR path embedded.
+    if(!isDLL || !coreSecondaryLocation){
+        Q_strncpyz(fullFilename, va("%s\\%s", fs_game, filename), sizeof(fullFilename));
+    }else{
+        Q_strncpyz(fullFilename, va("%s\\%s\\%s", fs_cdpath, fs_game, filename), sizeof(fullFilename));
+    }
 
     // Don't just overwrite the original file in case it's still in use. Rename it first.
     if(!MoveFile(fullFilename, va("%s.bak", fullFilename))){
@@ -505,19 +527,28 @@ remote one, updates it.
 ==========================
 */
 
-static void _1fx_httpDL_checkModFile(char *filename)
+static void _1fx_httpDL_checkModFile(char *filename, qboolean isDLL)
 {
-    char *localChecksum;
-    char *remoteChecksum;
+    char    *localChecksum;
+    char    *remoteChecksum;
+    char    fullFilename[MAX_PATH];
+
+    // Determine the full filename.
+    if(!isDLL || !coreSecondaryLocation){
+        Q_strncpyz(fullFilename, va("%s\\%s", fs_game, filename), sizeof(fullFilename));
+    }else{
+        // Only for DLLs in the secondary core location.
+        Q_strncpyz(fullFilename, va("%s\\%s\\%s", fs_cdpath, fs_game, filename), sizeof(fullFilename));
+    }
 
     // First off, check if there's an old backup left. Remove that now.
-    if(PathFileExists(va("%s\\%s.bak", fs_game, filename))){
-        DeleteFile(va("%s\\%s.bak", fs_game, filename));
+    if(PathFileExists(va("%s.bak", fullFilename))){
+        DeleteFile(va("%s.bak", fullFilename));
     }
 
     // Check if the 1fx. Mod website has an update available for us.
-	// Calculate local checksum.
-    localChecksum = _1fx_httpDL_getFileChecksum(va("%s\\%s", fs_game, filename));
+    // Calculate local checksum.
+    localChecksum = _1fx_httpDL_getFileChecksum(fullFilename);
 
     #ifdef _DEBUG
     if(localChecksum != NULL){
@@ -544,16 +575,16 @@ static void _1fx_httpDL_checkModFile(char *filename)
         #endif // _DEBUG
 
         // Fetch file and verify success.
-        if(PathFileExists(va("%s\\%s", fs_game, filename))){
-            if(_1fx_httpDL_getRemoteFile(va("%s/%s/%s/%s", HTTPDL_BASEURL, SOF2_VERSION_ID, fs_game, filename), va("%s\\%s.tmp", fs_game, filename), filename)){
+        if(PathFileExists(fullFilename)){
+            if(_1fx_httpDL_getRemoteFile(va("%s/%s/%s/%s", HTTPDL_BASEURL, SOF2_VERSION_ID, fs_game, filename), va("%s.tmp", fullFilename), filename)){
                 // We can replace the original file now with the downloaded file.
-                _1fx_httpDL_replaceModFile(filename, remoteChecksum);
+                _1fx_httpDL_replaceModFile(filename, remoteChecksum, isDLL);
             }
         }else{
             // First time we download this file. Save it to the proper location immediately.
             // If this happens to fail, no worries, next update the checksum won't match,
             // forcing a re-download.
-            _1fx_httpDL_getRemoteFile(va("%s/%s/%s/%s", HTTPDL_BASEURL, SOF2_VERSION_ID, fs_game, filename), va("%s\\%s", fs_game, filename), filename);
+            _1fx_httpDL_getRemoteFile(va("%s/%s/%s/%s", HTTPDL_BASEURL, SOF2_VERSION_ID, fs_game, filename), fullFilename, filename);
 
             #ifdef _DEBUG
             Com_Printf("[CoreUI_DLL]: Initial download complete of file: %s\n", filename);
@@ -729,6 +760,9 @@ static void *_1fx_httpDL_mainDownloader()
     // Initial pak size is -1 (so we don't get weird time left in seconds).
     httpDL.pakSize = -1;
 
+    // Determine the location of core files.
+    coreSecondaryLocation = _1fx_httpDL_useSecondaryLocation();
+
     Com_Printf("Checking 1fx. Client Additions..\n");
 
     // Start checking the core Mod files.
@@ -737,13 +771,14 @@ static void *_1fx_httpDL_mainDownloader()
     // but it's good practice to keep this in
     // sync with the server.
     // Also reference the old paks here, we most definitely
-    // don't want to join an old server with the older core pk3.
-    _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.00.pk3");
-    _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.02.pk3");
+    // don't want to join an old server with the older core pk3 referenced.
+    _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.00.pk3", qfalse);
+    _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.02.pk3", qfalse);
+    _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.10.pk3", qfalse);
 
-	_1fx_httpDL_checkModFile("sof2mp_uix86.dll");
-	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll");
-	_1fx_httpDL_checkModFile("ROCmod_1fx_client.pk3");
+	_1fx_httpDL_checkModFile("sof2mp_uix86.dll", qtrue);
+	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll", qtrue);
+	_1fx_httpDL_checkModFile("ROCmod_1fx_client.pk3", qfalse);
 
 	// Delete temporary MD5SUM file.
     DeleteFile(va("%s\\1fx_MD5SUM", fs_game));
@@ -796,8 +831,9 @@ void _1fx_httpDL_initialize()
 {
     int errnum;
 
-    // Fetch the fs_game CVAR value, and store it locally.
+    // Fetch the fs_game and fs_cdpath CVAR values, and store it locally.
     trap_Cvar_VariableStringBuffer("fs_game", fs_game, sizeof(fs_game));
+    trap_Cvar_VariableStringBuffer("fs_cdpath", fs_cdpath, sizeof(fs_cdpath));
 
     // Start the thread and start iterating through the files.
     errnum = pthread_create(&downloadThread, NULL, _1fx_httpDL_mainDownloader, NULL);

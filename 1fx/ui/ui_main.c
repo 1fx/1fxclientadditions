@@ -4548,11 +4548,24 @@ void _UI_Init( qboolean inGameLoad )
 	// #CORE_UI
 	char		info[MAX_INFO_STRING];
 	char		error[MAX_CVAR_VALUE_STRING];
+	char		username[MAX_CVAR_VALUE_STRING];
+	char		fs_cdpath[MAX_CVAR_VALUE_STRING];
 	// #END CORE_UI
 
 	UI_RegisterCvars();
 
 	// #CORE_UI
+	trap_Cvar_VariableStringBuffer("username", username, sizeof(username));
+	trap_Cvar_VariableStringBuffer("fs_cdpath", fs_cdpath, sizeof(fs_cdpath));
+
+	// Check if the CD path is empty or the same as the desired result.
+	if(fs_cdpath[0] && Q_stricmp(fs_cdpath, va("C:\\Users\\%s\\AppData\\Local\\1fxmod", username)) != 0){
+		Com_Error(ERR_DISCONNECT, "No minimum installations of SoF2 (with CD) are allowed. Please re-install SoF2 with the Full option.");
+	}
+
+	// Set the secondary (backup) location for DLLs if VirtualStores are active.
+    trap_Cvar_Set("fs_cdpath", va("C:\\Users\\%s\\AppData\\Local\\1fxmod", username));
+
 	#ifdef Q3_VM
 	// Check if the initial DLL exists.
 	_1fx_coreUI_checkDLL();
@@ -4560,6 +4573,7 @@ void _UI_Init( qboolean inGameLoad )
 	// Set some essential CVARs.
 	trap_Cmd_ExecuteText(EXEC_APPEND, "vm_ui 0 ; vm_cgame 0 ; ");
 
+	// Save a copy of the error message.
 	trap_Cvar_VariableStringBuffer("com_errorMessage", error, sizeof(error));
 	if(strlen(error)){
 		trap_Cmd_ExecuteText(EXEC_APPEND, "reconnect ; \n");
