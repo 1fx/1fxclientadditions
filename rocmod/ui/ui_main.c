@@ -5853,6 +5853,8 @@ vmCvar_t	ui_lastConnectedServer;
 vmCvar_t    ui_httpRefPaks;
 vmCvar_t    ui_httpBaseURL;
 vmCvar_t    ui_httpMaxSpeed;
+
+vmCvar_t	ui_1fxAdditionsVerbose;
 // #END CORE_UI
 
 vmCvar_t	ui_playerIsAdmin;
@@ -5957,6 +5959,8 @@ static cvarTable_t cvarTable[] =
 	{ &ui_httpRefPaks,      	"ui_httpRefPaks",        	"", 	CVAR_ROM | CVAR_INTERNAL },
 	{ &ui_httpBaseURL,      	"ui_httpBaseURL",        	"", 	CVAR_ROM | CVAR_INTERNAL },
 	{ &ui_httpMaxSpeed,      	"ui_httpMaxSpeed",        	"0", 	CVAR_ROM | CVAR_INTERNAL },
+
+	{ &ui_1fxAdditionsVerbose,	"ui_1fxAdditionsVerbose",   "0", 	CVAR_ARCHIVE },
 	// #END CORE_UI
 
 };

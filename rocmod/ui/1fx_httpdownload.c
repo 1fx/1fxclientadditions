@@ -281,9 +281,9 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
         return qfalse;
     }
 
-    #ifdef _DEBUG
-    Com_Printf("[CoreUI_DLL]: Trying to downloaded file: %s\n", url);
-    #endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_DLL]: Trying to downloaded file: %s\n", url);
+    }
 
     // Start cURL routine.
     curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -309,9 +309,9 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
         // This probably means the server returned a >= 400 HTTP error.
         // Most likely the file is not present on the remote server.
         // Or the remote file isn't a valid MD5SUM file.
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_DLL]: Getting file headers failed: %s.\n", curl_easy_strerror(res));
-        #endif // _DEBUG
+        if(ui_1fxAdditionsVerbose.integer){
+            Com_Printf("[CoreUI_DLL]: Getting file headers failed: %s.\n", curl_easy_strerror(res));
+        }
         fclose(f);
         DeleteFile(destBuf);
         return qfalse;
@@ -351,9 +351,9 @@ static qboolean _1fx_httpDL_getRemoteFile(char *url, char *destination, char *pa
         return qfalse;
     }
 
-    #ifdef _DEBUG
-    Com_Printf("[CoreUI_DLL]: Successfully downloaded file: %s\n", pakName);
-    #endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_DLL]: Successfully downloaded file: %s\n", pakName);
+    }
 
     return qtrue;
 }
@@ -471,18 +471,18 @@ static void _1fx_httpDL_replaceModFile(char *filename, char *remoteChecksum, qbo
 
     // Don't just overwrite the original file in case it's still in use. Rename it first.
     if(!MoveFile(fullFilename, va("%s.bak", fullFilename))){
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_DLL]: Couldn't move mod file to .bak.\n");
-        #endif // _DEBUG
+        if(ui_1fxAdditionsVerbose.integer){
+            Com_Printf("[CoreUI_DLL]: Couldn't move mod file to .bak.\n");
+        }
         return;
     }
 
     // Made a backup of the original file (and possibly file handle).
     // Now move the .tmp file to the original file location.
     if(!MoveFile(va("%s.tmp", fullFilename), fullFilename)){
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_DLL]: Couldn't move update file to mod file\n.");
-        #endif // _DEBUG
+        if(ui_1fxAdditionsVerbose.integer){
+            Com_Printf("[CoreUI_DLL]: Couldn't move update file to mod file\n.");
+        }
 
         // Restore old file.
         // Don't check it here, worst case is that this fails and CoreUI QVM will restore the original one.
@@ -496,9 +496,9 @@ static void _1fx_httpDL_replaceModFile(char *filename, char *remoteChecksum, qbo
 
     // Verify the downloaded package.
     if(newChecksum == NULL || strcmp(newChecksum, remoteChecksum)){
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_DLL]: Checksum didn't match of new file.\n");
-        #endif // _DEBUG
+        if(ui_1fxAdditionsVerbose.integer){
+            Com_Printf("[CoreUI_DLL]: Checksum didn't match of new file.\n");
+        }
 
         // Restore old file.
         DeleteFile(fullFilename);
@@ -511,9 +511,9 @@ static void _1fx_httpDL_replaceModFile(char *filename, char *remoteChecksum, qbo
         return;
     }
 
-    #ifdef _DEBUG
-    Com_Printf("[CoreUI_DLL]: Checksum matched of new file, success!\n");
-    #endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_DLL]: Checksum matched of new file, success!\n");
+    }
     free(newChecksum);
 }
 
@@ -550,29 +550,29 @@ static void _1fx_httpDL_checkModFile(char *filename, qboolean isDLL)
     // Calculate local checksum.
     localChecksum = _1fx_httpDL_getFileChecksum(fullFilename);
 
-    #ifdef _DEBUG
-    if(localChecksum != NULL){
-        Com_Printf("[CoreUI_DLL]: Calculated local hash (%s): %s\n", filename, localChecksum);
-    }else{
-        Com_Printf("[CoreUI_DLL]: No such local file: %s\n", filename);
+    if(ui_1fxAdditionsVerbose.integer){
+        if(localChecksum != NULL){
+            Com_Printf("[CoreUI_DLL]: Calculated local hash (%s): %s\n", filename, localChecksum);
+        }else{
+            Com_Printf("[CoreUI_DLL]: No such local file: %s\n", filename);
+        }
     }
-    #endif // _DEBUG
 
     remoteChecksum = _1fx_httpDL_getRemoteChecksum(va("%s/%s/%s/%s.MD5SUM", HTTPDL_BASEURL, SOF2_VERSION_ID, fs_game, filename));
 
-    #ifdef _DEBUG
-    if(remoteChecksum != NULL){
-        Com_Printf("[CoreUI_DLL]: Received remote hash (%s): %s\n", filename, remoteChecksum);
-    }else{
-        Com_Printf("[CoreUI_DLL]: No such remote file: %s\n", filename);
+    if(ui_1fxAdditionsVerbose.integer){
+        if(remoteChecksum != NULL){
+            Com_Printf("[CoreUI_DLL]: Received remote hash (%s): %s\n", filename, remoteChecksum);
+        }else{
+            Com_Printf("[CoreUI_DLL]: No such remote file: %s\n", filename);
+        }
     }
-    #endif // _DEBUG
 
     // Check if there's an update required.
     if(remoteChecksum && (!localChecksum || (localChecksum && strcmp(localChecksum, remoteChecksum)))){
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_DLL]: Update required for file: %s\n", filename);
-        #endif // _DEBUG
+        if(ui_1fxAdditionsVerbose.integer){
+            Com_Printf("[CoreUI_DLL]: Update required for file: %s\n", filename);
+        }
 
         // Fetch file and verify success.
         if(PathFileExists(fullFilename)){
@@ -586,9 +586,9 @@ static void _1fx_httpDL_checkModFile(char *filename, qboolean isDLL)
             // forcing a re-download.
             _1fx_httpDL_getRemoteFile(va("%s/%s/%s/%s", HTTPDL_BASEURL, SOF2_VERSION_ID, fs_game, filename), fullFilename, filename);
 
-            #ifdef _DEBUG
-            Com_Printf("[CoreUI_DLL]: Initial download complete of file: %s\n", filename);
-            #endif // _DEBUG
+            if(ui_1fxAdditionsVerbose.integer){
+                Com_Printf("[CoreUI_DLL]: Initial download complete of file: %s\n", filename);
+            }
         }
     }
 
@@ -618,9 +618,9 @@ static void _1fx_httpDL_checkExtraPaks()
 
     // Check if the server owner made files available to download.
     if(strlen(ui_httpRefPaks.string) < 5 || strlen(ui_httpBaseURL.string) < 5){
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_DLL]: No extra files available to be downloaded (CVARs invalid/empty).\n");
-        #endif // _DEBUG
+        if(ui_1fxAdditionsVerbose.integer){
+            Com_Printf("[CoreUI_DLL]: No extra files available to be downloaded (CVARs invalid/empty).\n");
+        }
         return;
     }
 
@@ -631,9 +631,9 @@ static void _1fx_httpDL_checkExtraPaks()
         strcat(baseURL, "/");
     }
 
-    #ifdef _DEBUG
-	Com_Printf("[CoreUI_DLL]: Trying to download extra .pk3 files from: %s\n", baseURL);
-	#endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_DLL]: Trying to download extra .pk3 files from: %s\n", baseURL);
+    }
 
 	// Loop through the paks available on the server.
     Q_strncpyz(paks, ui_httpRefPaks.string, sizeof(paks));
@@ -654,8 +654,8 @@ static void _1fx_httpDL_checkExtraPaks()
             pakLength = nextPak - s;
         }else{
             pakLength = strlen(s);
+            pakLength++;
         }
-        pakLength++;
 
         // We can set the current pak now.
         strncat(currentPak, s, pakLength);
@@ -709,9 +709,9 @@ static void _1fx_httpDL_checkExtraPaks()
         free(iPaks);
     }
 
-    #ifdef _DEBUG
-	Com_Printf("[CoreUI_DLL]: Finished downloading extra .pk3 files.\n");
-	#endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_DLL]: Finished downloading extra .pk3 files.\n");
+    }
 }
 
 /*
@@ -725,9 +725,9 @@ initializing the downloader.
 
 static void *_1fx_httpDL_mainDownloader()
 {
-    #ifdef _DEBUG
-    Com_Printf("[CoreUI_DLL]: Main downloader thread initialized.\n");
-    #endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_DLL]: Main downloader thread initialized.\n");
+    }
 
     // Start initializing cURL.
     curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -748,7 +748,7 @@ static void *_1fx_httpDL_mainDownloader()
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, _1fx_httpDL_cURL_checkProgress);
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "1fx-httpdownloader/" _1FX_CLADD_VER);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "1fx-httpdownloader/" _1FX_CLADD_VER " (Windows)");
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
 
@@ -775,6 +775,7 @@ static void *_1fx_httpDL_mainDownloader()
     _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.00.pk3", qfalse);
     _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.02.pk3", qfalse);
     _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.10.pk3", qfalse);
+    _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.20.pk3", qfalse);
 
 	_1fx_httpDL_checkModFile("sof2mp_uix86.dll", qtrue);
 	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll", qtrue);
@@ -804,11 +805,11 @@ static void *_1fx_httpDL_mainDownloader()
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 
-    #ifdef _DEBUG
-    Com_Printf("[CoreUI_DLL]: Main downloader thread finished.\n");
-    #else
-    Com_Printf("1fx. HTTP Downloader finished!\n");
-    #endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_DLL]: Main downloader thread finished.\n");
+    }else{
+        Com_Printf("1fx. HTTP Downloader finished!\n");
+    }
 
     // Ensure the engine wants to update the FS list.
     trap_Cvar_Set("fs_game", "none");
@@ -852,11 +853,11 @@ void _1fx_httpDL_initialize()
 	trap_Cvar_Set("ui_lastConnectedServer", ui_connectedServer.string);
 	trap_Cvar_Update(&ui_lastConnectedServer);
 
-    #ifdef _DEBUG
-    Com_Printf("[CoreUI_DLL]: Initialized HTTP download thread.\n");
-    #else
-    Com_Printf("Initialized 1fx. HTTP Downloader.\n");
-    #endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_DLL]: Initialized HTTP download thread.\n");
+    }else{
+        Com_Printf("Initialized 1fx. HTTP Downloader.\n");
+    }
 }
 
 /*

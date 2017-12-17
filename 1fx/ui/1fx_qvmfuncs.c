@@ -22,9 +22,7 @@ static void _1fx_coreUI_installDLL()
     fileHandle_t    input, output, testPk3;
     char            *data;
     int             len, len2 = 0, lenChunk = 0;
-    #ifdef _DEBUG
     int             chunkNum;
-    #endif // _DEBUG
 
     // The base Core UI DLL wasn't detected,
     // so we're going to extract it now from the .pk3.
@@ -100,21 +98,21 @@ static void _1fx_coreUI_installDLL()
         // Free memory allocated.
         trap_VM_LocalTempFree(lenChunk);
 
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_QVM]: Wrote chunk #%d with a length of %d B.\n", chunkNum, lenChunk);
+        if(ui_1fxAdditionsVerbose.integer){
+            Com_Printf("[CoreUI_QVM]: Wrote chunk #%d with a length of %d B.\n", chunkNum, lenChunk);
+        }
 
         // Advance to the next chunk.
         chunkNum++;
-        #endif // _DEBUG
     }while(len != len2);
 
     // Safe to close the input and output file now.
     trap_FS_FCloseFile(input);
     trap_FS_FCloseFile(output);
 
-    #ifdef _DEBUG
-    Com_Printf("[CoreUI_QVM]: Initial Core UI DLL successfully installed.\n");
-    #endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_QVM]: Initial Core UI DLL successfully installed.\n");
+    }
 }
 
 /*
@@ -167,14 +165,14 @@ static qboolean _1fx_coreUI_checkSecondaryLocation()
         // We need to skip this file the next iteration, so remember its length.
         fileLen = strlen(modDirectoryPtr);
 
-        #ifdef _DEBUG
-        Com_Printf("[CoreUI_QVM]: Found mod directory \"%s\" in secondary location...\n", modDirectoryPtr);
-        #endif // _DEBUG
+        if(ui_1fxAdditionsVerbose.integer){
+            Com_Printf("[CoreUI_QVM]: Found mod directory \"%s\" in secondary location...\n", modDirectoryPtr);
+        }
 
         if(!Q_stricmp(fs_game, modDirectoryPtr)){
-            #ifdef _DEBUG
-            Com_Printf("[CoreUI_QVM]: MATCHED mod directory \"%s\" in secondary location!\n", modDirectoryPtr);
-            #endif // _DEBUG
+            if(ui_1fxAdditionsVerbose.integer){
+                Com_Printf("[CoreUI_QVM]: MATCHED mod directory \"%s\" in secondary location!\n", modDirectoryPtr);
+            }
             return qfalse;
         }
     }
@@ -203,9 +201,9 @@ void _1fx_coreUI_checkDLL()
         needInstall = _1fx_coreUI_checkSecondaryLocation();
 
         if(needInstall){
-            #ifdef _DEBUG
-            Com_Printf("[CoreUI_QVM]: DLL not found (or empty), installing...\n");
-            #endif // _DEBUG
+            if(ui_1fxAdditionsVerbose.integer){
+                Com_Printf("[CoreUI_QVM]: DLL not found (or empty), installing...\n");
+            }
 
             // Start installation routine.
             trap_FS_FCloseFile(f);
@@ -217,9 +215,9 @@ void _1fx_coreUI_checkDLL()
     // File is present and contains data.
     trap_FS_FCloseFile(f);
 
-    #ifdef _DEBUG
-    Com_Printf("[CoreUI_QVM]: No initial Core UI DLL installation required.\n");
-    #endif // _DEBUG
+    if(ui_1fxAdditionsVerbose.integer){
+        Com_Printf("[CoreUI_QVM]: No initial Core UI DLL installation required.\n");
+    }
 }
 
 #endif // Q3_VM
