@@ -786,6 +786,7 @@ static void *_1fx_httpDL_mainDownloader()
     _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.02.pk3", qfalse);
     _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.10.pk3", qfalse);
     _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.20.pk3", qfalse);
+    _1fx_httpDL_checkModFile("ROCmod_1fx_coreUI_1.21.pk3", qfalse);
 
 	_1fx_httpDL_checkModFile("sof2mp_uix86.dll", qtrue);
 	_1fx_httpDL_checkModFile("sof2mp_cgamex86.dll", qtrue);
