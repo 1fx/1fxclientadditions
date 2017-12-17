@@ -612,8 +612,8 @@ locally but are available on the remote server.
 
 static void _1fx_httpDL_checkExtraPaks()
 {
-	char        *s, *iPaks;
-	char        baseURL[MAX_CVAR_VALUE_STRING], paks[MAX_CVAR_VALUE_STRING], currentPak[MAX_CVAR_VALUE_STRING], fileExtension[5];
+	char        *s, *iPaks, *fileExtension;
+	char        baseURL[MAX_CVAR_VALUE_STRING], paks[MAX_CVAR_VALUE_STRING], currentPak[MAX_CVAR_VALUE_STRING];
     int         pakLength;
 
     // Check if the server owner made files available to download.
@@ -657,46 +657,56 @@ static void _1fx_httpDL_checkExtraPaks()
             pakLength++;
         }
 
+        // Is our destination buffer full? If so, there have been numerous faulty files.
+        if(strlen(currentPak) + pakLength >= sizeof(currentPak)){
+            Com_Printf("1fx. HTTP Downloader: invalid file list (did you append .pk3 after the filenames?).\n");
+            break;
+        }
+        // Is the next pak too large to handle?
+        if(pakLength >= sizeof(currentPak)){
+            // Advance to the next pak.
+            s = nextPak;
+            continue;
+        }
+
         // We can set the current pak now.
         strncat(currentPak, s, pakLength);
 
         // We need a valid .pk3 extension to continue.
-        if((int)s + pakLength > 4){
-            Q_strncpyz(fileExtension, s + pakLength - 5, sizeof(fileExtension));
+        if(strlen(currentPak) > 4){
+            fileExtension = currentPak + pakLength - 4;
 
-            if(fileExtension[0] == '.'){
-                if(Q_stricmp(fileExtension, ".pk3") == 0){
-                    if(!PathFileExists(va("%s\\%s", fs_game, currentPak))){
-                        // We can download this .pk3 file now.
-
-                        // Remove trailing space.
-                        if(currentPak[strlen(currentPak)] == ' '){
-                            currentPak[strlen(currentPak) -1] = '\0';
-                        }
-
-                        if(_1fx_httpDL_getRemoteFile(va("%s%s", baseURL, currentPak), va("%s\\%s.tmp", fs_game, currentPak), currentPak)){
-                            // Move to the new location and remove the old file.
-                            // Don't bother too much with this, if it fails we'll download it again the next time.
-                            MoveFile(va("%s\\%s.tmp", fs_game, currentPak), va("%s\\%s", fs_game, currentPak));
-                            DeleteFile(va("%s\\%s.tmp", fs_game, currentPak));
-                        }
+            if(Q_stricmp(fileExtension, ".pk3") == 0){
+                if(!PathFileExists(va("%s\\%s", fs_game, currentPak))){
+                    // We can download this .pk3 file now.
+                    if(_1fx_httpDL_getRemoteFile(va("%s%s", baseURL, currentPak), va("%s\\%s.tmp", fs_game, currentPak), currentPak)){
+                        // Move to the new location and remove the old file.
+                        // Don't bother too much with this, if it fails we'll download it again the next time.
+                        MoveFile(va("%s\\%s.tmp", fs_game, currentPak), va("%s\\%s", fs_game, currentPak));
+                        DeleteFile(va("%s\\%s.tmp", fs_game, currentPak));
                     }
+                }
 
-                    // Don't continue if the user wants to cancel.
-                    if(httpDL.httpDLStatus == HTTPDL_CANCEL){
-                        curl_easy_cleanup(curl);
-                        curl_global_cleanup();
+                // Don't continue if the user wants to cancel.
+                if(httpDL.httpDLStatus == HTTPDL_CANCEL){
+                    curl_easy_cleanup(curl);
+                    curl_global_cleanup();
 
-                        // Reset last connected server to ensure the downloader starts upon reconnect.
-                        trap_Cvar_Set("ui_lastConnectedServer", "");
-                        trap_Cvar_Update(&ui_lastConnectedServer);
+                    // Reset last connected server to ensure the downloader starts upon reconnect.
+                    trap_Cvar_Set("ui_lastConnectedServer", "");
+                    trap_Cvar_Update(&ui_lastConnectedServer);
 
-                        pthread_exit(0);
-                    }
+                    pthread_exit(0);
                 }
 
                 // Reset currentPak variable.
                 memset(currentPak, 0, sizeof(currentPak));
+            }else{
+                // No .pk3 file, this file may have spaces in it.
+                // Add a space to the end of the buffer - if there's room for it.
+                if(strlen(currentPak) + 1 < sizeof(currentPak)){
+                    currentPak[strlen(currentPak)] = ' ';
+                }
             }
         }
 
