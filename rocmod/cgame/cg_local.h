@@ -6,7 +6,7 @@
 #include "tr_types.h"
 #include "../game/bg_public.h"
 #include "cg_public.h"
-#include "../ghoul2/g2.h"
+#include "../ghoul2/G2.h"
 #include "../ghoul2/G2_gore_shared.h"
 #include "../game/inv.h"
 
